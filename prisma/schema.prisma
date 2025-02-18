@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model album {
+  Album_id    Int           @id @default(autoincrement())
+  album_art   String?       @db.VarChar(255)
+  title       String        @db.VarChar(255)
+  user_id     Int
+  created_at  DateTime?     @default(now()) @db.DateTime(0)
+  updated_at  DateTime?     @default(now()) @db.DateTime(0)
+  users       users         @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "album_ibfk_1")
+  album_songs album_songs[]
+  songs       songs[]
+
+  @@index([user_id], map: "user_id")
+}
+
+model album_songs {
+  Album_id Int
+  song_id  Int
+  added_at DateTime? @default(now()) @db.DateTime(0)
+  album    album     @relation(fields: [Album_id], references: [Album_id], onDelete: Cascade, onUpdate: NoAction, map: "album_songs_ibfk_1")
+  songs    songs     @relation(fields: [song_id], references: [song_id], onDelete: Cascade, onUpdate: NoAction, map: "album_songs_ibfk_2")
+
+  @@id([Album_id, song_id])
+  @@index([song_id], map: "song_id")
+}
+
+model follows {
+  follow_id                      Int       @id @default(autoincrement())
+  user_id_a                      Int
+  user_id_b                      Int
+  follow_at                      DateTime? @default(now()) @db.DateTime(0)
+  users_follows_user_id_aTousers users     @relation("follows_user_id_aTousers", fields: [user_id_a], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "follows_ibfk_1")
+  users_follows_user_id_bTousers users     @relation("follows_user_id_bTousers", fields: [user_id_b], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "follows_ibfk_2")
+
+  @@index([user_id_a], map: "user_id_a")
+  @@index([user_id_b], map: "user_id_b")
+}
+
+model library {
+  library_id Int               @id @default(autoincrement())
+  user_id    Int
+  item_id    Int
+  item_type  library_item_type
+  created_id Int
+  updated_at DateTime?         @default(now()) @db.DateTime(0)
+  users      users             @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "library_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model likes {
+  like_id     Int       @id @default(autoincrement())
+  listener_id Int
+  song_id     Int
+  liked_at    DateTime? @default(now()) @db.DateTime(0)
+  users       users     @relation(fields: [listener_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "likes_ibfk_1")
+  songs       songs     @relation(fields: [song_id], references: [song_id], onDelete: Cascade, onUpdate: NoAction, map: "likes_ibfk_2")
+
+  @@index([listener_id], map: "listener_id")
+  @@index([song_id], map: "song_id")
+}
+
+model playlist_songs {
+  playlist_id Int
+  song_id     Int
+  added_at    DateTime? @default(now()) @db.DateTime(0)
+  playlists   playlists @relation(fields: [playlist_id], references: [playlist_id], onDelete: Cascade, onUpdate: NoAction, map: "playlist_songs_ibfk_1")
+  songs       songs     @relation(fields: [song_id], references: [song_id], onDelete: Cascade, onUpdate: NoAction, map: "playlist_songs_ibfk_2")
+
+  @@id([playlist_id, song_id])
+  @@index([song_id], map: "song_id")
+}
+
+model playlists {
+  playlist_id                       Int              @id @default(autoincrement())
+  playlist_art                      String?          @db.VarChar(255)
+  name                              String           @db.VarChar(100)
+  created_id                        Int
+  updated_at                        DateTime?        @default(now()) @db.DateTime(0)
+  user_id                           Int
+  playlist_songs                    playlist_songs[]
+  users_playlists_user_idTousers    users            @relation("playlists_user_idTousers", fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "playlists_ibfk_1")
+  users_playlists_created_idTousers users            @relation("playlists_created_idTousers", fields: [created_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "playlists_ibfk_2")
+
+  @@index([created_id], map: "created_id")
+  @@index([user_id], map: "user_id")
+}
+
+model songs {
+  song_id           Int                 @id @default(autoincrement())
+  title             String              @db.VarChar(255)
+  Album_id          Int?
+  genre             String?             @db.VarChar(50)
+  duration          Int
+  file_path         String              @db.VarChar(255)
+  file_format       String              @db.VarChar(50)
+  uploaded_at       DateTime?           @default(now()) @db.DateTime(0)
+  plays_count       Int?                @default(0)
+  user_id           Int
+  album_songs       album_songs[]
+  likes             likes[]
+  playlist_songs    playlist_songs[]
+  users             users               @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "songs_ibfk_1")
+  album             album?              @relation(fields: [Album_id], references: [Album_id], onUpdate: NoAction, map: "songs_ibfk_2")
+  streaming_history streaming_history[]
+
+  @@index([Album_id], map: "Album_id")
+  @@index([user_id], map: "user_id")
+}
+
+model streaming_history {
+  stream_id                                  Int       @id @default(autoincrement())
+  listener_id                                Int
+  user_id                                    Int
+  song_id                                    Int
+  played_at                                  DateTime? @default(now()) @db.DateTime(0)
+  users_streaming_history_listener_idTousers users     @relation("streaming_history_listener_idTousers", fields: [listener_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "streaming_history_ibfk_1")
+  users_streaming_history_user_idTousers     users     @relation("streaming_history_user_idTousers", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "streaming_history_ibfk_2")
+  songs                                      songs     @relation(fields: [song_id], references: [song_id], onDelete: Cascade, onUpdate: NoAction, map: "streaming_history_ibfk_3")
+
+  @@index([listener_id], map: "listener_id")
+  @@index([song_id], map: "song_id")
+  @@index([user_id], map: "user_id")
+}
+
+model users {
+  user_id                                                Int                 @id @default(autoincrement())
+  username                                               String              @unique(map: "username") @db.VarChar(100)
+  pfp                                                    String?             @db.VarChar(255)
+  email                                                  String              @unique(map: "email") @db.VarChar(255)
+  password_hash                                          String              @db.VarChar(255)
+  role                                                   users_role
+  created_at                                             DateTime?           @default(now()) @db.DateTime(0)
+  updated_at                                             DateTime?           @default(now()) @db.DateTime(0)
+  album                                                  album[]
+  follows_follows_user_id_aTousers                       follows[]           @relation("follows_user_id_aTousers")
+  follows_follows_user_id_bTousers                       follows[]           @relation("follows_user_id_bTousers")
+  library                                                library[]
+  likes                                                  likes[]
+  playlists_playlists_user_idTousers                     playlists[]         @relation("playlists_user_idTousers")
+  playlists_playlists_created_idTousers                  playlists[]         @relation("playlists_created_idTousers")
+  songs                                                  songs[]
+  streaming_history_streaming_history_listener_idTousers streaming_history[] @relation("streaming_history_listener_idTousers")
+  streaming_history_streaming_history_user_idTousers     streaming_history[] @relation("streaming_history_user_idTousers")
+}
+
+enum library_item_type {
+  song
+  album
+  playlist
+}
+
+enum users_role {
+  listener
+  artist
+  admin
+}
