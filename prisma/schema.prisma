@@ -152,6 +152,23 @@ model users {
   streaming_history_streaming_history_user_idTousers     streaming_history[] @relation("streaming_history_user_idTousers")
 }
 
+model rating {
+  rating_id    Int              @id @default(autoincrement())
+  user_id      Int
+  item_type    rating_item_type
+  item_id      Int
+  rating_value Int              // Validate between 1 and 5.
+  review       String?          
+  rated_at     DateTime         @default(now())
+  
+  // Relation: A rating belongs to a user.
+  user         users            @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  // Ensure a user cannot rate the same item more than once.
+  @@unique([user_id, item_type, item_id])
+}
+
+
 enum library_item_type {
   song
   album
@@ -162,4 +179,10 @@ enum users_role {
   listener
   artist
   admin
+}
+
+enum rating_item_type {
+  Song
+  Album
+  Artist
 }
