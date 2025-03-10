@@ -153,21 +153,6 @@ model users {
   streaming_history_streaming_history_user_idTousers     streaming_history[] @relation("streaming_history_user_idTousers")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model ratings {
-  rating_id    Int               @id @default(autoincrement())
-  user_id      Int
-  item_type    ratings_item_type
-  item_id      Int
-  rating_value Int?
-  review       String?           @db.Text
-  rated_at     DateTime?         @default(now()) @db.Timestamp(0)
-  users        users             @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "ratings_ibfk_1")
-
-  @@index([item_id, item_type], map: "item_id")
-  @@index([user_id], map: "user_id")
-}
-
 enum library_item_type {
   song
   album
@@ -178,10 +163,4 @@ enum users_role {
   listener
   artist
   admin
-}
-
-enum ratings_item_type {
-  Song
-  Album
-  Artist
 }
