@@ -1,3 +1,4 @@
+import Link from "next/link";
 export default function Signup() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
@@ -19,6 +20,13 @@ export default function Signup() {
         <button className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
           Sign Up
         </button>
+
+        <p className="mt-4 text-gray-600">
+            Already have an account?{" "}
+            <Link href="/login" className="text-blue-600 hover:underline">
+            Log in
+        </Link>
+            </p>
       </div>
     </div>
   );

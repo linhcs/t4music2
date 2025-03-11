@@ -18,7 +18,7 @@ export default function Login() {
           />
   
           <button className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
-            Log in
+            Sign in
           </button>
 
         <p className="mt-4 text-gray-600">
