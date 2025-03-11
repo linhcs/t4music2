@@ -1,8 +1,10 @@
-import Signup from "@/components/ui/signup";
-export default function Login() {
+// import Link from "next/link";
+import Login from "@/components/ui/login";
+
+export default function LoginPage() { 
   return (
     <div>
-      <Signup />
+      <Login />
     </div>
   );
 }

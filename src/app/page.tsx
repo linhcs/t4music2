@@ -14,20 +14,21 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-            <Button
-              size="lg"
-              className="rounded-full px-8 bg-white text-black hover:bg-white/90 min-w-[160px]"
-            >
-              Sign Up
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="rounded-full px-8 text-black border-white/20 hover:bg-white/10 min-w-[160px]"
-            >
-              Log In
-            </Button>
-          </div>
+
+
+  <Link href="/login">
+    <Button
+      size="lg"
+      variant="outline"
+      className="rounded-full px-8 text-black border-white/20 hover:bg-white/10 min-w-[160px]"
+    >
+{/* Added signup link to navigate*/}
+
+      Log In
+    </Button>
+  </Link>
+</div>
+
         </div>
       </main>
 
