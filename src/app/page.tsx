@@ -6,10 +6,10 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col bg-black">
       <main className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="text-center space-y-8">
-          <h1 className="font-thin text-[8rem] md:text-[12rem] leading-none font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/70">
+          <h1 className="fade-in font-thin text-[8rem] md:text-[12rem] leading-none font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/70">
             Amplifi
           </h1>
-          <p className="text-white/60 tracking-[0.3em] uppercase text-sm">
+          <p className="fade-in text-white/60 tracking-[0.3em] uppercase text-sm">
             Music Streaming
           </p>
 
