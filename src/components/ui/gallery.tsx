@@ -14,8 +14,15 @@ const Gallery = () => {
     ];
 
     return(
-        // can use in-line styling or cva (class-variance authoritity) to optimize repitition
-        // grid with 3 columns, spacing of 12px, padding of 12px (each increment of 1 increases by 4px)
+        // adding same background styling as login and sign up page
+        <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
+        <div className="flex flex-col items-center justify-center w-full max-w-md p-8 bg-black rounded-xl shadow-lg space-y-6 border border-gray-700">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-300 to-gray-500 bg-clip-text text-transparent">
+            Song Gallery
+          </h1>
+        
+        {/* can use in-line styling or cva (class-variance authoritity) to optimize repitition */}
+        {/*grid with 3 columns, spacing of 12px, padding of 12px (each increment of 1 increases by 4px)*/} 
         <div className= "grid grid-cols-3 gap-3 p-3">
             {images.map((image) => (
                 <div key = {image.id} className="flex justify-center">
@@ -23,6 +30,11 @@ const Gallery = () => {
                 </div>
             ))}
         </div>
+
+        </div>
+        </div>
+
+        
     );
 };
 
