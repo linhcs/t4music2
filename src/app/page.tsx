@@ -8,7 +8,6 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col bg-black">
       <main className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="text-center space-y-8">
-<<<<<<< HEAD
           <motion.h1
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -25,16 +24,9 @@ export default function LandingPage() {
             transition={{ duration: 1.25, delay: 1 }}
             className="text-white/60 tracking-[0.3em] uppercase text-sm"
           >
-=======
-          <h1 className="fade-in font-thin text-[8rem] md:text-[12rem] leading-none font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/70">
-            amplify
-          </h1>
-          <p className="fade-in text-white/60 tracking-[0.3em] uppercase text-sm">
->>>>>>> b34ea8be27a8230c9fe135cb2bf94b71412e2d73
             Music Streaming
           </motion.p>
 
-<<<<<<< HEAD
           {/* Buttons */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -43,14 +35,10 @@ export default function LandingPage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8"
           >
             {/* Log In Button */}
-=======
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
->>>>>>> b34ea8be27a8230c9fe135cb2bf94b71412e2d73
             <Link href="/login">
               <Button
                 size="lg"
                 variant="outline"
-<<<<<<< HEAD
                 className="rounded-full px-8 text-white border border-white/20 min-w-[160px] transition-all duration-300 hover:scale-105 
                 bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 animate-gradient"
 >
@@ -60,15 +48,6 @@ export default function LandingPage() {
 
           
           </motion.div>
-=======
-                className="rounded-full px-8 text-black border-white/20 hover:bg-white/10 min-w-[160px]"
-              >
-                {/* Added signup link to navigate*/}
-                Log In
-              </Button>
-            </Link>
-          </div>
->>>>>>> b34ea8be27a8230c9fe135cb2bf94b71412e2d73
         </div>
       </main>
 
