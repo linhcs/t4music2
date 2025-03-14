@@ -105,11 +105,9 @@ body {
 
 .animate-gradient {
   background-size: 200% 200%;
-  animation: gradientFlow 10s infinite linear;
-  text-shadow: 0px 0px 15px rgba(250, 168, 227, 0.345);
+  animation: gradientFlow 7s infinite linear;
+  text-shadow: 0px 0px 15px rgba(239, 168, 250, 0.473);
 }
-
-{/*login page card */}
 
 *{
   margin: 0;
@@ -144,30 +142,63 @@ h1{
   inherits: false;
 }
 
-.card::after, .card::before{
-  content: '';
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  background-image: conic-gradient(from var(--angle), #ff4545, #00ff99, #006aff, #ff0095, #ff4545);
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-  z-index: -1;
-  padding: 3px;
-  border-radius: 10px;
-  animation: 3s spin linear infinite;
-}
-.card::before{
-  filter: blur(1.5rem);
-  opacity: 0.5;
-}
-@keyframes spin{
-  from{
-    --angle: 0deg;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
-  to{
-    --angle: 360deg;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 1.2s ease-out forwards;
 }
 
+@keyframes spin {
+  from {
+      --angle: 0deg;
+  }
+  to {
+      --angle: 360deg;
+  }
+}
+.neon-card {
+  position: relative; 
+  margin: 0 auto;
+  padding: 2em;
+  width: 100%; 
+  max-width: 448px; 
+  background: black; 
+  text-align: center;
+  border-radius: 20px;
+  box-shadow: 0 0 15px rgba(246, 246, 246, 0);
+  z-index: 2;
+}
+
+.neon-card::after,
+.neon-card::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 400px; 
+  width: 400px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 0, 150, 0.5), rgba(0, 180, 255, 0.5));
+  filter: blur(80px);
+  z-index: -1; 
+  opacity: 1;
+}
+
+.neon-card::before {
+  opacity: 0.5;
+}
+
+@keyframes neonGlow {
+  0% { box-shadow: 0 0 10px rgba(255, 0, 150, 0.6); }
+  50% { box-shadow: 0 0 20px rgba(0, 180, 255, 0.8); }
+  100% { box-shadow: 0 0 10px rgba(167, 39, 236, 0.6); }
+}
