@@ -59,7 +59,7 @@ export default function LandingPage() {
             <Link href="#" className="hover:text-white transition-colors">
               Privacy
             </Link>
-            <Link href="#" className="hover:text-white transition-colors">
+            <Link href="/Terms" className="hover:text-white transition-colors">
               Terms
             </Link>
             <Link href="#" className="hover:text-white transition-colors">
