@@ -11,6 +11,25 @@ const Gallery = () => {
         {id: 4, src: "/song-placeholder.jpg"},
         {id: 5, src: "/song-placeholder.jpg"},
         {id: 6, src: "/song-placeholder.jpg"},
+        {id: 7, src: "/song-placeholder.jpg"},
+        {id: 8, src: "/song-placeholder.jpg"},
+        {id: 9, src: "/song-placeholder.jpg"},
+        {id: 10, src: "/song-placeholder.jpg"},
+        {id: 11, src: "/song-placeholder.jpg"},
+        {id: 12, src: "/song-placeholder.jpg"},
+        {id: 13, src: "/song-placeholder.jpg"},
+        {id: 14, src: "/song-placeholder.jpg"},
+        {id: 15, src: "/song-placeholder.jpg"},
+        {id: 16, src: "/song-placeholder.jpg"},
+        {id: 17, src: "/song-placeholder.jpg"},
+        {id: 18, src: "/song-placeholder.jpg"},
+        {id: 19, src: "/song-placeholder.jpg"},
+        {id: 20, src: "/song-placeholder.jpg"},
+        {id: 21, src: "/song-placeholder.jpg"},
+        {id: 22, src: "/song-placeholder.jpg"},
+        {id: 23, src: "/song-placeholder.jpg"},
+        {id: 24, src: "/song-placeholder.jpg"},
+
     ];
 
     return(
@@ -22,10 +41,10 @@ const Gallery = () => {
         
         {/* can use in-line styling or cva (class-variance authoritity) to optimize repitition */}
         {/*grid with 3 columns, spacing of 12px, padding of 12px (each increment of 1 increases by 4px)*/} 
-        <div className= "grid grid-cols-3 gap-3 p-3">
+        <div className= "grid grid-cols-6 gap-3 p-3">
             {images.map((image) => (
                 <div key = {image.id} className="flex justify-center">
-                    <img src = {image.src} className="w-full h-auto"/>
+                    <img src = {image.src} className="w-full h-auto rounded-lg shadow-lg"/>
                 </div>
             ))}
         </div>
