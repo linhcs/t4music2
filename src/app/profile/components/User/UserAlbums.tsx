@@ -11,7 +11,7 @@ export default function UserAlbums({ isArtist }: { isArtist: boolean }) {
   if (!isArtist) {
     userAlbums.unshift({
       name: "Liked Songs",
-      img: null, // No image for liked songs; use icon instead
+      img: null!, // No image for liked songs; use icon instead
     });
   }
 
