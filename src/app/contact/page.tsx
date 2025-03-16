@@ -8,24 +8,24 @@ export default function Contact() {
     <div className="min-h-screen flex flex-col bg-black">
       {/*Header Section */}
       <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1">
-        <motion.h1
+        <motion.h2
             initial={{ opacity: 1, y: 240 }}
             animate={{ opacity: 0, y: -500 }}
             transition={{ duration: 2, delay: 2.5 }}
             className="text-[8rem] md:text-[8rem] leading-none font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-500 animate-gradient"
             >
             How to Contact Us
-        </motion.h1>
+        </motion.h2>
       </header>
       <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1">
-        <motion.h1
+        <motion.h2
             initial={{ opacity: 0, y: -500 }}
             animate={{ opacity: 1, y: -200 }}
             transition={{ duration: 1.5, delay: 2.75 }}
             className="text-[4rem] md:text-[4rem] leading-none font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-500 animate-gradient"
             >
             Please Don&apos;t
-        </motion.h1>
+        </motion.h2>
       </header>
 
       
@@ -40,19 +40,19 @@ export default function Contact() {
           >
 
           {/* Corrected usage of headings and paragraphs */}
-          <h2 className="text-2xl font-semibold mb-4">Yes I&apos;m Serious </h2>
+          <h2 className="text-2xl font-semibold mb-4">Yes We&apos;re Serious </h2>
           <p className ="text-lg">
             But if you must, it needs to be accompanied by some <strong><em>Financial Assistance</em></strong> if you catch my drift ...
           </p>
           <div className="flex gap-20 px-40 mt-8 justify-center">
             <img
-              src="artist-banner.jpg"
-              alt="Artist Banner"
+              src="CashApp.jpg"
+              alt="Cash App"
               className=" w-80 h-80 rounded-3xl"
             />
             <img
-              src="artist-banner.jpg"
-              alt="Artist Banner"
+              src="GoFund.jpg"
+              alt="Go Fund Me"
               className=" w-80 h-80 rounded-3xl"
             />
           </div>
