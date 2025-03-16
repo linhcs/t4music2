@@ -56,7 +56,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-white/60">
           <div>© 2024 Amplifi. All rights reserved.</div>
           <nav className="flex gap-8">
-            <Link href="#" className="hover:text-white transition-colors">
+            <Link href="/Privacy" className="hover:text-white transition-colors">
               Privacy
             </Link>
             <Link href="/Terms" className="hover:text-white transition-colors">
