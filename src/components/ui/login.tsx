@@ -33,8 +33,12 @@ export default function Login() {
 
             alert("Login successful! Welcome to Amplifi!");
             window.location.href = "/dashboard";
-        } catch (error) {
-            setError(error.message);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setError(error.message);  // Access error.message safely
+            } else {
+                setError("An unknown error occurred");  // Fallback message if error is not an instance of Error
+            }
         } finally {
             setLoading(false);
         }
