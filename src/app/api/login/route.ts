@@ -26,7 +26,14 @@ export async function POST(req: Request) {
         // ✅ Authentication Successful - Redirect or Set Session
         return NextResponse.json({ message: "Logging you in!", user }, { status: 200 });
 
-    } catch (error) {
+    } catch (error: unknown) {
+        // Type-check the error variable
+        if (error instanceof Error) {
+            console.error(error.message); // You can log the error message
+        } else {
+            console.error("An unknown error occurred");
+        }
+
         return NextResponse.json({ error: "Oops! Login failed!" }, { status: 500 });
     }
 }
