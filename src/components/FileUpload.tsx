@@ -10,6 +10,8 @@ export default function FileUpload() {
   const [fileURL, setFileURL] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [songName, setSongName] = useState<string>("");
+  const [artistName, setArtistName] = useState<string>("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target as HTMLInputElement;
@@ -27,6 +29,16 @@ export default function FileUpload() {
     }
   };
 
+  const computeSHA256 = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return hashHex;
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!file) return;
@@ -35,15 +47,15 @@ export default function FileUpload() {
     setLoading(true);
 
     console.log("Uploading file:", file);
+
     if (!file) return;
-    const urlresult = await getSignedURL();
+    const checksum = await computeSHA256(file);
+    const urlresult = await getSignedURL(file.type, file.size, checksum);
     if (urlresult.failure !== undefined) {
       setStatusMessage("Failed to upload file!");
       setLoading(false);
-      console.error("error");
-      return;
+      throw new Error(urlresult.failure);
     }
-
     const url = urlresult.success.url;
 
     await fetch(url, {
@@ -72,6 +84,22 @@ export default function FileUpload() {
           onChange={handleFileChange}
         />
         {file && <p className="text-sm text-gray-500">{file.name}</p>}
+
+        <Label htmlFor="songName">Song Name</Label>
+        <Input
+          id="songName"
+          type="text"
+          value={songName}
+          onChange={(e) => setSongName(e.target.value)}
+        />
+
+        <Label htmlFor="artistName">Artist Name</Label>
+        <Input
+          id="artistName"
+          type="text"
+          value={artistName}
+          onChange={(e) => setArtistName(e.target.value)}
+        />
 
         <Button type="submit" disabled={!file || loading}>
           {loading ? "Uploading..." : "Upload"}
