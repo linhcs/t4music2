@@ -1,11 +1,11 @@
 "use client";
-import{useState, useRef} from "react";
+import{useState} from "react";
 import { Song, Album } from "../../../types"; //imports song interface ("structure") to use in gallery
 
 const Gallery = () => {
     //declare album to assign to songs
 
-    const[albums, setAlbums] = useState<Album[]>([
+    const[albums] = useState<Album[]>([
         {
             Album_id: 1,
             album_art: '/song-placeholder.jpg',
@@ -16,7 +16,7 @@ const Gallery = () => {
         },
     ]);
     
-    const [songs, setSongs] = useState<Song[]>([
+    const [songs] = useState<Song[]>([
         //assigning placeholder values to each song
         {
             song_id: 1,
