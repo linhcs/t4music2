@@ -100,7 +100,7 @@ const Gallery = () => {
         
         {/* can use in-line styling or cva (class-variance authoritity) to optimize repitition */}
         {/*grid with 6 columns, spacing of 12px, padding of 12px (each increment of 1 increases by 4px)*/} 
-        <div className= "grid grid-cols-5 gap-3 p-5 w-full max-w-7x1">
+        <div className= "grid grid-cols-5 gap-3 p-5 w-full max-w-7xl">
             {songs.map((song) => {
                 //find album referenced by song to return album cover art
                 const album = albums.find((album) => album.Album_id === song.Album_id);
