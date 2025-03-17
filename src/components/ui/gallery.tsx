@@ -8,7 +8,7 @@ const Gallery = () => {
     const[albums, setAlbums] = useState<Album[]>([
         {
             Album_id: 1,
-            album_art: '../../../public/song-placeholder.jpg',
+            album_art: 'song-placeholder.jpg',
             title: 'Global Warming',
             user_id: 1,
             created_at: new Date(),
@@ -24,7 +24,7 @@ const Gallery = () => {
             Album_id: 1,
             genre: 'Pop',
             duration: 180,
-            file_path: '../../music/HotelRoomService.mp3',
+            file_path: '/music/HotelRoomService.mp3',
             file_format: 'mp3',
             uploaded_at: new Date(),
             plays_count: 1,
@@ -37,7 +37,7 @@ const Gallery = () => {
             Album_id: 1,
             genre: 'Pop',
             duration: 180,
-            file_path: '../../music/HotelRoomService.mp3',
+            file_path: '/music/HotelRoomService.mp3',
             file_format: 'mp3',
             uploaded_at: new Date(),
             plays_count: 1,
@@ -50,7 +50,7 @@ const Gallery = () => {
             Album_id: 1,
             genre: 'Pop',
             duration: 180,
-            file_path: '../../music/HotelRoomService.mp3',
+            file_path: '/music/HotelRoomService.mp3',
             file_format: 'mp3',
             uploaded_at: new Date(),
             plays_count: 1,
@@ -63,7 +63,7 @@ const Gallery = () => {
             Album_id: 1,
             genre: 'Pop',
             duration: 180,
-            file_path: '../../music/HotelRoomService.mp3',
+            file_path: '/music/HotelRoomService.mp3',
             file_format: 'mp3',
             uploaded_at: new Date(),
             plays_count: 1,
@@ -76,7 +76,7 @@ const Gallery = () => {
             Album_id: 1,
             genre: 'Pop',
             duration: 180,
-            file_path: '../../music/HotelRoomService.mp3',
+            file_path: '/music/HotelRoomService.mp3',
             file_format: 'mp3',
             uploaded_at: new Date(),
             plays_count: 1,
@@ -100,7 +100,7 @@ const Gallery = () => {
         
         {/* can use in-line styling or cva (class-variance authoritity) to optimize repitition */}
         {/*grid with 6 columns, spacing of 12px, padding of 12px (each increment of 1 increases by 4px)*/} 
-        <div className= "grid grid-cols-6 gap-3 p-3">
+        <div className= "grid grid-cols-5 gap-3 p-5 w-full max-w-7x1">
             {songs.map((song) => {
                 //find album referenced by song to return album cover art
                 const album = albums.find((album) => album.Album_id === song.Album_id);
@@ -108,20 +108,21 @@ const Gallery = () => {
 
                 return (
                     <div 
-                    key = {song.song_id} className="flex justify-center"
+                    key = {song.song_id} className="flex flex-col justify-end"
                     style = {{
                         backgroundImage: `url(${album_art})`,
-                        backgroundSize: 'cover',
+                        backgroundSize: 'contain',
                         backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
                         height: '300px',
-                        borderRadius: '10px',
+                        width: '100%',
                     }}>
 
-                    <div className= "text-center">
-                    <h3 className = "text-white p-1"> {song.title} </h3>
+                    <div className= "bg-black bg-opacity-50 p-2 rounded-b-lg">
+                    <h2 className = "text-white font-bold p-1"> {song.title} </h2>
                     <button
                         onClick= {() => playSong(song.file_path)}
-                        className = "bg-black-500 text-white px-5 rounded-mx mt-2">
+                        className = "bg-white font-medium text-black px-2 mt-2 hover:bg-gray-100">
                         Play ▶️
                     </button>
                     </div>
