@@ -4,7 +4,7 @@ export default function AlbumPage() {
   // TODO: Replace this static album data with real backend logic when available.
   const albumData = {
     title: "My Album",
-    cover: "/artist-banner.jpg", // Ensure this image is in your /public folder
+    cover: "/artist-banner.jpg",
     tracks: [
       { id: "1", title: "Track One", duration: "3:30" },
       { id: "2", title: "Track Two", duration: "4:00" },
@@ -22,7 +22,7 @@ export default function AlbumPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Top Container (Hero section) */}
+      {/* Top  Container (Hero section)*/}
       <div className="p-8">
         <button
           onClick={handleBack}
