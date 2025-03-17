@@ -8,7 +8,7 @@ const Gallery = () => {
     const[albums, setAlbums] = useState<Album[]>([
         {
             Album_id: 1,
-            album_art: 'song-placeholder.jpg',
+            album_art: '/song-placeholder.jpg',
             title: 'Global Warming',
             user_id: 1,
             created_at: new Date(),
