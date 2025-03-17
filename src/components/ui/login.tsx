@@ -31,14 +31,18 @@ export default function Login() {
         throw new Error("Invalid username or password!");
       }
 
-      alert("Login successful! Welcome to Amplifi!");
-      window.location.href = "/dashboard";
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+            alert("Login successful! Welcome to Amplifi!");
+            window.location.href = "/dashboard";
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setError(error.message);  // Access error.message safely
+            } else {
+                setError("An unknown error occurred");  // Fallback message if error is not an instance of Error
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">

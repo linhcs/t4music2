@@ -31,8 +31,14 @@ export async function POST(req: Request) { // this runs when /api/signup (signup
         });
 // if it works it will return this message with users details 
         return NextResponse.json({ message: "User created successfully", user: newUser }, { status: 201 });
-    } catch (error) {
-        // otherwise, if something goes wrong, it will alert the user
-        return NextResponse.json({ error: "Signup failed" }, { status: 500 });
+    } catch (error: unknown) {
+        // Type-check the error variable
+        if (error instanceof Error) {
+            console.error(error.message); // You can log the error message
+        } else {
+            console.error("An unknown error occurred");
+        }
+
+        return NextResponse.json({ error: "Oops! Login failed!" }, { status: 500 });
     }
 }
