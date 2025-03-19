@@ -35,7 +35,7 @@ export default function Login() {
       }
 
       alert("Login successful! Welcome to Amplifi!");
-      window.location.href = "/app";  // Redirect to dashboard or wherever the user should go after logging in
+      window.location.href = "/app";  
     } catch (error: unknown) {
       if (error instanceof Error) {
         setError(error.message);
