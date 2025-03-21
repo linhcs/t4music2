@@ -1,4 +1,5 @@
-// Example React component
+'use client';
+
 import { useState } from 'react';
 
 const DownloadPDFButton = () => {
@@ -7,7 +8,7 @@ const DownloadPDFButton = () => {
   const handleDownload = async () => {
     setLoading(true);
 
-    const response = await fetch('/api/generate-pdf');
+    const response = await fetch('/api/pdfs/admin');
     const blob = await response.blob();
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
