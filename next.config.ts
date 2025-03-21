@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    appDir: true, // Enable App Directory feature
-  },
+  /* config options here */
 };
 
 export default nextConfig;
