@@ -1,4 +1,5 @@
 "use client";
+import NavBar from '@/components/ui/NavBar';
 import ArtistCard from '../components/Artist/ArtistCard';
 import ArtistUserStats from '../components/Artist/ArtistUserStats';
 import ProfileSettingsButton from '../components/ProfileSettingsButton';
@@ -10,28 +11,17 @@ import ArtistActions from '../components/Artist/ArtistActions';
 
 export default function ArtistProfilePage() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white overflow-visible">
+      <NavBar role="artist" />
       {/* Full-width hero banner at the top */}
       <ArtistCard />
-
       {/* Main content container below the banner */}
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-12">
-        {/* Expandable artist bio */}
         <ArtistBio />
-
-        {/* Artist-specific stats (followers, streams, etc.) */}
         <ArtistUserStats />
-
-        {/* Albums created by the artist */}
         <ArtistAlbums />
-
-        {/* Top performing tracks */}
         <TopTracks />
-
-        {/* Action buttons for editing profile, adding songs or albums */}
         <ArtistActions />
-
-        {/* Profile settings and account management */}
         <div className="flex flex-wrap gap-6 justify-center mt-8">
           <ProfileSettingsButton />
           <DeleteAccountButton />

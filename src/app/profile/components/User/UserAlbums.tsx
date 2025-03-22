@@ -1,6 +1,7 @@
 "use client";
 import { Heart } from "lucide-react";
 import Link from "next/link";
+import { FaPlus } from "react-icons/fa";
 
 export default function UserAlbums({ isArtist }: { isArtist: boolean }) {
   const userAlbums = [
@@ -39,6 +40,15 @@ export default function UserAlbums({ isArtist }: { isArtist: boolean }) {
             </div>
           </Link>
         ))}
+        {/* Plus card for adding a new album */}
+        <Link href="/albums/create">
+          <div className="min-w-[180px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center py-4">
+            <div className="h-36 w-36 flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500 rounded-xl shadow-inner">
+              <FaPlus size={48} className="text-white" />
+            </div>
+            <p className="text-center py-3 font-semibold">Add Album</p>
+          </div>
+        </Link>
       </div>
     </div>
   );

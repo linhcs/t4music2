@@ -39,7 +39,7 @@ export default function SelectRolePage() {
             </p>
           </div>
           {/* Enhanced Link Button */}
-          <Link href="/profile/user">
+          <Link href="/gallery">
             <motion.button
               whileHover={{ scale: 1.1 }}
               className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-2 px-6 py-3 rounded-full 
@@ -75,7 +75,7 @@ export default function SelectRolePage() {
             </p>
           </div>
           {/* Enhanced Link Button */}
-          <Link href="/profile/artist">
+          <Link href="/gallery">
             <motion.button
               whileHover={{ scale: 1.1 }}
               className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-2 px-6 py-3 rounded-full 

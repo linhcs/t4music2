@@ -1,4 +1,15 @@
+"use client";
+
+import { useState } from "react";
+
 export default function ArtistCard() {
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  const handleFollow = () => {
+    // Toggle follow state; later, add API integration.
+    setIsFollowing(!isFollowing);
+  };
+
   return (
     <div className="relative w-full h-80 overflow-hidden bg-black">
       {/* Background Image */}
@@ -11,7 +22,7 @@ export default function ArtistCard() {
       {/* Bottom Gradient Overlay */}
       <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-b from-transparent to-black" />
 
-      {/* Foreground Content (Avatar & Text) */}
+      {/* Foreground Content (Avatar, Artist Details & Follow Button) */}
       <div className="relative z-10 flex items-end h-full px-8 pb-6">
         <div className="flex items-center gap-6">
           <img
@@ -22,7 +33,15 @@ export default function ArtistCard() {
           <div className="flex flex-col">
             <h1 className="text-4xl font-extrabold text-white">Artist Name</h1>
             <p className="text-gray-300 mt-1">10,532,242 monthly listeners</p>
-            <p className="text-gray-400 text-sm">Pop • Songwriter</p>
+            <div className="flex items-center gap-4 mt-2">
+              <p className="text-gray-400 text-sm">Pop • Songwriter</p>
+              <button
+                onClick={handleFollow}
+                className="px-4 py-1 bg-gradient-to-r from-blue-500 to-green-500 rounded-full text-white font-semibold shadow hover:opacity-90 transition"
+              >
+                {isFollowing ? "Following" : "Follow"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
