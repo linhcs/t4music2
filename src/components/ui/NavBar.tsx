@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { Menu } from "@headlessui/react";
 import { FaHome, FaSearch, FaBell, FaUserCircle } from "react-icons/fa";
-
+import { useUserStore } from "@/app/store/userStore"; // Import Zustand store
+import { use } from "react";
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
@@ -13,6 +14,8 @@ interface NavBarProps {
 }
 
 export default function NavBar({ role = "listener" }: NavBarProps) {
+  const { email, username } = useUserStore(); // Retrieve user from Zustand store
+
   // Dummy notifications for demonstration
   const notifications = [
     { id: 1, message: "New song released: 'Summer Vibes'" },
@@ -50,9 +53,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
             <Menu.Button className="flex items-center hover:text-gray-300">
               <FaBell size={20} />
             </Menu.Button>
-            <Menu.Items
-              className="absolute right-0 mt-2 w-72 origin-top-right bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
-            >
+            <Menu.Items className="absolute right-0 mt-2 w-72 origin-top-right bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
               <div className="py-1">
                 {notifications.length === 0 ? (
                   <div className="px-4 py-2 text-sm text-gray-300">
@@ -83,14 +84,16 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
             <Menu.Button className="flex items-center">
               <FaUserCircle size={24} className="hover:text-gray-300" />
             </Menu.Button>
-            <Menu.Items
-              className="absolute right-0 mt-2 w-56 origin-top-right bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
-            >
+            {/* Displaying Current User's Username */}
+            <h1 className="text-xl font-bold ml-2">{username || "Guest"}</h1>
+            <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
               <div className="py-1">
                 <Menu.Item>
                   {({ active }) => (
                     <Link
-                      href={role === "artist" ? "/profile/artist" : "/profile/user"}
+                      href={
+                        role === "artist" ? "/profile/artist" : "/profile/user"
+                      }
                       className={classNames(
                         active ? "bg-gray-700 text-white" : "text-gray-300",
                         "block px-4 py-2 text-sm"
@@ -129,12 +132,16 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
                   </Menu.Item>
                 )}
                 <Menu.Item>
-                  {({ active }) => (
+                  {({ focus }) => (
                     <button
                       className={classNames(
-                        active ? "bg-gray-700 text-white" : "text-gray-300",
+                        focus ? "bg-gray-700 text-white" : "text-gray-300",
                         "block w-full text-left px-4 py-2 text-sm"
                       )}
+                      onClick={() => {
+                        useUserStore.getState().clearUser();
+                        window.location.href = "/";
+                      }}
                     >
                       Logout
                     </button>
