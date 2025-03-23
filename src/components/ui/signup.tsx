@@ -4,9 +4,11 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/app/store/userStore";
 
 export default function Signup() {
   const router = useRouter();
+  const setUser = useUserStore((state) => state.setUser);
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -44,15 +46,16 @@ export default function Signup() {
       if (!response.ok) {
         throw new Error("Signup failed.");
       }
-  
+
       localStorage.setItem("signupData", JSON.stringify(formData));
-  
+
       // Redirect to select-role
       router.push("/select-role");
-    } catch (error:unknown) {
+    } catch (error: unknown) {
       console.error(error);
       setError("Something went wrong :(.");
     }
+    setUser(formData.email, formData.username);
   };
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
