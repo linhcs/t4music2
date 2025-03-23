@@ -1,10 +1,8 @@
 "use client";
 import{useState, useEffect} from "react";
-import { Song, Album } from "../../../types"; //imports song interface ("structure") to use in gallery
+import { Song} from "../../../types"; //imports song interface ("structure") to use in gallery
 
 const Gallery = () => {
-    //declare album to assign to songs
-    const [albums, setAlbums] = useState<Album[]>([]);
     const [songs, setSongs] = useState<Song[]>([]);
 
     //stores the song instance (actual audio file)
@@ -23,15 +21,6 @@ const Gallery = () => {
                 const response = await fetch('/api/songs');
                 const data: Song[] = await response.json();
                 setSongs(data);
-
-                //prevent duplicate album objects
-                const albumList = data.reduce((acc: Album[], song: Song) => {
-                    if (song.album && !acc.find(album => album.Album_id === song.album?.Album_id)){
-                        acc.push(song.album);
-                    }
-                    return acc;
-                }, [] as Album[]);
-                setAlbums(albumList);
             } catch(error){
                 console.error("Failed to fetch songs:", error);
             }
