@@ -1,89 +1,9 @@
 "use client";
 import{useState, useEffect} from "react";
-import { Song, Album } from "../../../types"; //imports song interface ("structure") to use in gallery
+import { Song} from "../../../types"; //imports song interface ("structure") to use in gallery
 
 const Gallery = () => {
-    //declare album to assign to songs
-
-    const[albums] = useState<Album[]>([
-        {
-            Album_id: 1,
-            album_art: '/song-placeholder.jpg',
-            title: 'Global Warming',
-            user_id: 1,
-            created_at: new Date(),
-            updated_at: new Date()
-        },
-    ]);
-    
-    const [songs] = useState<Song[]>([
-        //assigning placeholder values to each song
-        {
-            song_id: 1,
-            title: 'Hotel Room Service',
-            Album_id: 1,
-            genre: 'Pop',
-            duration: 180,
-            file_path: '/music/HotelRoomService.mp3',
-            file_format: 'mp3',
-            uploaded_at: new Date(),
-            plays_count: 1,
-            user_id: 1,
-        },
-
-        {
-            song_id: 2,
-            title: 'Hotel Room Service',
-            Album_id: 1,
-            genre: 'Pop',
-            duration: 180,
-            file_path: '/music/HotelRoomService.mp3',
-            file_format: 'mp3',
-            uploaded_at: new Date(),
-            plays_count: 1,
-            user_id: 1,
-        },
-        
-        {
-            song_id: 3,
-            title: 'Hotel Room Service',
-            Album_id: 1,
-            genre: 'Pop',
-            duration: 180,
-            file_path: '/music/HotelRoomService.mp3',
-            file_format: 'mp3',
-            uploaded_at: new Date(),
-            plays_count: 1,
-            user_id: 1,
-        },
-
-        {
-            song_id: 4,
-            title: 'Hotel Room Service',
-            Album_id: 1,
-            genre: 'Pop',
-            duration: 180,
-            file_path: '/music/HotelRoomService.mp3',
-            file_format: 'mp3',
-            uploaded_at: new Date(),
-            plays_count: 1,
-            user_id: 1,
-        },
-
-        {
-            song_id: 5,
-            title: 'Hotel Room Service',
-            Album_id: 1,
-            genre: 'Pop',
-            duration: 180,
-            file_path: '/music/HotelRoomService.mp3',
-            file_format: 'mp3',
-            uploaded_at: new Date(),
-            plays_count: 1,
-            user_id: 1,
-        },
-
-    ]);
+    const [songs, setSongs] = useState<Song[]>([]);
 
     //stores the song instance (actual audio file)
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
@@ -94,6 +14,21 @@ const Gallery = () => {
     //flag to set true/false if playing, false by default
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
+    //fetch songs/albums from API
+    useEffect(() => {
+        const fetchData = async () => {
+            try{
+                const response = await fetch('/api/songs');
+                const data: Song[] = await response.json();
+                setSongs(data);
+            } catch(error){
+                console.error("Failed to fetch songs:", error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    //keeps track if audio play/pause
     useEffect(() => {
         if (audio) {
             //event listeners to keep track of when playing/pausing
@@ -153,8 +88,7 @@ const Gallery = () => {
         <div className= "grid grid-cols-5 gap-3 p-5 w-full max-w-7xl">
             {songs.map((song) => {
                 //find album referenced by song to return album cover art
-                const album = albums.find((album) => album.Album_id === song.Album_id);
-                const album_art = album?.album_art || '';
+                const album_art = song.album?.album_art || '';
 
                 return (
                     <div 
