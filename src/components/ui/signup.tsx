@@ -1,12 +1,10 @@
-// components/ui/signup.tsx
-
 "use client";
 import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function Signup() {
-  const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -15,6 +13,7 @@ export default function Signup() {
   });
 
   const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,10 +27,11 @@ export default function Signup() {
       return;
     }
 
-    setError(""); // Clear error if matched
+    setError("");
 
     try {
-      const response = await fetch("/api/signup", {
+      // signup request
+      const signupRes = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -41,19 +41,46 @@ export default function Signup() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Signup failed.");
+      if (!signupRes.ok) {
+        const errorData = await signupRes.json();
+        throw new Error(errorData.error || "Signup failed.");
       }
-  
-      localStorage.setItem("signupData", JSON.stringify(formData));
-  
-      // Redirect to select-role
-      router.push("/select-role");
-    } catch (error:unknown) {
-      console.error(error);
-      setError("Something went wrong :(.");
+
+      // getting user data from db 
+      const userRes = await fetch("/api/user/data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: formData.username }),
+      });
+
+      const userData = await userRes.json();
+      if (!userRes.ok) throw new Error("Failed to load user data.");
+
+      // again setting global zustand state
+      const store = useUserStore.getState();
+      store.setUser(userData.username, userData.role);
+      store.setLikedSongs(userData.likedSongs);
+      store.setPlaylists(userData.playlists);
+      store.setStreamingHistory(userData.streamingHistory);
+
+      alert("Signup successful! Welcome to Amplifi <3");
+
+      // redirecting based on role
+      if (userData.role === "artist") {
+        router.push("/artistprofile");
+      } else if (userData.role === "listener") {
+        router.push("/home");
+      } else if (userData.role === "admin") {
+        router.push("/adminprofile");
+      } else {
+        router.push("/home");
+      }
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else setError("An unknown error occurred.");
     }
   };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
       <div className="neon-card relative flex flex-col items-center justify-center w-full max-w-md p-8 rounded-xl shadow-lg space-y-6 border border-gray-800 animate-gradient">

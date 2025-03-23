@@ -1,16 +1,15 @@
 "use client";
 
 import NavBar from "@/components/ui/NavBar";
-import Sidebar from "@/components/ui/Sidebar";
+import Sidebar from "@/components/ui/Sidebar"; // also made a sidebar!!
 import { useState } from "react";
 import { Song, Album } from "../../../types";
 import { FiPlayCircle } from "react-icons/fi";
+import { useUserStore } from "@/store/useUserStore"; // importing storage from zustand
 
-interface ListenerAttribute {
-  username: string;
-}
+const ListenerHome = () => {
+  const { username } = useUserStore(); // we get username from zustand
 
-const ListenerHome = ({ username }: ListenerAttribute) => {
   const [albums] = useState<Album[]>([
     {
       Album_id: 1,
@@ -35,7 +34,6 @@ const ListenerHome = ({ username }: ListenerAttribute) => {
       plays_count: 1,
       user_id: 1,
     },
-    // Copy-pasted examples (for testing layout)
     {
       song_id: 2,
       title: "Hotel Room Service",
@@ -60,7 +58,7 @@ const ListenerHome = ({ username }: ListenerAttribute) => {
       plays_count: 1,
       user_id: 1,
     },
-  ]);
+  ]); // dummy music eee pitbull mmistaworldwide
 
   const playSong = (file_path: string) => {
     const audio = new Audio(file_path);
@@ -77,7 +75,7 @@ const ListenerHome = ({ username }: ListenerAttribute) => {
 
           return (
             <div
-              key={`${song.song_id}-${Math.random()}`} // in case of same IDs
+              key={`${song.song_id}-${Math.random()}`}
               className="group relative rounded-lg overflow-hidden shadow-md"
               style={{
                 backgroundImage: `url(${album_art})`,
@@ -103,23 +101,23 @@ const ListenerHome = ({ username }: ListenerAttribute) => {
   );
 
   return (
-      <div className="flex min-h-screen bg-black text-white">
-        {/*i added a sidebar EEEE */}
-        <Sidebar username={username} />
-    
-        <div className="flex flex-col flex-1 min-w-0">
-          <NavBar role="listener" />
-    
-          <main className="p-6 overflow-auto">
-            <SongGallerySection title="Continue Where You Left Off" items={songs.slice(0, 3)} />
-            <SongGallerySection title="Recently Played Songs" items={songs.slice(0, 3)} />
-            <SongGallerySection title="Recently Played Albums" items={songs.slice(0, 3)} />
-            <SongGallerySection title="Recommended For You" items={songs.slice(0, 3)} />
-          </main>
-        </div>
+    <div className="flex min-h-screen bg-black text-white">
+      <Sidebar username={username} /> 
+
+      <div className="flex flex-col flex-1 min-w-0">
+        <NavBar role="listener" />
+        <main className="p-6 overflow-auto">
+          {/* <h1 className="text-3xl font-bold text-purple-400 mb-4">
+            {/* Welcome back, {username ? username : "Listener"}! 🎧 : i was trying to do something cool but its not working */} 
+          
+          <SongGallerySection title="Continue Where You Left Off" items={songs.slice(0, 3)} />
+          <SongGallerySection title="Recently Played Songs" items={songs.slice(0, 3)} />
+          <SongGallerySection title="Recently Played Albums" items={songs.slice(0, 3)} />
+          <SongGallerySection title="Recommended For You" items={songs.slice(0, 3)} />
+        </main>
       </div>
-    );
-    
+    </div>
+  );
 };
 
 export default ListenerHome;
