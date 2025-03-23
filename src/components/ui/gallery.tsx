@@ -1,5 +1,5 @@
 "use client";
-import{useState} from "react";
+import{useState, useEffect} from "react";
 import { Song, Album } from "../../../types"; //imports song interface ("structure") to use in gallery
 
 const Gallery = () => {
@@ -85,11 +85,61 @@ const Gallery = () => {
 
     ]);
 
-    //function to play song
-    const playSong = (file_path : string) => {
-        const audio = new Audio(file_path);
-        audio.play();
-    }
+    //stores the song instance (actual audio file)
+    const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+
+    //stores information to keep track of the song (title)
+    const [currentSong, setCurrentSong] = useState<Song | null>(null);
+
+    //flag to set true/false if playing, false by default
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (audio) {
+            //event listeners to keep track of when playing/pausing
+            const onAudioPlay = () => setIsPlaying(true);
+            const onAudioPause = () => setIsPlaying(false);
+
+            audio.addEventListener("play", onAudioPlay);
+            audio.addEventListener("pause", onAudioPause);
+
+            //delete event listeners when audio changes
+            return () => {
+                audio.removeEventListener("play", onAudioPlay);
+                audio.removeEventListener("pause", onAudioPause);
+            };
+
+        }
+
+    }, [audio]);
+
+    //function to play/pause song, takes a Song object as argument
+    const audioPlayer = (song : Song) => {
+        //check if audio exists and is currently playing
+        if (audio && currentSong?.song_id === song.song_id){
+            if (audio.paused){
+                audio.play();
+            }
+            else{
+                audio.pause();
+            }
+        }
+        else{
+            //if a different song is clicked on (so there is audio it's just not the same one as before)
+            if (audio){
+                //pause the current audio
+                audio.pause();
+            }
+            //create a new audio object
+            const newAudio = new Audio(song.file_path);
+            newAudio.play();
+            setAudio(newAudio);
+            setCurrentSong(song);
+            setIsPlaying(true);
+        }
+    };
+
+
 
     return(
         // adding same background styling as login and sign up page
@@ -121,9 +171,9 @@ const Gallery = () => {
                     <div className= "bg-black bg-opacity-50 p-2 rounded-b-lg">
                     <h2 className = "text-white font-bold p-1"> {song.title} </h2>
                     <button
-                        onClick= {() => playSong(song.file_path)}
+                        onClick= {() => audioPlayer(song)}
                         className = "bg-white font-medium text-black px-2 mt-2 hover:bg-gray-100">
-                        Play ▶️
+                        {currentSong?.song_id === song.song_id && isPlaying ? '⏸️' : '▶️'}
                     </button>
                     </div>
                 </div>
