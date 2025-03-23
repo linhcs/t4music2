@@ -1,5 +1,3 @@
-// components/ui/login.tsx
-
 "use client";
 import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
@@ -16,27 +14,37 @@ export default function Login() {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+  
     try {
-      // Replace /api/user with the correct login API endpoint, which is typically POST.
       const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
+  
+      const data = await response.json();
+  
       if (!response.ok) {
-        throw new Error("Invalid username or password!");
+        throw new Error(data.error || "Invalid username or password!");
       }
-
+  
       alert("Login successful! Welcome to Amplifi!");
-      window.location.href = "/app";  
-    } catch (error: unknown) {
+  
+// redirecting based on user role
+      if (data.role === "artist") {
+        window.location.href = "/artistprofile";
+      } else if (data.role === "listener") {
+        window.location.href = "/home";
+      } else if (data.role === "admin") {
+        window.location.href = "/adminprofile";
+      } else {
+        window.location.href = "/home"; // fallback if there's no response 
+      }
+    } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
       } else {
@@ -46,6 +54,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">

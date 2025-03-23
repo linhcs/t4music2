@@ -13,7 +13,7 @@ type User = {
 export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
-    console.log("🔹 Logging in:", username);
+    console.log(" Logging in:", username);
 
     if (!username || !password) {
       return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       SELECT * FROM users WHERE username = ${username} LIMIT 1;
     `;
 
-    console.log("🔹 Found user:", users);
+    console.log(" Found user:", users);
 
     // Check if user exists in the returned array
     if (!users || users.length === 0) {
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     // Compare hashed password
     const isPasswordValid = await bcrypt.compare(password, userData.password_hash);
-    console.log("🔹 Password valid:", isPasswordValid);
+    console.log(" Password valid:", isPasswordValid);
 
     if (!isPasswordValid) {
       return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
@@ -43,8 +43,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: "Login successful" }, { status: 200 });
 
-  } catch (error) {
+  } catch (error:unknown) {
     console.error("Login Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
+
