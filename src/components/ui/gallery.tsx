@@ -78,8 +78,8 @@ const Gallery = () => {
 
     return(
         // adding same background styling as login and sign up page
-        <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-300 to-gray-500 bg-clip-text text-transparent">
+        <div className="flex flex-col items.start min-h-screen bg-black p-4">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-pink-300 via-blue-400 to-purple-500 bg-clip-text text-transparent pl-5">
             Song Gallery
           </h1>
         
@@ -103,10 +103,10 @@ const Gallery = () => {
                     }}>
 
                     <div className= "bg-black bg-opacity-50 p-2 rounded-b-lg">
-                    <h2 className = "text-white font-bold p-1"> {song.title} </h2>
+                    <h2 className = "text-white font-bold p-1 text-lg"> {song.title} </h2>
                     <button
                         onClick= {() => audioPlayer(song)}
-                        className = "bg-white font-medium text-black px-2 mt-2 hover:bg-gray-100">
+                        className = "bg-white font-medium text-black w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100">
                         {currentSong?.song_id === song.song_id && isPlaying ? '⏸️' : '▶️'}
                     </button>
                     </div>
