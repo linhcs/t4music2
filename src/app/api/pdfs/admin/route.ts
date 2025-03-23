@@ -5,20 +5,22 @@ import fs from 'fs';
 import path from 'path';
 import * as fontkit from 'fontkit';
 // Import utility functions for drawing the table
-import { drawHeaders, addUserDataToPage } from '@/lib/tableutils';
+import { drawHeaders, addUserDataToPage, changearr } from '@/lib/tableutils';
 
 const prisma = new PrismaClient();
 
 
-export async function GET() {
+export async function POST(req: Request) {
   try {
+
+    const { updatedArr } = await req.json();
     
     // Query the database for some data
     const users = await prisma.users.findMany(
     {
-      // where: {
-      //   role: 'listener',  // Filter for 'listener' role
-      // },
+      where: {
+       role: 'listener',  // Filter for 'listener' role
+      },
       orderBy: {
         created_at: 'asc',  // Sort by dateTime in ascending order (change to 'desc' for descending)
       },
@@ -42,6 +44,8 @@ export async function GET() {
 
 
     let yPosition = 720;
+
+    changearr(updatedArr);
 
     yPosition = drawHeaders(page, yPosition, font);
 

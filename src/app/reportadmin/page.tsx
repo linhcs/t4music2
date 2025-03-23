@@ -1,45 +1,26 @@
 'use client';
-
 import { useState } from 'react';
 
-// order is 'Id','Username','Email','role','Created'
-// order is  0      1         2        3      4
-let selectarr = [false,false,false,false,false];
-
-const CheckboxTable = () => {
-  const [selectArr, setSelectArr] = useState(selectarr);
-
-  // Handle checkbox toggle
-  const handleCheckboxChange = (index: any) => {
-    const updatedArr = [...selectArr];
-    updatedArr[index] = !updatedArr[index]; // Toggle the value at the clicked index
-    setSelectArr(updatedArr);
-  };
-
+const CheckboxTable = ({ selectArr, handleCheckboxChange }: any) => {
   return (
     <div>
-      {/* Table with checkboxes */}
+      <h2>Select what you want to see</h2>
       <table className="checkbox-table">
         <thead>
           <tr>
-            <th>Id</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Created</th>
-            <th>Select</th> {/* Column for checkboxes */}
+            <th>Attribute</th>
+            <th>Select</th>
           </tr>
         </thead>
         <tbody>
-          {/* Render each row with a checkbox */}
-          {['Id', 'Username', 'Email', 'Role', 'Created'].map((col, index) => (
+          {['User ID', 'Username', 'Email', 'Role', 'Created'].map((col, index) => (
             <tr key={index}>
               <td>{col}</td>
-              <td>
+              <td className='px-8'>
                 <input
                   type="checkbox"
-                  checked={selectArr[index]}
-                  onChange={() => handleCheckboxChange(index)}
+                  checked={selectArr[index]} // Checked state based on selectArr
+                  onChange={() => handleCheckboxChange(index)} // Update selectArr on toggle
                 />
               </td>
             </tr>
@@ -50,37 +31,59 @@ const CheckboxTable = () => {
   );
 };
 
-
-const DownloadPDFButton = () => {
+const DownloadPDFButton = ({ updatedArr }: any) => {
   const [loading, setLoading] = useState(false);
 
   const handleDownload = async () => {
     setLoading(true);
 
-    const response = await fetch('/api/pdfs/admin');
-    const blob = await response.blob();
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'generated.pdf';
-    link.click();
-    
+    const response = await fetch('/api/pdfs/admin', {
+      method: 'POST',  // Assuming a POST request
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ updatedArr }), // Send updated selectArr in the request body
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'generated.pdf';
+      link.click();
+    }
     setLoading(false);
   };
 
   return (
-    <button onClick={handleDownload} disabled={loading}>
-      {loading ? 'Generating PDF...' : 'Download PDF'}
-    </button>
-  );
-};
-
-const App = () => {
-  return (
-    <div className = "flex-1 px-80 py-20">
-      <CheckboxTable /> {/* Render the table with checkboxes */}
-      <DownloadPDFButton /> {/* Render the download button */}
+    <div className='mt-10'>
+      <button onClick={handleDownload} disabled={loading}>
+        {loading ? 'Generating PDF...' : 'Download PDF'}
+      </button>
     </div>
   );
 };
 
-export default App;
+const ReportAdminPage = () => {
+  // Initialize selectArr with 5 values (false by default)
+  const [selectArr, setSelectArr] = useState([false, false, false, false, false]);
+
+  // Handle checkbox change to update the selectArr array
+  const handleCheckboxChange = (index: number) => {
+    const updatedArr = [...selectArr];
+    updatedArr[index] = !updatedArr[index]; // Toggle the value at the clicked index
+    setSelectArr(updatedArr);
+
+    // Log the updated array to the console to check
+    console.log("Updated selectArr:", updatedArr);
+  };
+
+  return (
+    <div className='flex-1 px-80'>
+      <CheckboxTable selectArr={selectArr} handleCheckboxChange={handleCheckboxChange} />
+      <DownloadPDFButton updatedArr={selectArr} /> {/* Pass updatedArr as prop */}
+    </div>
+  );
+};
+
+export default ReportAdminPage;
