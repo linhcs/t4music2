@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 export default function UserCard() {
   return (
     <div className="relative w-full bg-gradient-to-b from-gray-800 to-black">
@@ -7,10 +8,13 @@ export default function UserCard() {
         {/* Avatar + User Info */}
         <div className="flex items-center gap-6">
           {/* Avatar */}
-          <img
+          <Image
             src="/ed.jpeg"
             alt="User Avatar"
+            width={112}
+            height={112}
             className="w-28 h-28 rounded-full object-cover border-4 border-black shadow-md"
+            priority
           />
 
           {/* Text Info */}

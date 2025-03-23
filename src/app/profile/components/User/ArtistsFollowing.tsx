@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ArtistsFollowing() {
   // TODO: Replace static artist data with dynamic data from the backend in the future.
@@ -18,9 +19,11 @@ export default function ArtistsFollowing() {
           // TODO: Update to /artist/[artistId] once dynamic routing/backend is implemented.
           <Link key={artist.id} href="/artist">
             <div className="text-center hover:scale-105 transition-transform duration-300 cursor-pointer">
-              <img
+              <Image
                 src={artist.img}
                 alt={artist.name}
+                width={112}
+                height={112}
                 className="w-28 h-28 rounded-full shadow-xl object-cover"
               />
               <p className="mt-2 font-medium">{artist.name}</p>

@@ -1,4 +1,5 @@
 "use client";
+import Image from 'next/image';
 
 export default function TopTracks() {
   const topTracks = [
@@ -17,10 +18,12 @@ export default function TopTracks() {
             className="bg-gray-900 py-3 px-5 rounded-xl shadow-lg flex items-center justify-between hover:bg-gray-800 transition duration-300"
           >
             <div className="flex items-center gap-4">
-              <img
+              <Image
                 src={track.img}
-                alt={track.title}
-                className="w-12 h-12 object-cover rounded-md"
+                alt={`Album artwork for ${track.title}`}
+                width={48}
+                height={48}
+                className="object-cover rounded-md"
               />
               <span className="font-medium text-lg">{track.title}</span>
             </div>

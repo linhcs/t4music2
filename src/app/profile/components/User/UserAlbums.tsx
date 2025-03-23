@@ -1,6 +1,7 @@
 "use client";
 import { Heart } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { FaPlus } from "react-icons/fa";
 
 export default function UserAlbums({ isArtist }: { isArtist: boolean }) {
@@ -29,9 +30,11 @@ export default function UserAlbums({ isArtist }: { isArtist: boolean }) {
                 {album.name === "Liked Songs" ? (
                   <HeartIcon />
                 ) : (
-                  <img
+                  <Image
                     src={album.img ?? ""}
                     alt={album.name}
+                    width={144}
+                    height={144}
                     className="rounded-xl object-cover h-full w-full"
                   />
                 )}

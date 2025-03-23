@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 export default function ArtistCard() {
   const [isFollowing, setIsFollowing] = useState(false);
@@ -13,10 +14,13 @@ export default function ArtistCard() {
   return (
     <div className="relative w-full h-80 overflow-hidden bg-black">
       {/* Background Image */}
-      <img
+      <Image
         src="artist-banner.jpg"
         alt="Artist Banner"
         className="absolute inset-0 w-full h-full object-cover opacity-70"
+        width={1920}
+        height={1080}
+        priority
       />
 
       {/* Bottom Gradient Overlay */}
@@ -25,10 +29,12 @@ export default function ArtistCard() {
       {/* Foreground Content (Avatar, Artist Details & Follow Button) */}
       <div className="relative z-10 flex items-end h-full px-8 pb-6">
         <div className="flex items-center gap-6">
-          <img
+          <Image
             src="/artist-default.jpg"
             alt="Artist Avatar"
             className="w-32 h-32 rounded-full object-cover border-4 border-black shadow-xl"
+            width={128}
+            height={128}
           />
           <div className="flex flex-col">
             <h1 className="text-4xl font-extrabold text-white">Artist Name</h1>

@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 export default function TopTracks() {
   const tracks = [
     { title: "Track One", img: "/artist-placeholder.jpg" },
@@ -17,9 +19,12 @@ export default function TopTracks() {
             className="bg-gray-900 py-3 px-5 rounded-xl shadow-lg flex items-center justify-between hover:bg-gray-800 transition"
           >
             <div className="flex items-center gap-4">
-              <img 
+              <Image 
                 src={track.img} 
-                className="w-12 h-12 object-cover rounded-md"
+                className="object-cover rounded-md"
+                width={48}
+                height={48}
+                alt={`${track.title} album cover`}
               />
               <span className="font-medium text-lg">{track.title}</span>
             </div>

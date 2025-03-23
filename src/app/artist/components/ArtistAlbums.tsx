@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ArtistAlbums() {
   // Static album data for now; in the future, replace with dynamic backend data.
@@ -17,9 +18,11 @@ export default function ArtistAlbums() {
           // TODO: Update the URL pattern when integrating the backend.
           <Link key={album.id} href={`/albums/${album.id}`}>
             <div className="min-w-[180px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 cursor-pointer">
-              <img
+              <Image
                 src={album.img}
                 alt={album.name}
+                width={180}
+                height={160}
                 className="h-40 w-full object-cover rounded-t-xl"
               />
               <p className="text-center py-3 font-semibold">{album.name}</p>

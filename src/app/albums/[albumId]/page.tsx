@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 export default function AlbumPage() {
   // TODO: Replace this static album data with real backend logic when available.
   const albumData = {
@@ -47,10 +48,13 @@ export default function AlbumPage() {
 
         <div className="flex flex-col sm:flex-row gap-6">
           {/* Album Cover */}
-          <img
+          <Image
             src={albumData.cover}
             alt="Album Cover"
-            className="w-[200px] h-[200px] object-cover rounded-md shadow-lg"
+            width={200}
+            height={200}
+            priority
+            className="object-cover rounded-md shadow-lg"
           />
 
           <div className="flex flex-col justify-end">

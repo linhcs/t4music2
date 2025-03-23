@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Menu } from "@headlessui/react";
 import { FaHome, FaSearch, FaBell, FaUserCircle } from "react-icons/fa";
 import { useUserStore } from "@/app/store/userStore"; // Import Zustand store
-import { use } from "react";
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
@@ -14,7 +13,7 @@ interface NavBarProps {
 }
 
 export default function NavBar({ role = "listener" }: NavBarProps) {
-  const { email, username } = useUserStore(); // Retrieve user from Zustand store
+  const { username } = useUserStore(); // Retrieve user from Zustand store
 
   // Dummy notifications for demonstration
   const notifications = [
@@ -26,14 +25,12 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
   return (
     <nav className="bg-gray-900 text-white px-4 py-3 shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left Section: Home Icon */}
         <div className="flex items-center">
           <Link href="/gallery" className="hover:text-gray-300">
             <FaHome size={24} />
           </Link>
         </div>
 
-        {/* Center Section: Large Search Bar */}
         <div className="flex-1 mx-6">
           <div className="relative max-w-xl mx-auto">
             <input
@@ -47,9 +44,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
           </div>
         </div>
 
-        {/* Right Section: Notifications + Profile */}
         <div className="flex items-center space-x-4">
-          {/* Notifications Dropdown */}
           <Menu as="div" className="relative inline-block text-left">
             <Menu.Button className="flex items-center hover:text-gray-300">
               <FaBell size={20} />
@@ -80,12 +75,10 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
             </Menu.Items>
           </Menu>
 
-          {/* Profile Dropdown */}
           <Menu as="div" className="relative inline-block text-left">
             <Menu.Button className="flex items-center">
               <FaUserCircle size={24} className="hover:text-gray-300" />
             </Menu.Button>
-            {/* Displaying Current User's Username */}
             <h1 className="text-xl font-bold ml-2">{username || "Guest"}</h1>
             <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
               <div className="py-1">

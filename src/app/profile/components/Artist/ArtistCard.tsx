@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 export default function ArtistCard() {
   return (
     <div className="relative w-full bg-gradient-to-b from-gray-800 to-black">
@@ -8,10 +9,13 @@ export default function ArtistCard() {
         {/* Avatar + Artist Info */}
         <div className="flex items-center gap-6">
           {/* Artist Avatar */}
-          <img
+          <Image
             src="/artist-default.jpg"
             alt="Artist Avatar"
             className="w-28 h-28 rounded-full object-cover border-4 border-black shadow-md"
+            width={112}
+            height={112}
+            priority
           />
 
           {/* Text Info */}

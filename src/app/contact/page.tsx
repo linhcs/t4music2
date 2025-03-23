@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function Contact() {
   return (
@@ -45,15 +46,19 @@ export default function Contact() {
             But if you must, it needs to be accompanied by some <strong><em>Financial Assistance</em></strong> if you catch my drift ...
           </p>
           <div className="flex gap-20 px-40 mt-8 justify-center">
-            <img
+            <Image
               src="CashApp.jpg"
               alt="Cash App"
               className=" w-80 h-80 rounded-3xl"
+              width={320}
+              height={320}
             />
-            <img
+            <Image
               src="GoFund.jpg"
               alt="Go Fund Me"
               className=" w-80 h-80 rounded-3xl"
+              width={320}
+              height={320}
             />
           </div>
           
