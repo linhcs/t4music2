@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Menu } from "@headlessui/react";
 import { FaHome, FaSearch, FaBell, FaUserCircle } from "react-icons/fa";
 import { useUserStore } from "@/app/store/userStore"; // Import Zustand store
+import { use } from "react";
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
@@ -132,12 +133,16 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
                   </Menu.Item>
                 )}
                 <Menu.Item>
-                  {({ active }) => (
+                  {({ focus }) => (
                     <button
                       className={classNames(
-                        active ? "bg-gray-700 text-white" : "text-gray-300",
+                        focus ? "bg-gray-700 text-white" : "text-gray-300",
                         "block w-full text-left px-4 py-2 text-sm"
                       )}
+                      onClick={() => {
+                        useUserStore.getState().clearUser();
+                        window.location.href = "/";
+                      }}
                     >
                       Logout
                     </button>
