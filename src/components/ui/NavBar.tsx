@@ -21,11 +21,11 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
   ];
 
   return (
-    <nav className="bg-gray-900 text-white px-4 py-3 shadow-md">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left Section: Home Icon */}
+    <nav className="bg-black text-white px-5 py-2 shadow-md">
+    <div className="w-full flex items-center justify-between px-4">
+{/* Left Section: Home Icon */}
         <div className="flex items-center">
-          <Link href="/gallery" className="hover:text-gray-300">
+          <Link href="/app" className="hover:text-gray-300">
             <FaHome size={24} />
           </Link>
         </div>
@@ -36,7 +36,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
             <input
               type="text"
               placeholder="What do you want to play?"
-              className="w-full py-2 px-4 rounded-full bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full py-2 px-3 rounded-full bg-gray-800 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-gray-900"
             />
             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
               <FaSearch size={18} className="text-gray-500" />
@@ -44,7 +44,6 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
           </div>
         </div>
 
-        {/* Right Section: Notifications + Profile */}
         <div className="flex items-center space-x-4">
           {/* Notifications Dropdown */}
           <Menu as="div" className="relative inline-block text-left">

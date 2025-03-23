@@ -1,38 +1,65 @@
 "use client";
+
+import NavBar from "@/components/ui/NavBar";
+import Sidebar from "@/components/ui/Sidebar";
 import { useState } from "react";
 import { Song, Album } from "../../../types";
 import { FiPlayCircle } from "react-icons/fi";
 
-interface ListenerHomeProps {
+interface ListenerAttribute {
   username: string;
 }
 
-const ListenerHome = ({ username }: ListenerHomeProps) => {
+const ListenerHome = ({ username }: ListenerAttribute) => {
   const [albums] = useState<Album[]>([
     {
       Album_id: 1,
-      album_art: '/song-placeholder.jpg',
-      title: 'Global Warming',
+      album_art: "/song-placeholder.jpg",
+      title: "Global Warming",
       user_id: 1,
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
     },
   ]);
 
   const [songs] = useState<Song[]>([
     {
       song_id: 1,
-      title: 'Hotel Room Service',
+      title: "Hotel Room Service",
       Album_id: 1,
-      genre: 'Pop',
+      genre: "Pop",
       duration: 180,
-      file_path: '/music/HotelRoomService.mp3',
-      file_format: 'mp3',
+      file_path: "/music/HotelRoomService.mp3",
+      file_format: "mp3",
       uploaded_at: new Date(),
       plays_count: 1,
       user_id: 1,
     },
-    // additional songs...
+    // Copy-pasted examples (for testing layout)
+    {
+      song_id: 2,
+      title: "Hotel Room Service",
+      Album_id: 1,
+      genre: "Pop",
+      duration: 180,
+      file_path: "/music/HotelRoomService.mp3",
+      file_format: "mp3",
+      uploaded_at: new Date(),
+      plays_count: 1,
+      user_id: 1,
+    },
+    {
+      song_id: 3,
+      title: "Hotel Room Service",
+      Album_id: 1,
+      genre: "Pop",
+      duration: 180,
+      file_path: "/music/HotelRoomService.mp3",
+      file_format: "mp3",
+      uploaded_at: new Date(),
+      plays_count: 1,
+      user_id: 1,
+    },
   ]);
 
   const playSong = (file_path: string) => {
@@ -46,25 +73,22 @@ const ListenerHome = ({ username }: ListenerHomeProps) => {
       <div className="grid grid-cols-5 gap-4">
         {items.map((song) => {
           const album = albums.find((album) => album.Album_id === song.Album_id);
-          const album_art = album?.album_art || '';
+          const album_art = album?.album_art || "";
 
           return (
             <div
-              key={song.song_id}
+              key={`${song.song_id}-${Math.random()}`} // in case of same IDs
               className="group relative rounded-lg overflow-hidden shadow-md"
               style={{
                 backgroundImage: `url(${album_art})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                width: '60%',
-                paddingTop: '60%',
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                width: "60%",
+                paddingTop: "60%",
               }}
             >
               <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button
-                  onClick={() => playSong(song.file_path)}
-                  className="text-5xl text-white"
-                >
+                <button onClick={() => playSong(song.file_path)} className="text-5xl text-white">
                   <FiPlayCircle />
                 </button>
               </div>
@@ -79,17 +103,23 @@ const ListenerHome = ({ username }: ListenerHomeProps) => {
   );
 
   return (
-    <div className="flex flex-col items justify-start min-h-screen bg-black p-6 overflow-auto">
-      <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-300 via-purple-400 to-blue-500 bg-clip-text text-transparent animate-gradient">
-        Hello, {username}
-      </h1>
-
-      <SongGallerySection title="Continue Where You Left Off" items={songs.slice(0, 3)} />
-      <SongGallerySection title="Recently Played Songs" items={songs.slice(0, 3)} />
-      <SongGallerySection title="Recently Played Albums" items={songs.slice(0, 3)} />
-      <SongGallerySection title="Recommended For You" items={songs.slice(0, 3)} />
-    </div>
-  );
+      <div className="flex min-h-screen bg-black text-white">
+        {/*i added a sidebar EEEE */}
+        <Sidebar username={username} />
+    
+        <div className="flex flex-col flex-1 min-w-0">
+          <NavBar role="listener" />
+    
+          <main className="p-6 overflow-auto">
+            <SongGallerySection title="Continue Where You Left Off" items={songs.slice(0, 3)} />
+            <SongGallerySection title="Recently Played Songs" items={songs.slice(0, 3)} />
+            <SongGallerySection title="Recently Played Albums" items={songs.slice(0, 3)} />
+            <SongGallerySection title="Recommended For You" items={songs.slice(0, 3)} />
+          </main>
+        </div>
+      </div>
+    );
+    
 };
 
 export default ListenerHome;
