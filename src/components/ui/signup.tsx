@@ -1,3 +1,5 @@
+// components/ui/signup.tsx
+
 "use client";
 import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
@@ -11,6 +13,7 @@ export default function Signup() {
     password: "",
     confirmPassword: "",
   });
+
   const [error, setError] = useState("");
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -27,13 +30,30 @@ export default function Signup() {
 
     setError(""); // Clear error if matched
 
-    // Save the signup data in localStorage so it can be used later after role selection.
-    localStorage.setItem("signupData", JSON.stringify(formData));
+    try {
+      const response = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
 
-    // Redirect to the role selection page
-    router.push("/select-role");
+      if (!response.ok) {
+        throw new Error("Signup failed.");
+      }
+  
+      localStorage.setItem("signupData", JSON.stringify(formData));
+  
+      // Redirect to select-role
+      router.push("/select-role");
+    } catch (error:unknown) {
+      console.error(error);
+      setError("Something went wrong :(.");
+    }
   };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
       <div className="neon-card relative flex flex-col items-center justify-center w-full max-w-md p-8 rounded-xl shadow-lg space-y-6 border border-gray-800 animate-gradient">
