@@ -179,10 +179,3 @@ model ratings {
   @@index([user_id], map: "user_id")
   @@index([song_id], map: "song_id")
 }
-
-model all_users {
-  username String @unique
-  email    String
-
-  @@map("all_users") // This tells Prisma that this model corresponds to the view
-}

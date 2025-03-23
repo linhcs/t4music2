@@ -9,14 +9,21 @@ import { drawHeaders, addUserDataToPage } from '@/lib/tableutils';
 
 const prisma = new PrismaClient();
 
+
 export async function GET() {
   try {
     
     // Query the database for some data
-    const users = await prisma.allUsers.findMany();
-    if (!users || users.length === 0) {
-      return new NextResponse('No users found in the database', { status: 404 });
+    const users = await prisma.users.findMany(
+    {
+      // where: {
+      //   role: 'listener',  // Filter for 'listener' role
+      // },
+      orderBy: {
+        created_at: 'asc',  // Sort by dateTime in ascending order (change to 'desc' for descending)
+      },
     }
+    );
 
 
     // Create a new PDF document
@@ -35,6 +42,8 @@ export async function GET() {
 
 
     let yPosition = 720;
+
+    yPosition = drawHeaders(page, yPosition, font);
 
     for (let i = 0; i < users.length; i++) {
       const user = users[i];
