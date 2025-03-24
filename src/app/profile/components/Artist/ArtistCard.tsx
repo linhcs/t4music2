@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useUserStore } from "@/app/store/userStore"; // or use a separate store if needed
+import { useUserStore } from "@/app/store/userStore"; 
 
 export default function ArtistCard() {
   const { username } = useUserStore(); // Retrieve artist name from store
