@@ -51,8 +51,8 @@ export async function getSignedURL(
 
   const title = "test";
   const duration = 123;
-  const someUserId = 123123;
-  const albumId = 123123;
+  const someUserId = 1;
+  const albumId = 1;
   if (!title || !someUserId || !fileKey || !duration || !signedURL) {
     console.error("Missing required inputs for database insertion:", {
       title,

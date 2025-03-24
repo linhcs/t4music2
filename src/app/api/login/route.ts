@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
     // ✅ Authentication Successful - Redirect or Set Session
     return NextResponse.json(
-      { message: "Logging you in!", user },
+      { message: "Logging you in!", userId: user.user_id },
       { status: 200 }
     );
   } catch (error: unknown) {
@@ -41,7 +41,6 @@ export async function POST(req: Request) {
     } else {
       console.error("An unknown error occurred");
     }
-
     return NextResponse.json({ error: "Oops! Login failed!" }, { status: 500 });
   }
 }
