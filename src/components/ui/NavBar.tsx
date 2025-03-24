@@ -23,14 +23,9 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
   ];
 
   return (
-<<<<<<< HEAD
-    <nav className="bg-gray-900 text-white px-4 py-3 shadow-md">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-=======
     <nav className="bg-black text-white px-5 py-2 shadow-md">
-    <div className="w-full flex items-center justify-between px-4">
-{/* Left Section: Home Icon */}
->>>>>>> dianethbranch
+      <div className="w-full flex items-center justify-between px-4">
+        {/* Left Section: Home Icon */}
         <div className="flex items-center">
           <Link href="/app" className="hover:text-gray-300">
             <FaHome size={24} />
@@ -85,7 +80,6 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
             <Menu.Button className="flex items-center">
               <FaUserCircle size={24} className="hover:text-gray-300" />
             </Menu.Button>
-            <h1 className="text-xl font-bold ml-2">{username || "Guest"}</h1>
             <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
               <div className="py-1">
                 <Menu.Item>
