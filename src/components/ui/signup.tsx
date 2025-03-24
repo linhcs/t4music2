@@ -46,6 +46,7 @@ export default function Signup() {
       if (!response.ok) {
         throw new Error("Signup failed.");
       }
+      console.log(response);
 
       localStorage.setItem("signupData", JSON.stringify(formData));
 
@@ -55,7 +56,7 @@ export default function Signup() {
       console.error(error);
       setError("Something went wrong :(.");
     }
-    setUser(formData.email, formData.username);
+    // setUser(formData.username);
   };
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">

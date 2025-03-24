@@ -1,13 +1,12 @@
 "use client";
 import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
-
+import { useUserStore } from "@/app/store/userStore";
 export default function Login() {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,7 +20,7 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await fetch("/api/user", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -30,19 +29,21 @@ export default function Login() {
       if (!response.ok) {
         throw new Error("Invalid username or password!");
       }
+      console.log(response);
+      //wait 3 seconds here
+      alert("welcome");
 
-            alert("Login successful! Welcome to Amplifi!");
-            window.location.href = "/dashboard";
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                setError(error.message);  // Access error.message safely
-            } else {
-                setError("An unknown error occurred");  // Fallback message if error is not an instance of Error
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
+      window.location.href = "/profile/user/";
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message); // Access error.message safely
+      } else {
+        setError("An unknown error occurred"); // Fallback message if error is not an instance of Error
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
