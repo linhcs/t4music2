@@ -1,8 +1,7 @@
 "use server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { prismaclient } from "../../../../prisma/script";
-
+import { prisma } from "@prisma/script";
 const s3 = new S3Client({
   region: "us-east-1",
   credentials: {
@@ -81,7 +80,7 @@ export async function getSignedURL(
       albumId,
     ];
 
-    const song = await prismaclient.$queryRawUnsafe(query, ...params);
+    const song = await prisma.$queryRawUnsafe(query, ...params);
 
     if (!song) {
       console.error(

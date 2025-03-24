@@ -1,20 +1,11 @@
 "use client";
 import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
-<<<<<<< HEAD
-import { useUserStore } from "@/app/store/userStore";
-export default function Login() {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
-=======
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 
 export default function Login() {
   const [formData, setFormData] = useState({ username: "", password: "" });
->>>>>>> dianethbranch
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -29,33 +20,13 @@ export default function Login() {
     setError("");
 
     try {
-<<<<<<< HEAD
-      const response = await fetch("/api/login", {
-=======
-      // authenticating data 
+      // authenticating data
       const res = await fetch("/api/login", {
->>>>>>> dianethbranch
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
-<<<<<<< HEAD
-      if (!response.ok) {
-        throw new Error("Invalid username or password!");
-      }
-      console.log(response);
-      //wait 3 seconds here
-      alert("welcome");
-
-      window.location.href = "/profile/user/";
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setError(error.message); // Access error.message safely
-      } else {
-        setError("An unknown error occurred"); // Fallback message if error is not an instance of Error
-      }
-=======
       const loginData = await res.json();
 
       if (!res.ok) throw new Error(loginData.error || "Invalid credentials");
@@ -80,7 +51,7 @@ export default function Login() {
 
       alert("Login successful! Welcome to Amplifi 🎧"); // is the emoji cringe idk kinda cute
 
-      // redirecting based on role 
+      // redirecting based on role
       if (userData.role === "listener") {
         router.push("/home");
       } else if (userData.role === "artist") {
@@ -93,7 +64,6 @@ export default function Login() {
     } catch (error) {
       if (error instanceof Error) setError(error.message);
       else setError("Unknown error occurred");
->>>>>>> dianethbranch
     } finally {
       setLoading(false);
     }
