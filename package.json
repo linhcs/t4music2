@@ -23,6 +23,7 @@
     "fontkit": "^2.0.4",
     "framer-motion": "^12.5.0",
     "lucide-react": "^0.475.0",
+    "mysql": "^2.18.1",
     "next": "15.1.7",
     "pdf-lib": "^1.17.1",
     "react": "^19.0.0",

@@ -9,25 +9,20 @@ import { drawHeaders, addUserDataToPage, changearr } from '@/lib/tableutils';
 
 const prisma = new PrismaClient();
 
+interface User { email: string; role: string; user_id: number; username: string; created_at: Date; }
+
 
 export async function POST(req: Request) {
   try {
 
     const { updatedArr } = await req.json();
-    
+
+    const noshot = "users";
+    const rawquery = `SELECT * FROM ${noshot};`;
+
     // Query the database for some data
-    const users = await prisma.users.findMany(
-    {
-      where: {
-       role: 'listener',  // Filter for 'listener' role
-      },
-      orderBy: {
-        created_at: 'asc',  // Sort by dateTime in ascending order (change to 'desc' for descending)
-      },
-    }
-    );
-
-
+    const users: User[] = await prisma.$queryRawUnsafe(rawquery);
+  
     // Create a new PDF document
     const pdfDoc = await PDFDocument.create();
 
