@@ -2,6 +2,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { prisma } from "@prisma/script";
+
 const s3 = new S3Client({
   region: "us-east-1",
   credentials: {
@@ -14,8 +15,7 @@ const acceptedTypes = ["audio/mpeg", "audio/ogg", "audio/wav"];
 const maxFileSize = 1024 * 1024 * 10;
 
 const generateFileName = (type: string) => {
-  const date = new Date();
-  return `${date.getTime()}.${type.split("/")[1]}`;
+  return `${Date.now()}.${type.split("/")[1]}`;
 };
 
 export async function getSignedURL(
@@ -23,17 +23,8 @@ export async function getSignedURL(
   size: number,
   checksum: string
 ) {
-  console.log("AWS Credentials:", {
-    AccessKey: process.env.AWS_ACCESS_KEY,
-    SecretKey: process.env.AWS_SECRET_ACCESS_KEY,
-  });
-
-  if (!acceptedTypes.includes(type)) {
-    return { failure: "Invalid File Type!" };
-  }
-
-  if (size > maxFileSize) {
-    return { failure: "File is too big!" };
+  if (!acceptedTypes.includes(type) || size > maxFileSize) {
+    return { failure: "Invalid file or file size!" };
   }
 
   const fileKey = generateFileName(type);
@@ -48,58 +39,36 @@ export async function getSignedURL(
 
   const signedURL = await getSignedUrl(s3, putObj, { expiresIn: 5400 });
 
-  const title = "test";
-  const duration = 123;
-  const someUserId = 1;
-  const albumId = 1;
-  if (!title || !someUserId || !fileKey || !duration || !signedURL) {
-    console.error("Missing required inputs for database insertion:", {
-      title,
-      someUserId,
-      fileKey,
-      duration,
-      signedURL,
-    });
-    return { failure: "Required inputs are missing!" };
-  }
-
   try {
-    const query = `
-      INSERT INTO songs (title, genre, duration, file_path, file_format, user_id, album_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-      RETURNING *;
-    `;
+    const title = "test";
+    const duration = 123;
+    const someUserId = 1;
+    const albumId = 1;
 
+    const query = `
+    INSERT INTO songs (title, genre, duration, file_path, file_format, user_id, album_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?);
+  `;
     const params = [
       title,
       "Pop",
       duration,
       fileKey,
-      type.split("/")[1],
+      "mpeg",
       someUserId,
       albumId,
     ];
 
-    const song = await prisma.$queryRawUnsafe(query, ...params);
+    await prisma.$queryRawUnsafe(query, ...params);
 
-    if (!song) {
-      console.error(
-        "Database Insert Error: Insert returned null. Check your database or query."
-      );
-      console.error("Query:", query);
-      console.error("Params:", params);
-      throw new Error("Database insert failed. No song was returned.");
-    }
+    const song = await prisma.songs.findFirst({
+      where: { file_path: fileKey },
+    });
 
-    console.log("Database Insert Result:", song);
+    if (!song) throw new Error("Database insert failed. No song was returned.");
+
     return { success: { url: signedURL, song } };
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Database Insert Error:", error.message);
-      console.error("Stack Trace:", error.stack);
-    } else {
-      console.error("Database Insert Error:", error);
-    }
     return { failure: "Failed to save song details in the database!" };
   }
 }
