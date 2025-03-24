@@ -1,14 +1,23 @@
 "use client";
 import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
+<<<<<<< HEAD
 import { useUserStore } from "@/app/store/userStore";
 export default function Login() {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
+=======
+import { useRouter } from "next/navigation";
+import { useUserStore } from "@/store/useUserStore";
+
+export default function Login() {
+  const [formData, setFormData] = useState({ username: "", password: "" });
+>>>>>>> dianethbranch
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,12 +29,18 @@ export default function Login() {
     setError("");
 
     try {
+<<<<<<< HEAD
       const response = await fetch("/api/login", {
+=======
+      // authenticating data 
+      const res = await fetch("/api/login", {
+>>>>>>> dianethbranch
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
+<<<<<<< HEAD
       if (!response.ok) {
         throw new Error("Invalid username or password!");
       }
@@ -40,6 +55,45 @@ export default function Login() {
       } else {
         setError("An unknown error occurred"); // Fallback message if error is not an instance of Error
       }
+=======
+      const loginData = await res.json();
+
+      if (!res.ok) throw new Error(loginData.error || "Invalid credentials");
+
+      // getting full user data
+      const userRes = await fetch("/api/user/data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: formData.username }),
+      });
+
+      const userData = await userRes.json();
+
+      if (!userRes.ok) throw new Error("Failed to load user data");
+
+      // here im setting the global zustand store so we can use it
+      const store = useUserStore.getState();
+      store.setUser(userData.username, userData.role);
+      store.setLikedSongs(userData.likedSongs);
+      store.setPlaylists(userData.playlists);
+      store.setStreamingHistory(userData.streamingHistory);
+
+      alert("Login successful! Welcome to Amplifi 🎧"); // is the emoji cringe idk kinda cute
+
+      // redirecting based on role 
+      if (userData.role === "listener") {
+        router.push("/home");
+      } else if (userData.role === "artist") {
+        router.push("/artistprofile");
+      } else if (userData.role === "admin") {
+        router.push("/adminprofile");
+      } else {
+        router.push("/home"); // fallback if anything goes wrong
+      }
+    } catch (error) {
+      if (error instanceof Error) setError(error.message);
+      else setError("Unknown error occurred");
+>>>>>>> dianethbranch
     } finally {
       setLoading(false);
     }
