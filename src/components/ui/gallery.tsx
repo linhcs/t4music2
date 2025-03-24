@@ -1,89 +1,9 @@
 "use client";
 import{useState, useEffect} from "react";
-import { Song, Album } from "../../../types"; //imports song interface ("structure") to use in gallery
+import { Song} from "../../../types"; //imports song interface ("structure") to use in gallery
 
 const Gallery = () => {
-    //declare album to assign to songs
-
-    const[albums] = useState<Album[]>([
-        {
-            Album_id: 1,
-            album_art: '/song-placeholder.jpg',
-            title: 'Global Warming',
-            user_id: 1,
-            created_at: new Date(),
-            updated_at: new Date()
-        },
-    ]);
-    
-    const [songs] = useState<Song[]>([
-        //assigning placeholder values to each song
-        {
-            song_id: 1,
-            title: 'Hotel Room Service',
-            Album_id: 1,
-            genre: 'Pop',
-            duration: 180,
-            file_path: '/music/HotelRoomService.mp3',
-            file_format: 'mp3',
-            uploaded_at: new Date(),
-            plays_count: 1,
-            user_id: 1,
-        },
-
-        {
-            song_id: 2,
-            title: 'Hotel Room Service',
-            Album_id: 1,
-            genre: 'Pop',
-            duration: 180,
-            file_path: '/music/HotelRoomService.mp3',
-            file_format: 'mp3',
-            uploaded_at: new Date(),
-            plays_count: 1,
-            user_id: 1,
-        },
-        
-        {
-            song_id: 3,
-            title: 'Hotel Room Service',
-            Album_id: 1,
-            genre: 'Pop',
-            duration: 180,
-            file_path: '/music/HotelRoomService.mp3',
-            file_format: 'mp3',
-            uploaded_at: new Date(),
-            plays_count: 1,
-            user_id: 1,
-        },
-
-        {
-            song_id: 4,
-            title: 'Hotel Room Service',
-            Album_id: 1,
-            genre: 'Pop',
-            duration: 180,
-            file_path: '/music/HotelRoomService.mp3',
-            file_format: 'mp3',
-            uploaded_at: new Date(),
-            plays_count: 1,
-            user_id: 1,
-        },
-
-        {
-            song_id: 5,
-            title: 'Hotel Room Service',
-            Album_id: 1,
-            genre: 'Pop',
-            duration: 180,
-            file_path: '/music/HotelRoomService.mp3',
-            file_format: 'mp3',
-            uploaded_at: new Date(),
-            plays_count: 1,
-            user_id: 1,
-        },
-
-    ]);
+    const [songs, setSongs] = useState<Song[]>([]);
 
     //stores the song instance (actual audio file)
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
@@ -94,6 +14,21 @@ const Gallery = () => {
     //flag to set true/false if playing, false by default
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
+    //fetch songs/albums from API
+    useEffect(() => {
+        const fetchData = async () => {
+            try{
+                const response = await fetch('/api/songs');
+                const data: Song[] = await response.json();
+                setSongs(data);
+            } catch(error){
+                console.error("Failed to fetch songs:", error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    //keeps track if audio play/pause
     useEffect(() => {
         if (audio) {
             //event listeners to keep track of when playing/pausing
@@ -143,8 +78,8 @@ const Gallery = () => {
 
     return(
         // adding same background styling as login and sign up page
-        <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-300 to-gray-500 bg-clip-text text-transparent">
+        <div className="flex flex-col items.start min-h-screen bg-black p-4">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-pink-300 via-blue-400 to-purple-500 bg-clip-text text-transparent pl-5">
             Song Gallery
           </h1>
         
@@ -153,8 +88,7 @@ const Gallery = () => {
         <div className= "grid grid-cols-5 gap-3 p-5 w-full max-w-7xl">
             {songs.map((song) => {
                 //find album referenced by song to return album cover art
-                const album = albums.find((album) => album.Album_id === song.Album_id);
-                const album_art = album?.album_art || '';
+                const album_art = song.album?.album_art || '';
 
                 return (
                     <div 
@@ -169,10 +103,10 @@ const Gallery = () => {
                     }}>
 
                     <div className= "bg-black bg-opacity-50 p-2 rounded-b-lg">
-                    <h2 className = "text-white font-bold p-1"> {song.title} </h2>
+                    <h2 className = "text-white font-bold p-1 text-lg"> {song.title} </h2>
                     <button
                         onClick= {() => audioPlayer(song)}
-                        className = "bg-white font-medium text-black px-2 mt-2 hover:bg-gray-100">
+                        className = "bg-white font-medium text-black w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100">
                         {currentSong?.song_id === song.song_id && isPlaying ? '⏸️' : '▶️'}
                     </button>
                     </div>
