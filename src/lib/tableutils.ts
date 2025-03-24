@@ -1,7 +1,5 @@
-import { streaming_history } from '@prisma/client';
 import { PDFPage, PDFFont } from 'pdf-lib';
 import { rgb } from 'pdf-lib';
-import { act } from 'react';
 
 const columnwidthsobj = [
   { label: 'Id', w: 30 },
@@ -10,6 +8,8 @@ const columnwidthsobj = [
   { label: 'role', w: 80 },
   { label: 'Created', w: 100 }
 ];
+
+interface User { email: string; role: string; user_id: number; username: string; pfp: string | null; password_hash: string; created_at: Date | null; updated_at: Date | null; }
 
 const rowHeight = 20; // Row height for each user
 const start = 44;
@@ -44,7 +44,7 @@ function Arrayprep(passedarray: boolean[]){
   };
   colheaders = [];
   //makes an array of collumn headers
-  let tcolheaders: string[] = colreference.map((index) => columnwidthsobj[index].label);
+  const tcolheaders: string[] = colreference.map((index) => columnwidthsobj[index].label);
   colheaders = tcolheaders;
 };
 
@@ -69,7 +69,7 @@ export const drawHeaders = (page: PDFPage, yPosition: number, font: PDFFont) => 
 };
 
 // Function to draw user data rows
-export const addUserDataToPage = (page: PDFPage, user: any, yPosition: number, font: PDFFont) => {
+export const addUserDataToPage = (page: PDFPage, user: User, yPosition: number, font: PDFFont) => {
 
   Arrayprep(passedarray);
 
@@ -114,19 +114,13 @@ export const addUserDataToPage = (page: PDFPage, user: any, yPosition: number, f
     page.drawText(user.role, { x: colpos[render] + 7, y: yPosition - rowHeight, font, size: 12 });
     render +=1;
   };
-  if(passedarray[4]){
+  if(passedarray[4] && user.created_at != null){
     //convert to date
-    let created = user.created_at.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    const created = user.created_at.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     //draw
     page.drawText(created, { x: colpos[render] + 7, y: yPosition - rowHeight, font, size: 12 });
     render +=1;
   };
-
-  
-
-  
-
-  
 
   return yPosition - rowHeight; // Move the yPosition down after adding user data
 };

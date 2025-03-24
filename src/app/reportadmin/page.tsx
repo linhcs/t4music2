@@ -1,7 +1,11 @@
 'use client';
 import { useState } from 'react';
 
-const CheckboxTable = ({ selectArr, handleCheckboxChange }: any) => {
+
+const CheckboxTable: React.FC<{
+  selectArr: boolean[]; // Array of booleans for the checkboxes
+  handleCheckboxChange: (index: number) => void; // Function that takes a number (index) and returns void
+}> = ({ selectArr, handleCheckboxChange }) => {
   return (
     <div>
       <h2>Select what you want to see</h2>
@@ -31,7 +35,7 @@ const CheckboxTable = ({ selectArr, handleCheckboxChange }: any) => {
   );
 };
 
-const DownloadPDFButton = ({ updatedArr }: any) => {
+const DownloadPDFButton: React.FC<{ updatedArr : boolean[]; }> = ({ updatedArr }) => {
   const [loading, setLoading] = useState(false);
 
   const handleDownload = async () => {
@@ -70,7 +74,7 @@ const ReportAdminPage = () => {
 
   // Handle checkbox change to update the selectArr array
   const handleCheckboxChange = (index: number) => {
-    const updatedArr = [...selectArr];
+    const updatedArr: boolean[] = [...selectArr];
     updatedArr[index] = !updatedArr[index]; // Toggle the value at the clicked index
     setSelectArr(updatedArr);
 

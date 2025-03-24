@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     let page = pdfDoc.addPage([612, 792]); // letters size
 
     //runing ignore becasue it says its a problem but it works so idk
-    //@ts-ignore
+    //@ts-expect-error: this is not cuaisng issues typescript is just for lame lamos
     pdfDoc.registerFontkit(fontkit);
     //font
     const comicSansPath = path.resolve('public/fonts/comic.ttf');
