@@ -3,6 +3,7 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
+//import { sign } from "crypto";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -45,9 +46,9 @@ export default function Signup() {
         const errorData = await signupRes.json();
         throw new Error(errorData.error || "Signup failed.");
       }
-      console.log(Response);
+      console.log(signupRes);
 
-      // getting user data from db 
+      // getting user data from db
       const userRes = await fetch("/api/user/data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

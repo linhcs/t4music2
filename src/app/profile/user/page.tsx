@@ -5,10 +5,12 @@ import ProfileSettingsButton from '../components/ProfileSettingsButton';
 import DeleteAccountButton from '../components/DeleteAccountButton';
 import UserAlbums from '../components/User/UserAlbums';
 import ArtistsFollowing from '../components/User/ArtistsFollowing';
+import NavBar from '@/components/ui/NavBar';
 
 export default function UserProfilePage() {
   return (
     <div className="bg-black min-h-screen text-white">
+      <NavBar />
       {/* Hero-style banner at top */}
       <UserCard />
 

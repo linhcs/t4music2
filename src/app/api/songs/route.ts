@@ -7,7 +7,12 @@ export async function GET(){
     try {
         const songs = await prisma.songs.findMany({
             include: {
-                album: true,
+                users:{
+                    select:{
+                        username: true
+                    }
+                },
+                album: true
             },
         });
         return NextResponse.json(songs, { status: 200});

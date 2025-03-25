@@ -8,7 +8,10 @@ export async function POST(request: Request) {
 
     // Check if required fields are filled in
     if (!username || !password) {
-      return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Username and password are required" },
+        { status: 400 }
+      );
     }
 
     // Check if user alr. exists (by username)
@@ -17,7 +20,10 @@ export async function POST(request: Request) {
     `;
 
     if (existingUser[0].count > 0) {
-      return NextResponse.json({ error: "User already exists" }, { status: 409 });
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 409 }
+      );
     }
 
     // Hash password
@@ -26,13 +32,20 @@ export async function POST(request: Request) {
     // Insert new user into DB
     await prisma.$executeRaw`
       INSERT INTO users (username, email, password_hash) 
-      VALUES (${username}, ${email || `${username}@example.com`}, ${hashedPassword})
+      VALUES (${username}, ${
+      email || `${username}@example.com`
+    }, ${hashedPassword})
     `;
 
-    return NextResponse.json({ message: "User registered successfully" }, { status: 201 });
-
+    return NextResponse.json(
+      { message: "User registered successfully" },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Signup Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
