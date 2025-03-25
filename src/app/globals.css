@@ -203,3 +203,13 @@ h1{
   50% { box-shadow: 0 0 20px rgba(0, 180, 255, 0.8); }
   100% { box-shadow: 0 0 10px rgba(167, 39, 236, 0.6); }
 }
+
+.no-flicker {
+  backface-visibility: hidden;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+.group:hover .play-button {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}

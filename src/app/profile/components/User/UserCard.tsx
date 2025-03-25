@@ -25,9 +25,9 @@ export default function UserCard() {
             Profile
           </span>
 
-          {/* Username (keeping the actual username logic the same) */}
+          {/* Username (same as ListenerHome approach) */}
           <h2 className="text-5xl font-extrabold text-white leading-none">
-            {username || "User"}
+            {username ? username : "User"}
           </h2>
 
           {/* Additional stats row */}

@@ -3,7 +3,6 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
-//import { sign } from "crypto";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -11,12 +10,13 @@ export default function Signup() {
     username: "",
     password: "",
     confirmPassword: "",
+    role: "",
   });
 
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -28,10 +28,14 @@ export default function Signup() {
       return;
     }
 
+    if (!formData.role) {
+      setError("Please select a role.");
+      return;
+    }
+
     setError("");
 
     try {
-      // signup request
       const signupRes = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -39,6 +43,7 @@ export default function Signup() {
           email: formData.email,
           username: formData.username,
           password: formData.password,
+          role: formData.role,
         }),
       });
 
@@ -46,9 +51,7 @@ export default function Signup() {
         const errorData = await signupRes.json();
         throw new Error(errorData.error || "Signup failed.");
       }
-      console.log(signupRes);
 
-      // getting user data from db
       const userRes = await fetch("/api/user/data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -58,25 +61,17 @@ export default function Signup() {
       const userData = await userRes.json();
       if (!userRes.ok) throw new Error("Failed to load user data.");
 
-      // again setting global zustand state
       const store = useUserStore.getState();
       store.setUser(userData.username, userData.role);
       store.setLikedSongs(userData.likedSongs);
       store.setPlaylists(userData.playlists);
       store.setStreamingHistory(userData.streamingHistory);
 
-      alert("Signup successful! Welcome to Amplifi <3");
+      alert("Signup successful! Welcome to Amplifi 🎧");
 
-      // redirecting based on role
-      if (userData.role === "artist") {
-        router.push("/artistprofile");
-      } else if (userData.role === "listener") {
-        router.push("/home");
-      } else if (userData.role === "admin") {
-        router.push("/adminprofile");
-      } else {
-        router.push("/home");
-      }
+      if (userData.role === "artist") router.push("/artistprofile");
+      else if (userData.role === "listener") router.push("/home");
+      else router.push("/home");
     } catch (err) {
       if (err instanceof Error) setError(err.message);
       else setError("An unknown error occurred.");
@@ -127,6 +122,35 @@ export default function Signup() {
             required
             className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
           />
+
+          {/* i added the role buttons here instead */}
+          <h2 className="text-center text-lg font-semibold bg-gradient-to-r from-pink-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mt-4">
+             Decide your fate...
+          </h2>
+          <div className="flex justify-between gap-4 mt-2">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, role: "listener" })}
+              className={`w-full py-3 rounded-lg font-semibold text-white text-center transition-all duration-300 ${
+                formData.role === "listener"
+                  ? "bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400"
+                  : "bg-gray-800 hover:bg-gray-700"
+              }`}
+            >
+              I’m a Listener 🎧
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, role: "artist" })}
+              className={`w-full py-3 rounded-lg font-semibold text-white text-center transition-all duration-300 ${
+                formData.role === "artist"
+                  ? "bg-gradient-to-r from-purple-500 via-blue-400 to-pink-500"
+                  : "bg-gray-800 hover:bg-gray-700"
+              }`}
+            >
+              I’m an Artist 🎤
+            </button>
+          </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 

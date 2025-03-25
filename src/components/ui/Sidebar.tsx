@@ -24,15 +24,17 @@ export default function Sidebar({ username }: Sidebaruser) {
       </div>
 
       <nav className="flex flex-col space-y-2 px-4">
-        <Link href="/liked-songs" className="flex items-center gap-3 hover:text-pink-400">
+      <Link href="/listener/liked-songs"
+      className="flex items-center gap-3 hover:text-pink-400">
           <FaHeart />
           {isOpen && <span>Liked Songs</span>}
         </Link>
-        <Link href="/my-playlists" className="flex items-center gap-3 hover:text-blue-400">
+        <Link href="/listener/my-playlists"
+        className="flex items-center gap-3 hover:text-blue-400">
           <FaListUl />
           {isOpen && <span>My Playlists</span>}
         </Link>
-        <Link href="/browse" className="flex items-center gap-3 hover:text-purple-400">
+        <Link href="/home" className="flex items-center gap-3 hover:text-purple-400">
           <FaMusic />
           {isOpen && <span>Browse Music</span>}
         </Link>

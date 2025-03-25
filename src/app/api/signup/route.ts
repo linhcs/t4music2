@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
   try {
-    const { username, email, password } = await request.json();
+    const { username, email, password,role } = await request.json();
 
     // Check if required fields are filled in
     if (!username || !password) {
@@ -31,10 +31,10 @@ export async function POST(request: Request) {
 
     // Insert new user into DB
     await prisma.$executeRaw`
-      INSERT INTO users (username, email, password_hash) 
+      INSERT INTO users (username, email, password_hash, role) 
       VALUES (${username}, ${
       email || `${username}@example.com`
-    }, ${hashedPassword})
+    }, ${hashedPassword}, ${role})
     `;
 
     return NextResponse.json(

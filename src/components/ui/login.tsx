@@ -13,12 +13,11 @@ export default function Login() {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+  
     try {
       // authenticating data
       const res = await fetch("/api/login", {
@@ -68,6 +67,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
