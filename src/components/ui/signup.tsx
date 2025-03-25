@@ -45,7 +45,7 @@ export default function Signup() {
         const errorData = await signupRes.json();
         throw new Error(errorData.error || "Signup failed.");
       }
-      console.log(response);
+      console.log(Response);
 
       // getting user data from db 
       const userRes = await fetch("/api/user/data", {
@@ -80,10 +80,6 @@ export default function Signup() {
       if (err instanceof Error) setError(err.message);
       else setError("An unknown error occurred.");
     }
-<<<<<<< HEAD
-    // setUser(formData.username);
-=======
->>>>>>> dianethbranch
   };
 
   return (
