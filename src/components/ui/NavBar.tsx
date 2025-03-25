@@ -13,7 +13,7 @@ interface NavBarProps {
 }
 
 export default function NavBar({ role = "listener" }: NavBarProps) {
-  const { username } = useUserStore(); // Retrieve user from Zustand store
+  //const { username } = useUserStore(); // Retrieve user from Zustand store
 
   // Dummy notifications for demonstration
   const notifications = [

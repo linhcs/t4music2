@@ -3,7 +3,7 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
-import { sign } from "crypto";
+//import { sign } from "crypto";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
