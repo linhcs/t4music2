@@ -4,6 +4,7 @@ import ArtistCard from '../components/Artist/ArtistCard';
 import ArtistUserStats from '../components/Artist/ArtistUserStats';
 import ProfileSettingsButton from '../components/ProfileSettingsButton';
 import DeleteAccountButton from '../components/DeleteAccountButton';
+import ReportsButton from '../components/ReportsButton';
 import ArtistAlbums from '../components/Artist/ArtistAlbums';
 import TopTracks from '../components/Artist/TopTracks';
 import ArtistBio from '../components/Artist/ArtistBio';
@@ -23,6 +24,7 @@ export default function ArtistProfilePage() {
         <TopTracks />
         <ArtistActions />
         <div className="flex flex-wrap gap-6 justify-center mt-8">
+          <ReportsButton />
           <ProfileSettingsButton />
           <DeleteAccountButton />
         </div>

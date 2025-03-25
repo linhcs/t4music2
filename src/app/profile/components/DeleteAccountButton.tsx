@@ -1,6 +1,9 @@
 export default function DeleteAccountButton() {
   return (
-    <button className="bg-red-600 hover:bg-red-500 transition rounded-full py-3 px-7 shadow-lg text-lg font-semibold">
+    <button 
+    className="rounded-full text-[20px] px-7 font-semibold text-white border border-white/10 transition-all duration-300 hover:scale-90 
+        bg-gradient-to-r from-red-800 via-red-600 to-red-800 animate-gradient" 
+    >
       Delete Account
     </button>
   );
