@@ -1,27 +1,40 @@
 "use client";
+import Image from "next/image";
+import { useUserStore } from "@/app/store/userStore"; 
 
-import Image from 'next/image';
 export default function ArtistCard() {
+  const { username } = useUserStore(); // Retrieve artist name from store
+
   return (
-    <div className="relative w-full bg-gradient-to-b from-gray-800 to-black">
-      {/* Banner container - you could swap this out for a background image if you like */}
-      <div className="h-48 flex items-end px-8 pb-6">
-        {/* Avatar + Artist Info */}
-        <div className="flex items-center gap-6">
+    <div className="relative w-full bg-black">
+      <div className="p-8">
+        <div className="flex items-center gap-6 mt-8">
           {/* Artist Avatar */}
           <Image
             src="/artist-default.jpg"
             alt="Artist Avatar"
-            className="w-28 h-28 rounded-full object-cover border-4 border-black shadow-md"
-            width={112}
-            height={112}
+            width={120}
+            height={120}
+            className="rounded-full object-cover border-4 border-black shadow-md"
             priority
           />
 
-          {/* Text Info */}
+          {/* Artist Info */}
           <div className="flex flex-col">
-            <h2 className="text-3xl font-bold text-white">Artist Name</h2>
-            <p className="text-gray-300 text-sm">1.2M Followers • Indie Genre</p>
+            {/* Label above the artist name */}
+            <span className="text-white text-sm uppercase tracking-wide mb-1">
+              Artist
+            </span>
+
+            {/* Artist Name (larger text) */}
+            <h2 className="text-5xl font-extrabold text-white leading-none">
+              {username || "Artist Name"}
+            </h2>
+
+            {/* Basic stats (customize as needed) */}
+            <p className="text-white text-sm mt-2">
+              1.2M Followers • Indie Genre
+            </p>
             <p className="text-gray-400 text-sm mt-1">
               Short tagline or bio snippet here
             </p>

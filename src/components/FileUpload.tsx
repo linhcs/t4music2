@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { getSignedURL } from "@/app/api/misc/actions";
-import { useUserStore } from "@/app/store/userStore";
+//import { useUserStore } from "@/app/store/userStore";
 
 export default function FileUpload() {
   const [file, setFile] = useState<File | null>(null);
@@ -13,7 +13,7 @@ export default function FileUpload() {
   const [loading, setLoading] = useState(false);
   const [songName, setSongName] = useState<string>("");
   const [artistName, setArtistName] = useState<string>("");
-  const [currUser, setCurrUser] = useState<string>("");
+  //const [currUser, setCurrUser] = useState<string>("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target as HTMLInputElement;

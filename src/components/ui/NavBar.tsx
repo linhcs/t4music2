@@ -13,7 +13,7 @@ interface NavBarProps {
 }
 
 export default function NavBar({ role = "listener" }: NavBarProps) {
-  const { username } = useUserStore(); // Retrieve user from Zustand store
+  //const { username } = useUserStore(); // Retrieve user from Zustand store
 
   // Dummy notifications for demonstration
   const notifications = [
@@ -24,10 +24,10 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
 
   return (
     <nav className="bg-black text-white px-5 py-2 shadow-md">
-      <div className="w-full flex items-center justify-between px-4">
-        {/* Left Section: Home Icon */}
+    <div className="w-full flex items-center justify-between px-4">
+      {/* Left Section: Home Icon */}
         <div className="flex items-center">
-          <Link href="/app" className="hover:text-gray-300">
+          <Link href="/home" className="hover:text-gray-300">
             <FaHome size={24} />
           </Link>
         </div>
