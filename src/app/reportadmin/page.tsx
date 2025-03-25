@@ -1,7 +1,10 @@
 'use client';
 import { Button } from "@/components/ui/button";
 import { listeners } from "process";
+import { useRouter } from "next/navigation";
+import { useUserStore } from "@/store/useUserStore";
 import { useEffect, useState } from 'react';
+import InactivityTimer from "@/app/reportadmin/component/page";
 
 interface listeners {
   user_id: number;
@@ -94,8 +97,7 @@ const DownloadPDFButton: React.FC<{ updatedArr : boolean[]; }> = ({ updatedArr }
       size="lg"
       variant="outline"
       className="rounded-full text-[17px] text-white border border-white/10 transition-all duration-300 hover:scale-90 
-      bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 animate-gradient"
-              
+      bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 animate-gradient"         
       >
       {loading ? 'Generating PDF...' : 'Download PDF'}
       </Button>
@@ -104,6 +106,13 @@ const DownloadPDFButton: React.FC<{ updatedArr : boolean[]; }> = ({ updatedArr }
 };
 
 const ReportAdminPage = () => {
+  const router = useRouter();
+  const { role } = useUserStore();
+  useEffect(() => {
+    if (role !== 'admin') {
+      router.push("/login");
+    }
+  }, [role, router]);
   // Initialize selectArr with 5 values (false by default)
   const [selectArr, setSelectArr] = useState([false, false, false, false, false]);
   const [listeners, setListeners] = useState<listeners[]>([]);
@@ -229,6 +238,7 @@ const ReportAdminPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-black">
+      <InactivityTimer />
       <div className="flex space-x-4 p-5 px-[320px] py-20">
         {/* Window 1: Users */}
         <div className="w-[250px] h-[350px] overflow-y-auto border border-gray-300 p-2 px-[22px]">

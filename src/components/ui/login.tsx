@@ -57,7 +57,7 @@ export default function Login() {
       } else if (userData.role === "artist") {
         router.push("/artistprofile");
       } else if (userData.role === "admin") {
-        router.push("/adminprofile");
+        router.push("/reportadmin");
       } else {
         router.push("/home"); // fallback if anything goes wrong
       }
