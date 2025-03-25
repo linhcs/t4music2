@@ -26,6 +26,8 @@ export default function PlayBar({currentSong, isPlaying, progress, onPlayPause, 
                     src = {currentSong.album.album_art}
                     className="w-16 h-16 rounded-md"
                     alt={currentSong.album.title}
+                    width={64}
+                    height={64}
                 />
             )}
             <div className="flex-1 min-w-0">
