@@ -1,5 +1,6 @@
 'use client';
 import { Button } from "@/components/ui/button";
+import { listeners } from "process";
 import { useEffect, useState } from 'react';
 
 interface listeners {
@@ -16,6 +17,18 @@ interface albums {
   user_id: number;
   album_id: number;
   title: string;
+}
+
+type PassedObj = listeners | artists | albums;
+
+// Type guard to check if the object is an album
+function isAlbum(obj: PassedObj): obj is albums {
+  return (obj as albums).title !== undefined;
+  
+}
+
+function isUser(obj: PassedObj): obj is listeners | artists {
+  return (obj as listeners | artists).username !== undefined;
 }
 
 const CheckboxTable: React.FC<{
@@ -135,33 +148,65 @@ const ReportAdminPage = () => {
   // Handle deletion of the selected user
   const handleDeleteUser = async () => {
     if (selectedobj !== null) {
-      const name = selectedobj.hasOwnProperty('username') ? 0 : 1;
-      const confirmed = window.confirm(`Are you sure you want to Delete ${name === 0 ? selectedobj.username : selectedobj.title}?`);
       
-      if (confirmed) {
-        // Send the delete request to the server
-        const response = await fetch('/api/adminpage/delete', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ selectedobj }), // Send the selected object to delete
-        });
+      if (isAlbum(selectedobj)) {
+        
+        const confirmed = window.confirm(`Are you sure you want to Delete ${selectedobj.title}?`);
+        
+        if (confirmed) {
+          // Send the delete request to the server
+          const response = await fetch('/api/adminpage/delete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ selectedobj }), // Send the selected object to delete
+          });
 
-        if (response.ok) {
-          alert(`${name === 0 ? selectedobj.username : selectedobj.title} has been removed`);
+          if (response.ok) {
+            alert(`${selectedobj.title} has been removed`);
 
-          // Clear the selected user
-          setSelectedobj(null);
+            // Clear the selected user
+            setSelectedobj(null);
 
-          // Fetch updated data after deletion
-          await fetchData();
+            // Fetch updated data after deletion
+            await fetchData();
+          } else {
+            alert("Action Failed.");
+          }
         } else {
-          alert("Action Failed.");
+          alert("Action canceled.");
         }
-      } else {
-        alert("Action canceled.");
       }
+     else if (isUser(selectedobj)) {
+      
+        const confirmed = window.confirm(`Are you sure you want to Delete ${selectedobj.username}?`);
+        
+        if (confirmed) {
+          // Send the delete request to the server
+          const response = await fetch('/api/adminpage/delete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ selectedobj }), // Send the selected object to delete
+          });
+
+          if (response.ok) {
+            alert(`${selectedobj.username} has been removed`);
+
+            // Clear the selected user
+            setSelectedobj(null);
+
+            // Fetch updated data after deletion
+            await fetchData();
+          } else {
+            alert("Action Failed.");
+          }
+        } else {
+          alert("Action canceled.");
+        }
+     }
     } else {
       alert("Please select something first.");
     }

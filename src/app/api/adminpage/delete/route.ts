@@ -20,6 +20,11 @@ interface listeners {
   // Define a type that includes all possible structures for passedobj
   type PassedObj = listeners | artists | albums;
 
+  // Type guard to check if the object is an album
+function isAlbum(obj: PassedObj): obj is albums {
+  return (obj as albums).album_id !== undefined;
+}
+
   export async function POST(req: Request) {
     try {
 
@@ -27,11 +32,11 @@ interface listeners {
 
     console.log('Parsed passedobj:', selectedobj);
 
-    const check = selectedobj.hasOwnProperty('username') ? 0 : 1;
-    
-    const tablename = check == 0 ? 'users' : 'album';
-    const reference = check == 0 ? 'user_id' : 'album_id';
-    const id = check == 0 ? selectedobj.user_id : selectedobj.album_id;
+    const isAlbumObject = isAlbum(selectedobj);
+
+    const tablename = isAlbumObject ? 'album' : 'users';
+    const reference = isAlbumObject ? 'album_id' : 'user_id';
+    const id = isAlbumObject ? selectedobj.album_id : selectedobj.user_id;
     const rawquery = `DELETE FROM ${tablename} WHERE ${reference} = ${id};`;
 
     
