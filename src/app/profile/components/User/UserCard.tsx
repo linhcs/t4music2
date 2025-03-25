@@ -1,28 +1,39 @@
 "use client";
+import Image from "next/image";
+import { useUserStore } from "@/app/store/userStore"; // Import Zustand store
 
-import Image from 'next/image';
 export default function UserCard() {
-  return (
-    <div className="relative w-full bg-gradient-to-b from-gray-800 to-black">
-      <div className="h-48 flex items-end px-8 pb-6">
-        {/* Avatar + User Info */}
-        <div className="flex items-center gap-6">
-          {/* Avatar */}
-          <Image
-            src="/ed.jpeg"
-            alt="User Avatar"
-            width={112}
-            height={112}
-            className="w-28 h-28 rounded-full object-cover border-4 border-black shadow-md"
-            priority
-          />
+  const { username } = useUserStore(); // Retrieve username from store
 
-          {/* Text Info */}
-          <div className="flex flex-col">
-            <h2 className="text-3xl font-bold text-white">User</h2>
-            <p className="text-gray-300 text-sm">1.2M Followers • 120 Following</p>
-            <p className="text-gray-400 text-sm mt-1">Short bio or tagline goes here</p>
-          </div>
+  return (
+    <div className="relative w-full bg-black p-8">
+      <div className="flex items-center gap-6 mt-8">
+        {/* Avatar */}
+        <Image
+          src="/ed.jpeg"
+          alt="User Avatar"
+          width={120}
+          height={120}
+          className="rounded-full object-cover border-4 border-black shadow-md"
+          priority
+        />
+
+        {/* Text Info */}
+        <div className="flex flex-col">
+          {/* Small label above the username */}
+          <span className="text-white text-sm uppercase tracking-wide mb-1">
+            Profile
+          </span>
+
+          {/* Username (keeping the actual username logic the same) */}
+          <h2 className="text-5xl font-extrabold text-white leading-none">
+            {username || "User"}
+          </h2>
+
+          {/* Additional stats row */}
+          <p className="text-white text-sm mt-2">
+            16 Public Playlists • 2 Followers • 2 Following
+          </p>
         </div>
       </div>
     </div>
