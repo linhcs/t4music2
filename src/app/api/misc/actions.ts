@@ -53,7 +53,7 @@ export async function getSignedURL(
       title,
       "Pop",
       duration,
-      fileKey,
+      signedURL,
       "mpeg",
       someUserId,
       albumId,
