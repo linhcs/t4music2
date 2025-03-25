@@ -69,6 +69,7 @@ export async function getSignedURL(
 
     return { success: { url: signedURL, song } };
   } catch (error) {
+    console.error("Database insert failed.", error);
     return { failure: "Failed to save song details in the database!" };
   }
 }
