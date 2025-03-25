@@ -1,6 +1,7 @@
 import { PDFPage, PDFFont } from 'pdf-lib';
 import { rgb } from 'pdf-lib';
 
+
 const columnwidthsobj = [
   { label: 'Id', w: 30 },
   { label: 'Username', w: 122 },
@@ -10,7 +11,7 @@ const columnwidthsobj = [
 ];
 
 interface User { email: string; role: string; user_id: number; username: string; created_at: Date; }
-
+interface follower {username: string; follow_at: Date; }
 const rowHeight = 20; // Row height for each user
 const start = 44;
 
@@ -121,6 +122,71 @@ export const addUserDataToPage = (page: PDFPage, user: User, yPosition: number, 
     page.drawText(created, { x: colpos[render] + 7, y: yPosition - rowHeight, font, size: 12 });
     render +=1;
   };
+
+  return yPosition - rowHeight; // Move the yPosition down after adding user data
+};
+
+export const drawFanHeaders = (page: PDFPage, yPosition: number, font: PDFFont) => {
+  page.drawText('Usernames', { x: start + 7, y: yPosition - rowHeight, font, size: 12 });
+  page.drawText('Follow Date', { x: start + 122 + 7, y: yPosition - rowHeight, font, size: 12 });
+  return yPosition; // Return the yPosition after drawing the headers
+};
+
+// Function to draw fans data rows
+export const addFanDataToPage = (page: PDFPage, fan: follower, yPosition: number, font: PDFFont) => {
+
+  const eff = [start, 122 + start];
+  const eff2 = [122, 100];
+  for (let i = 0; i < 2; i++) {
+    page.drawRectangle({
+      x: eff[i],
+      y: yPosition - rowHeight - 4, // Adjust Y position to fit text
+      width: eff2[i],
+      height: rowHeight,
+      borderColor: rgb(0, 0, 0),
+      borderWidth: 1,
+    });
+  };
+
+  page.drawText(fan.username, { x: start + 7, y: yPosition - rowHeight, font, size: 12 });
+  const follow_time = fan.follow_at.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  page.drawText(follow_time, { x: start + 122 + 7, y: yPosition - rowHeight, font, size: 12 });
+
+  // let render = 0;
+  // if(passedarray[0]){
+  //   render +=1;
+  // };
+  // if(passedarray[1]){
+  //   // Truncate username if it's too long
+  //   let username = user.username;
+  //   if (username.length > 20) {
+  //     username = username.substring(0, 20); // Truncate to 20 characters
+  //   }
+  //   // draw
+  //   page.drawText(username, { x: colpos[render] + 7, y: yPosition - rowHeight, font, size: 12 });
+  //   render +=1;
+  // };
+  // if(passedarray[2]){
+  //   // Truncate email if it's too long
+  //   let email = user.email;
+  //   if (email.length > 25) {
+  //     email = email.substring(0, 25); // Truncate to 20 characters
+  //   }
+  //   //draw
+  //   page.drawText(email, { x: colpos[render] + 7, y: yPosition - rowHeight, font, size: 12 });
+  //   render +=1;
+  // };
+  // if(passedarray[3]){
+  //   page.drawText(user.role, { x: colpos[render] + 7, y: yPosition - rowHeight, font, size: 12 });
+  //   render +=1;
+  // };
+  // if(passedarray[4] && user.created_at != null){
+  //   //convert to date
+  //   const created = user.created_at.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  //   //draw
+  //   page.drawText(created, { x: colpos[render] + 7, y: yPosition - rowHeight, font, size: 12 });
+  //   render +=1;
+  // };
 
   return yPosition - rowHeight; // Move the yPosition down after adding user data
 };
