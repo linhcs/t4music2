@@ -30,6 +30,13 @@ const ListenerHome = () => {
     fetchData();
   }, []);
 
+  //update progress bar
+  const updateProgress = useCallback(() => {
+    if (audioRef.current && !isNaN(audioRef.current.duration)) {
+      setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+    }
+  }, []);
+  
   //audio control
   const audioPlayer = useCallback((song: Song) => {
     if (!audioRef.current) {
@@ -56,14 +63,7 @@ const ListenerHome = () => {
     setIsPlaying(true);
     setProgress(0);
     audioRef.current.play().catch(error => console.error("Playback failed:", error));
-  }, [currentSong]);
-
-  //update progress bar
-  const updateProgress = useCallback(() => {
-    if (audioRef.current && !isNaN(audioRef.current.duration)) {
-      setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
-    }
-  }, []);
+  }, [currentSong, updateProgress]);
 
   //allow user to click on playbar to adjust
   const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
