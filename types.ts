@@ -36,6 +36,9 @@ export interface Song {
   plays_count?: number;
   user_id: number;
   album?: Album;
+  users?:{
+    username: string;
+  };
 }
 
 export interface Playlist {
