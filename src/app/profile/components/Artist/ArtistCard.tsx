@@ -1,44 +1,38 @@
 "use client";
 import Image from "next/image";
-import { useUserStore } from "@/app/store/userStore"; 
+import { useUserStore } from "@/app/store/userStore"; // Import Zustand store
 
 export default function ArtistCard() {
-  const { username } = useUserStore(); // Retrieve artist name from store
+  const { username} = useUserStore(); // Retrieve username and artist status from store
 
   return (
-    <div className="relative w-full bg-black">
-      <div className="p-8">
-        <div className="flex items-center gap-6 mt-8">
-          {/* Artist Avatar */}
-          <Image
-            src="/artist-default.jpg"
-            alt="Artist Avatar"
-            width={120}
-            height={120}
-            className="rounded-full object-cover border-4 border-black shadow-md"
-            priority
-          />
+    <div className="relative w-full bg-black p-8">
+      <div className="flex items-center gap-6 mt-8">
+        {/* Avatar */}
+        <Image
+          src="/ed.jpeg"
+          alt="Artist Avatar"
+          width={120}
+          height={120}
+          className="rounded-full object-cover border-4 border-black shadow-md"
+          priority
+        />
 
-          {/* Artist Info */}
-          <div className="flex flex-col">
-            {/* Label above the artist name */}
-            <span className="text-white text-sm uppercase tracking-wide mb-1">
-              Artist
-            </span>
+        {/* Text Info */}
+        <div className="flex flex-col">
+          {/* Small label above the username */}
+          <span className="text-white text-sm uppercase tracking-wide mb-1">
+          </span>
 
-            {/* Artist Name (larger text) */}
-            <h2 className="text-5xl font-extrabold text-white leading-none">
-              {username || "Artist Name"}
-            </h2>
+          {/* Artist/Username */}
+          <h2 className="text-5xl font-extrabold text-white leading-none">
+            {username || "Artist Name"}
+          </h2>
 
-            {/* Basic stats (customize as needed) */}
+          {/* Additional stats row */}
             <p className="text-white text-sm mt-2">
-              1.2M Followers • Indie Genre
+              32 Tracks • 5 Albums • 10,000 Followers
             </p>
-            <p className="text-gray-400 text-sm mt-1">
-              Short tagline or bio snippet here
-            </p>
-          </div>
         </div>
       </div>
     </div>
