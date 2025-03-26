@@ -50,23 +50,26 @@ export default function FileUpload() {
 
     console.log("Uploading file:", file);
 
-    if (!file) return;
     const checksum = await computeSHA256(file);
     const urlresult = await getSignedURL(file.type, file.size, checksum);
-    if (urlresult.failure !== undefined) {
+    if (!urlresult.success !== undefined) {
       setStatusMessage("Failed to upload file!");
       setLoading(false);
-      throw new Error(urlresult.failure);
+      throw new Error(urlresult.failure || "Unkown Error");
     }
-    const url = urlresult.success.url;
 
-    await fetch(url, {
-      method: "PUT",
-      body: file,
-      headers: {
-        "Content-Type": file.type,
-      },
-    });
+    if(urlresult.success?.url)
+    {
+      const url = urlresult.success.url;
+
+      await fetch(url, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+    }
 
     setStatusMessage("File uploaded!");
     setLoading(false);

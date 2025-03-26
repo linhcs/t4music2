@@ -1,6 +1,8 @@
 "use server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { prisma } from "../../../../prisma/script";
+//import { FileKey } from "lucide-react";
 //import { metadata } from "../../layout";
 
 const s3 = new S3Client({
@@ -77,13 +79,15 @@ export async function getSignedURL(
     await prisma.$queryRawUnsafe(query, ...params);
 
     const song = await prisma.songs.findFirst({
-      where: { file_path: fileKey },
+      where: { file_path: signedURL },
     });
+    
 
     if (!song) throw new Error("Database insert failed. No song was returned.");
 
     return { success: { url: signedURL, song } };
   } catch (error) {
-    return { failure: "Failed to save song details in the database!" };
+    console.error(error);
+    return { Failure: "Failed to save song details in the database!" };
   }
 }
