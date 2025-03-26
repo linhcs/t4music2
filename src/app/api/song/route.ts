@@ -1,4 +1,4 @@
-//import { createSearchParamsFromClient } from "next/dist/server/request/search-params";
+// import { createSearchParamsFromClient } from "next/dist/server/request/search-params";
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
