@@ -13,6 +13,8 @@ export default function FileUpload() {
   const [loading, setLoading] = useState(false);
   const [songName, setSongName] = useState<string>("");
   const [artistName, setArtistName] = useState<string>("");
+  const [genre, setGenre] = useState<string>("");
+  const [albumName, setAlbumName] = useState<string>("");
   //const [currUser, setCurrUser] = useState<string>("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,28 +50,46 @@ export default function FileUpload() {
     setStatusMessage("Uploading file...");
     setLoading(true);
 
-    console.log("Uploading file:", file);
+    try {
+      console.log("Uploading file:", file);
 
-    if (!file) return;
-    const checksum = await computeSHA256(file);
-    const urlresult = await getSignedURL(file.type, file.size, checksum);
-    if (urlresult.failure !== undefined) {
-      setStatusMessage("Failed to upload file!");
+      const checksum = await computeSHA256(file);
+      const urlresult = await getSignedURL(file.type, file.size, checksum);
+
+      if ("failure" in urlresult) {
+        setStatusMessage(`Error: ${urlresult.failure}`);
+        setLoading(false);
+        return;
+      }
+
+      const url = urlresult.success.url;
+
+      await fetch(url, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      setStatusMessage("File uploaded successfully!");
+      setSongName("");
+      setArtistName("");
+      setGenre("");
+      setAlbumName("");
+      setFile(null);
+      if (fileURL) URL.revokeObjectURL(fileURL);
+      setFileURL(null);
+    } catch (error) {
+      console.error("Upload error:", error);
+      setStatusMessage(
+        `Upload failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
       setLoading(false);
-      throw new Error(urlresult.failure);
     }
-    const url = urlresult.success.url;
-
-    await fetch(url, {
-      method: "PUT",
-      body: file,
-      headers: {
-        "Content-Type": file.type,
-      },
-    });
-
-    setStatusMessage("File uploaded!");
-    setLoading(false);
   };
 
   return (
@@ -87,12 +107,13 @@ export default function FileUpload() {
         />
         {file && <p className="text-sm text-gray-500">{file.name}</p>}
 
-        <Label htmlFor="songName">Song Name</Label>
+        <Label htmlFor="songName">Song Title *</Label>
         <Input
           id="songName"
           type="text"
           value={songName}
           onChange={(e) => setSongName(e.target.value)}
+          required
         />
 
         <Label htmlFor="artistName">Artist Name</Label>
@@ -101,6 +122,24 @@ export default function FileUpload() {
           type="text"
           value={artistName}
           onChange={(e) => setArtistName(e.target.value)}
+        />
+
+        <Label htmlFor="genre">Genre</Label>
+        <Input
+          id="genre"
+          type="text"
+          value={genre}
+          onChange={(e) => setGenre(e.target.value)}
+          placeholder="Pop, Rock, Jazz, etc."
+        />
+
+        <Label htmlFor="albumName">Album Name</Label>
+        <Input
+          id="albumName"
+          type="text"
+          value={albumName}
+          onChange={(e) => setAlbumName(e.target.value)}
+          placeholder="Optional"
         />
 
         <Button type="submit" disabled={!file || loading}>

@@ -1,7 +1,7 @@
 "use server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { prisma } from "@prisma/script";
+import { PrismaClient } from "@prisma/client"; // Correct import
 
 const s3 = new S3Client({
   region: "us-east-1",
@@ -10,6 +10,8 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
 });
+
+const prisma = new PrismaClient(); // Proper initialization
 
 const acceptedTypes = ["audio/mpeg", "audio/ogg", "audio/wav"];
 const maxFileSize = 1024 * 1024 * 10;
@@ -37,39 +39,30 @@ export async function getSignedURL(
     ChecksumSHA256: checksum,
   });
 
-  const signedURL = await getSignedUrl(s3, putObj, { expiresIn: 5400 });
-
   try {
-    const title = "test";
-    const duration = 123;
-    const someUserId = 1;
-    const albumId = 1;
+    const signedURL = await getSignedUrl(s3, putObj, { expiresIn: 5400 });
 
-    const query = `
-    INSERT INTO songs (title, genre, duration, file_path, file_format, user_id, album_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?);
-  `;
-    const params = [
-      title,
-      "Pop",
-      duration,
-      signedURL,
-      "mpeg",
-      someUserId,
-      albumId,
-    ];
-
-    await prisma.$queryRawUnsafe(query, ...params);
-
-    const song = await prisma.songs.findFirst({
-      where: { file_path: fileKey },
+    // Temporary dummy data
+    const song = await prisma.songs.create({
+      data: {
+        title: "Test Song",
+        genre: "Pop",
+        duration: 180,
+        file_path: fileKey,
+        file_format: type.split("/")[1], // Dynamic format
+        user_id: 1,
+        plays_count: 0,
+        URL: signedURL.split("?")[0],
+      },
     });
-
-    if (!song) throw new Error("Database insert failed. No song was returned.");
 
     return { success: { url: signedURL, song } };
   } catch (error) {
-    console.error("Database insert failed.", error);
-    return { failure: "Failed to save song details in the database!" };
+    console.error("Database error:", error);
+    return {
+      failure: `Database operation failed: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
+    };
   }
 }
