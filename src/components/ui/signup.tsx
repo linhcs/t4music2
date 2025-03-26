@@ -69,7 +69,7 @@ export default function Signup() {
 
       alert("Signup successful! Welcome to Amplifi 🎧");
 
-      if (userData.role === "artist") router.push("/artistprofile");
+      if (userData.role === "artist") router.push("/profile/artist");
       else if (userData.role === "listener") router.push("/home");
       else router.push("/home");
     } catch (err) {
