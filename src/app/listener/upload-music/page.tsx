@@ -8,7 +8,7 @@ import { useState } from 'react';
 export default function UploadMusicPage() {
   const { username } = useUserStore();
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState('');
+  const [uploadStatus, setUploadStatus] = useState<string>('');
   const [songInfo, setSongInfo] = useState({
     title: '',
     genre: '',
@@ -165,8 +165,8 @@ export default function UploadMusicPage() {
 
               {uploadStatus && (
                 <div className={`p-3 rounded-md ${
-                  uploadStatus.startsWith('✅') ? 'bg-green-900/50' : 
-                  uploadStatus.startsWith('❌') ? 'bg-red-900/50' : 'bg-blue-900/50'
+                  (uploadStatus || '').startsWith('✅') ? 'bg-green-900/50' : 
+                  (uploadStatus || '').startsWith('❌') ? 'bg-red-900/50' : 'bg-blue-900/50'
                 }`}>
                   <p className="text-sm">{uploadStatus}</p>
                 </div>
