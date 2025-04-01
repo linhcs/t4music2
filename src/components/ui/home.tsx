@@ -3,10 +3,29 @@
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Song } from "../../../types";
 import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
 import { useUserStore } from "@/store/useUserStore";
 import PlayBar from "@/components/ui/playBar";
+
+type Song = {
+  song_id: number;
+  title: string;
+  file_path: string;
+  duration: number;
+  uploaded_at: Date;
+  file_format: string; 
+  user_id: number;
+  users: {
+    username: string;
+    pfp: string | null;
+  };
+  album: {
+    Album_id: number;
+    album_art?: string;
+    title: string;
+    user_id: number;
+  };
+};
 
 const ListenerHome = () => {
   const { username } = useUserStore();
@@ -17,15 +36,53 @@ const ListenerHome = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
 
+  type ApiAlbum = {
+    album_id?: number;
+    Album_id?: number;
+    album_art?: string;
+    title?: string;
+    user_id?: number;
+  };
+  
+  type ApiUser = {
+    user_id?: number;
+    username: string;
+    pfp: string | null;
+  };
+  
+  type ApiSong = {
+    song_id: number;
+    title: string;
+    file_path: string;
+    duration: number;
+    uploaded_at: Date | string;
+    file_format?: string;
+    user_id?: number;
+    users: ApiUser;
+    album?: ApiAlbum;
+  };
+
   //fetch songs/albums from API
   useEffect(() => {
     setHasMounted(true);
     const fetchData = async () => {
       try {
         const response = await fetch('/api/songs');
-        const data: Song[] = await response.json();
-        setSongs(data);
-      } catch(error) {
+        const result: ApiSong[] = await response.json();
+        
+        const checkedSong = result.map((song: ApiSong) => ({
+          ...song,
+          file_format: song.file_format || 'mp3',
+          user_id: song.user_id || song.users.user_id || 0,
+          album: song.album ? {
+            Album_id: song.album.album_id || song.album.Album_id || 0,
+            album_art: song.album.album_art || undefined,
+            title: song.album.title || 'Untitled Album',
+            user_id: song.album.user_id || song.user_id || 0
+          } : undefined
+        }));
+        setSongs(checkedSong as Song[]);
+      } catch (error) {
         console.error("Failed to fetch songs:", error);
       }
     };
@@ -81,6 +138,15 @@ const ListenerHome = () => {
     setProgress(seekPercentage);
   }, [currentSong]);
 
+  const albums = songs.reduce((acc: Record<string, Song[]>, song) => {
+    const albumKey = song.album?.title || 'Unknown Album';
+    if (!acc[albumKey]) {
+      acc[albumKey] = [];
+    }
+    acc[albumKey].push(song);
+    return acc;
+  }, {});
+
   //prevents from rendering over and over again
   const SongGallerySection = useCallback(({ title, items }: { title: string; items: Song[] }) => {
     return (
@@ -88,7 +154,7 @@ const ListenerHome = () => {
         <h2 className="text-xl font-bold text-white mt-8 mb-3">{title}</h2>
         <div className="grid grid-cols-5 gap-4">
           {items.map((song) => {
-            const album_art = song.album?.album_art || '';
+            const album_art = song.album?.album_art || '/defaultAlbumArt.png';
             const isSongCurrentlyPlaying = currentSong?.song_id === song.song_id && isPlaying;
 
             return (
@@ -117,6 +183,7 @@ const ListenerHome = () => {
                 </div>
                 <div className="absolute bottom-0 w-full bg-black bg-opacity-50 px-2 py-1">
                   <h3 className="text-white text-sm font-semibold truncate">{song.title}</h3>
+                  <p className="text-white text-xs truncate">{song.users.username}</p>
                 </div>
               </div>
             );
@@ -135,9 +202,7 @@ const ListenerHome = () => {
         <NavBar role="listener" />
         <main className="p-6 overflow-auto">
           <SongGallerySection title="Continue Where You Left Off" items={songs.slice(0, 5)} />
-          <SongGallerySection title="Recently Played Songs" items={songs.slice(0, 5)} />
-          <SongGallerySection title="Recently Played Albums" items={songs.slice(0, 5)} />
-          <SongGallerySection title="Recommended For You" items={songs.slice(0, 5)} />
+          <SongGallerySection title="Recently Played Albums" items={Object.values(albums).flat().slice(0, 5)} />
         </main>
       </div>
       <PlayBar
