@@ -1,5 +1,6 @@
 'use client';
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import { listeners } from "process";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
@@ -40,7 +41,8 @@ const CheckboxTable: React.FC<{
 }> = ({ selectArr, handleCheckboxChange }) => {
   return (
     <div>
-      <h2>Select what you want to see</h2>
+      <h2 className="text-2xl font-semibold mt-10 mb-5">User print out</h2>
+      <h2 className= "mb-4"> leave blank for no users to be printed </h2>
       <table className="checkbox-table">
         <thead>
           <tr>
@@ -239,6 +241,16 @@ const ReportAdminPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-black">
       <InactivityTimer />
+      <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1">
+        <motion.h1
+            initial={{ opacity: 0, y: -500 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.25 }}
+            className="text-[4rem] md:text-[4rem] leading-none font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-500 animate-gradient"
+            >
+            User and Albumn controls
+        </motion.h1>
+      </header>
       <div className="flex space-x-4 p-5 px-[320px] py-20">
         {/* Window 1: Users */}
         <div className="w-[250px] h-[350px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
@@ -295,11 +307,19 @@ const ReportAdminPage = () => {
           Delete User
         </Button>
       </div>
+      <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1 mb-10">
+        <div className="text-[4rem] md:text-[4rem] leading-none font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-500 animate-gradient">
+          Reports
+        </div>
+      </header>
 
-      <div className="px-[310px] mb-12">
+      <div className="px-[310px] mb-4">
         <CheckboxTable selectArr={selectArr} handleCheckboxChange={handleCheckboxChange} />
+      </div>
+      <div className="flex justify-center mb-12">
         <DownloadPDFButton updatedArr={selectArr} />
       </div>
+  
     </div>
   );
 };

@@ -40,11 +40,30 @@ export async function POST(req: Request) {
 
     let yPosition = 720;
 
+
+
+    // User Log portion
+    page = pdfDoc.addPage([612, 792]);
     changearr(updatedArr);
-
     yPosition = drawHeaders(page, yPosition, font);
-
+    // limits pages if blank
+    let allFalse = false;
+    for (let i = 0; i < updatedArr.length; i++)
+    {
+      //console.log(updatedArr[i]);
+      if(updatedArr[i] === true) { allFalse = true;}
+    };
     for (let i = 0; i < users.length; i++) {
+      if(!allFalse){
+        const pdfBytes = await pdfDoc.save();
+
+        return new NextResponse(pdfBytes, {
+          headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': 'attachment; filename=generated.pdf',
+          },
+        });
+      };
       const user = users[i];
 
       if (yPosition < 72) { // If there's not enough space on the current page, add a new one
