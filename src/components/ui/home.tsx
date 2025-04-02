@@ -7,16 +7,27 @@ import { Song } from "../../../types";
 import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
 import { useUserStore } from "@/store/useUserStore";
 import PlayBar from "@/components/ui/playBar";
+import { useRouter } from "next/navigation"; 
 
 const ListenerHome = () => {
-  const { username } = useUserStore();
+  const router = useRouter()
+  const { username, toggleLike, likedSongs, playlists } = useUserStore();
   const [songs, setSongs] = useState<Song[]>([]);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
-
+  
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    song: Song | null;
+  } | null>(null);
+  
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+  const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState<Song | null>(null);
+  
   //fetch songs/albums from API
   useEffect(() => {
     setHasMounted(true);
@@ -91,9 +102,15 @@ const ListenerHome = () => {
             const album_art = song.album?.album_art || '';
             const isSongCurrentlyPlaying = currentSong?.song_id === song.song_id && isPlaying;
 
+     {/*added this bc we need it in order to add prompt box thingy*/}
             return (
               <div
                 key={song.song_id}
+                onContextMenu={(e) => {
+                  e.preventDefault(); // this prevents opening randomly on page w/ right click
+                  setContextMenu({ x: e.clientX, y: e.clientY, song }); // context menu purr
+                }}
+                onClick={() => audioPlayer(song)}
                 className="group relative rounded-lg overflow-hidden shadow-md no-flicker"
                 style={{
                   backgroundImage: `url(${album_art})`,
@@ -128,18 +145,18 @@ const ListenerHome = () => {
   if (!hasMounted) return null;
 
 
+
+ 
   return (
     <div className="flex min-h-screen bg-black text-white">
-      <Sidebar username={username} /> 
+      <Sidebar username={username} />
       <div className="flex flex-col flex-1 min-w-0">
         <NavBar role="listener" />
         <main className="p-6 overflow-auto">
-          <SongGallerySection title="Continue Where You Left Off" items={songs.slice(0, 5)} />
-          <SongGallerySection title="Recently Played Songs" items={songs.slice(0, 5)} />
-          <SongGallerySection title="Recently Played Albums" items={songs.slice(0, 5)} />
-          <SongGallerySection title="Recommended For You" items={songs.slice(0, 5)} />
+          <SongGallerySection title="Recommended For You" items={songs} />
         </main>
       </div>
+
       <PlayBar
         currentSong={currentSong}
         isPlaying={isPlaying}
@@ -147,6 +164,86 @@ const ListenerHome = () => {
         onPlayPause={() => currentSong && audioPlayer(currentSong)}
         onSeek={handleSeek}
       />
+
+      {contextMenu && (
+        <div
+          className="fixed bg-gray-800 text-white rounded shadow-lg z-50"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          onClick={() => setContextMenu(null)}
+        >
+          <ul>
+            <li
+              className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
+              onClick={async () => {
+                const song = contextMenu.song!;
+                toggleLike(song); // updating zustand here 
+              
+                try {
+                  await fetch("/api/likes/toggle", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      username,
+                      songId: song.song_id,
+                    }),
+                  });
+                } catch (err) {
+                  console.error("Failed to sync like to DB:", err);
+                }
+              
+                setContextMenu(null);
+              }}
+              
+            >
+              💗 {likedSongs.some((s) => s.song_id === contextMenu.song?.song_id) ? 'Remove from your Liked Songs' : 'Save to your Liked Songs'}
+            </li>
+            <li
+              className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
+              onClick={() => {
+                setSelectedSongForPlaylist(contextMenu.song);
+                setShowPlaylistModal(true);
+                setContextMenu(null);
+              }}
+            >
+              ➕ Add to Playlist
+            </li>
+          </ul>
+        </div>
+      )}
+
+      {showPlaylistModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-6 rounded-lg w-96 space-y-4">
+            <h2 className="text-white text-lg font-bold">Add to Playlist</h2>
+            {playlists.map((playlist) => (
+              <div
+                key={playlist.playlist_id}
+                className="text-white hover:bg-gray-700 p-2 rounded cursor-pointer"
+                onClick={() => {
+                  fetch("/api/playlist/add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      song_id: selectedSongForPlaylist?.song_id,
+                      playlist_id: playlist.playlist_id,
+                    }),
+                  }).then(() => setShowPlaylistModal(false));
+                }}
+              >
+                {playlist.name}
+              </div>
+            ))}
+            <button
+              className="w-full mt-2 py-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 rounded text-white font-medium"
+              onClick={() => {
+                router.push("/listener/my-playlists?create=true");
+              }}
+            >
+              + Create New Playlist
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
