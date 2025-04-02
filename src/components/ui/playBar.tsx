@@ -28,6 +28,7 @@ export default function PlayBar({currentSong, isPlaying, progress, onPlayPause, 
                     alt={currentSong.album.title}
                     width={64}
                     height={64}
+                    unoptimized={true}
                 />
             )}
             <div className="flex-1 min-w-0">

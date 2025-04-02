@@ -49,13 +49,19 @@ export default function Login() {
       store.setPlaylists(userData.playlists);
       store.setStreamingHistory(userData.streamingHistory);
 
-      alert("Login successful! Welcome to Amplifi 🎧");
+      alert("Login successful! Welcome to Amplifi 🎧"); // is the emoji cringe idk kinda cute
 
-      // redirect
-      if (loginData.role === "listener") router.push("/home");
-      else if (loginData.role === "artist") router.push("/artistprofile");
-      else router.push("/home");
-
+      // redirecting based on role
+      if (userData.role === "listener") {
+        router.push("/home");
+      } else if (userData.role === "artist") {
+        router.push("/profile/artist");
+      } else if (userData.role === "admin") {
+        router.push("/reportadmin");
+      } else {
+        router.push("/home"); // fallback if anything goes wrong
+      }
+      
     } catch (error) {
       if (error instanceof Error) setError(error.message);
       else setError("Unknown error occurred");
