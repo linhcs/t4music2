@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { FaBars, FaHeart, FaListUl, FaMusic, FaChevronLeft } from "react-icons/fa";
+import { FaBars, FaHeart, FaListUl, FaMusic, FaChevronLeft, FaCloudUploadAlt } from "react-icons/fa";
 
 interface Sidebaruser{
     username?:string;
@@ -37,6 +37,10 @@ export default function Sidebar({ username }: Sidebaruser) {
         <Link href="/home" className="flex items-center gap-3 hover:text-purple-400">
           <FaMusic />
           {isOpen && <span>Browse Music</span>}
+        </Link>
+        <Link href="/listener/upload-music" className="flex items-center gap-3 hover:text-green-400">
+          <FaCloudUploadAlt />
+          {isOpen && <span>Upload Music</span>}
         </Link>
       </nav>
     </div>
