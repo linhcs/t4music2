@@ -1,5 +1,9 @@
 "use server";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { prisma } from "@prisma/script";
 
@@ -40,29 +44,16 @@ export async function getSignedURL(
   const signedURL = await getSignedUrl(s3, putObj, { expiresIn: 5400 });
 
   try {
-    const title = "test";
-    const duration = 123;
-    const someUserId = 1;
-    const albumId = 1;
-
-    const query = `
-    INSERT INTO songs (title, genre, duration, file_path, file_format, user_id, album_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?);
-  `;
-    const params = [
-      title,
-      "Pop",
-      duration,
-      signedURL,
-      "mpeg",
-      someUserId,
-      albumId,
-    ];
-
-    await prisma.$queryRawUnsafe(query, ...params);
-
-    const song = await prisma.songs.findFirst({
-      where: { file_path: fileKey },
+    const song = await prisma.songs.create({
+      data: {
+        title: "Test Song",
+        genre: "Pop",
+        duration: 180,
+        file_path: fileKey,
+        file_format: type.split("/")[1],
+        user_id: 1,
+        plays_count: 0,
+      },
     });
 
     if (!song) throw new Error("Database insert failed. No song was returned.");
@@ -71,5 +62,25 @@ export async function getSignedURL(
   } catch (error) {
     console.error("Database insert failed.", error);
     return { failure: "Failed to save song details in the database!" };
+  }
+}
+
+export async function getPlaybackURL(fileKey: string) {
+  try {
+    const getObj = new GetObjectCommand({
+      Bucket: process.env.AWS_BUCKET!,
+      Key: fileKey,
+    });
+
+    const signedURL = await getSignedUrl(s3, getObj, { expiresIn: 3600 }); // 1 hour expiry for playback
+
+    return { success: { url: signedURL } };
+  } catch (error) {
+    console.error("Error generating playback URL:", error);
+    return {
+      failure: `Failed to generate playback URL: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
+    };
   }
 }
