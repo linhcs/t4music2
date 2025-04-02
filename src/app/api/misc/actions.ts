@@ -5,7 +5,7 @@ import {
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { PrismaClient } from "@prisma/client"; // Correct import
+import { prisma } from "@prisma/script";
 
 const s3 = new S3Client({
   region: "us-east-1",
@@ -14,8 +14,6 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
 });
-
-const prisma = new PrismaClient(); // Proper initialization
 
 const acceptedTypes = ["audio/mpeg", "audio/ogg", "audio/wav"];
 const maxFileSize = 1024 * 1024 * 10;
@@ -43,10 +41,9 @@ export async function getSignedURL(
     ChecksumSHA256: checksum,
   });
 
-  try {
-    const signedURL = await getSignedUrl(s3, putObj, { expiresIn: 5400 });
+  const signedURL = await getSignedUrl(s3, putObj, { expiresIn: 5400 });
 
-    // Create song with necessary data
+  try {
     const song = await prisma.songs.create({
       data: {
         title: "Test Song",
@@ -59,14 +56,12 @@ export async function getSignedURL(
       },
     });
 
+    if (!song) throw new Error("Database insert failed. No song was returned.");
+
     return { success: { url: signedURL, song } };
   } catch (error) {
-    console.error("Database error:", error);
-    return {
-      failure: `Database operation failed: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`,
-    };
+    console.error("Database insert failed.", error);
+    return { failure: "Failed to save song details in the database!" };
   }
 }
 
