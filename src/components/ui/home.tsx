@@ -8,8 +8,9 @@ import { useUserStore } from "@/store/useUserStore";
 import PlayBar from "@/components/ui/playBar";
 import { useRouter } from "next/navigation"; 
 import { getPlaybackURL } from "@/app/api/misc/actions";
+ import { Song } from "../../../types";
 
-const ListenerHome = () => {
+ const ListenerHome = () => {
   const router = useRouter()
   const { username, toggleLike, likedSongs, playlists } = useUserStore();
   const [songs, setSongs] = useState<Song[]>([]);
