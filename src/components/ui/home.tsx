@@ -199,17 +199,13 @@ import { getPlaybackURL } from "@/app/api/misc/actions";
       <div className="flex flex-col flex-1 min-w-0">
         <NavBar role="listener" />
         <main className="p-6 overflow-auto">
-          <SongGallerySection
-            title="Recently Added"
-            items={songs.slice(0, 5)}
-          />
-          <SongGallerySection title="Popular Songs" items={songs.slice(0, 5)} />
-          <SongGallerySection title="Your Library" items={songs.slice(0, 5)} />
-          <SongGallerySection
-            title="Recommended For You"
-            items={songs.slice(0, 5)}
-          />
-          <SongGallerySection title="Recommended For You" items={songs} />
+        <SongGallerySection
+             title="Recently Added"
+             items={songs.slice(0, 5)}
+           />
+           <SongGallerySection title="Popular Songs" items={songs.slice(0, 5)} />
+           <SongGallerySection title="Your Library" items={songs.slice(0, 5)} />
+           <SongGallerySection title="Recommended For You" items={songs.slice(0, 5)} />
         </main>
       </div>
 
