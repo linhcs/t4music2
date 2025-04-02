@@ -35,6 +35,7 @@ export interface Song {
   uploaded_at?: Date;
   plays_count?: number;
   user_id: number;
+  URL?: string;
   album?: Album;
   users?:{
     username: string;

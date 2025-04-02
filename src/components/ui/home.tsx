@@ -3,11 +3,11 @@
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Song } from "../../../types";
 import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
 import { useUserStore } from "@/store/useUserStore";
 import PlayBar from "@/components/ui/playBar";
 import { useRouter } from "next/navigation"; 
+import { getPlaybackURL } from "@/app/api/misc/actions";
 
 const ListenerHome = () => {
   const router = useRouter()
@@ -18,6 +18,9 @@ const ListenerHome = () => {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  //fetch songs from API
   
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -33,11 +36,16 @@ const ListenerHome = () => {
     setHasMounted(true);
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/songs');
+        const response = await fetch("/api/songs");
+        if (!response.ok) {
+          throw new Error("Failed to fetch songs");
+        }
         const data: Song[] = await response.json();
         setSongs(data);
-      } catch(error) {
+      } catch (error) {
         console.error("Failed to fetch songs:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -46,113 +54,160 @@ const ListenerHome = () => {
   //update progress bar
   const updateProgress = useCallback(() => {
     if (audioRef.current && !isNaN(audioRef.current.duration)) {
-      setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+      setProgress(
+        (audioRef.current.currentTime / audioRef.current.duration) * 100
+      );
     }
   }, []);
-  
+
   //audio control
-  const audioPlayer = useCallback((song: Song) => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.addEventListener('timeupdate', updateProgress);
-    }
-
-    //play/pause same song
-    if (currentSong?.song_id === song.song_id) {
-      if (audioRef.current.paused) {
-        audioRef.current.play().then(() => setIsPlaying(true));
-      } else {
-        audioRef.current.pause();
-        setIsPlaying(false);
+  const audioPlayer = useCallback(
+    async (song: Song) => {
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
+        audioRef.current.addEventListener("timeupdate", updateProgress);
       }
-      return;
-    }
 
-    //change to another song
-    audioRef.current.pause();
-    audioRef.current.src = song.file_path;
-    audioRef.current.currentTime = 0;
-    setCurrentSong(song);
-    setIsPlaying(true);
-    setProgress(0);
-    audioRef.current.play().catch(error => console.error("Playback failed:", error));
-  }, [currentSong, updateProgress]);
+      //play/pause same song
+      if (currentSong?.song_id === song.song_id) {
+        if (audioRef.current.paused) {
+          audioRef.current.play().then(() => setIsPlaying(true));
+        } else {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        }
+        return;
+      }
+
+      //change to another song
+      audioRef.current.pause();
+
+      // Get signed URL for playback
+      const urlResult = await getPlaybackURL(song.file_path);
+      if ("failure" in urlResult) {
+        console.error("Failed to get playback URL:", urlResult.failure);
+        return;
+      }
+
+      audioRef.current.src = urlResult.success.url;
+      audioRef.current.currentTime = 0;
+      setCurrentSong(song);
+      setIsPlaying(true);
+      setProgress(0);
+      audioRef.current
+        .play()
+        .catch((error) => console.error("Playback failed:", error));
+    },
+    [currentSong, updateProgress]
+  );
 
   //allow user to click on playbar to adjust
-  const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current || !currentSong) return;
+  const handleSeek = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!audioRef.current || !currentSong) return;
 
-    const ProgressBar = e.currentTarget;
-    const clickPosition = e.clientX - ProgressBar.getBoundingClientRect().left;
-    const progressBarWidth = ProgressBar.clientWidth;
-    const seekPercentage = (clickPosition / progressBarWidth) * 100;
-    const seekTime = (audioRef.current.duration * seekPercentage) / 100;
+      const ProgressBar = e.currentTarget;
+      const clickPosition =
+        e.clientX - ProgressBar.getBoundingClientRect().left;
+      const progressBarWidth = ProgressBar.clientWidth;
+      const seekPercentage = (clickPosition / progressBarWidth) * 100;
+      const seekTime = (audioRef.current.duration * seekPercentage) / 100;
 
-    audioRef.current.currentTime = seekTime;
-    setProgress(seekPercentage);
-  }, [currentSong]);
+      audioRef.current.currentTime = seekTime;
+      setProgress(seekPercentage);
+    },
+    [currentSong]
+  );
 
   //prevents from rendering over and over again
-  const SongGallerySection = useCallback(({ title, items }: { title: string; items: Song[] }) => {
-    return (
-      <section className="w-full max-w-7xl">
-        <h2 className="text-xl font-bold text-white mt-8 mb-3">{title}</h2>
-        <div className="grid grid-cols-5 gap-4">
-          {items.map((song) => {
-            const album_art = song.album?.album_art || '';
-            const isSongCurrentlyPlaying = currentSong?.song_id === song.song_id && isPlaying;
+  const SongGallerySection = useCallback(
+    ({ title, items }: { title: string; items: Song[] }) => {
+      return (
+        <section className="w-full max-w-7xl">
+          <h2 className="text-xl font-bold text-white mt-8 mb-3">{title}</h2>
+          <div className="grid grid-cols-5 gap-4">
+            {items.map((song) => {
+              const album_art = song.album?.album_art || "";
+              const isSongCurrentlyPlaying =
+                currentSong?.song_id === song.song_id && isPlaying;
 
      {/*added this bc we need it in order to add prompt box thingy*/}
-            return (
-              <div
-                key={song.song_id}
+              return (
+                <div
+                  key={song.song_id}
                 onContextMenu={(e) => {
                   e.preventDefault(); // this prevents opening randomly on page w/ right click
                   setContextMenu({ x: e.clientX, y: e.clientY, song }); // context menu purr
                 }}
                 onClick={() => audioPlayer(song)}
-                className="group relative rounded-lg overflow-hidden shadow-md no-flicker"
-                style={{
-                  backgroundImage: `url(${album_art})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  width: "60%",
-                  paddingTop: "60%",
-                  willChange: "transform, opacity"
-                }}
-              >
-                <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out flex items-center justify-center">
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      audioPlayer(song);
-                    }} 
-                    className="text-5xl text-white transition-transform duration-100 hover:scale-105 ease-out will-change-transform"
-                  >
-                    {isSongCurrentlyPlaying ? <FiPauseCircle /> : <FiPlayCircle />}
-                  </button>
+                  className="group relative rounded-lg overflow-hidden shadow-md no-flicker"
+                  style={{
+                    backgroundImage: `url(${album_art})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    width: "60%",
+                    paddingTop: "60%",
+                    willChange: "transform, opacity",
+                  }}
+                >
+                  <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out flex items-center justify-center">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        audioPlayer(song);
+                      }}
+                      className="text-5xl text-white transition-transform duration-100 hover:scale-105 ease-out will-change-transform"
+                    >
+                      {isSongCurrentlyPlaying ? (
+                        <FiPauseCircle />
+                      ) : (
+                        <FiPlayCircle />
+                      )}
+                    </button>
+                  </div>
+                  <div className="absolute bottom-0 w-full bg-black bg-opacity-50 px-2 py-1">
+                    <h3 className="text-white text-sm font-semibold truncate">
+                      {song.title}
+                    </h3>
+                  </div>
                 </div>
-                <div className="absolute bottom-0 w-full bg-black bg-opacity-50 px-2 py-1">
-                  <h3 className="text-white text-sm font-semibold truncate">{song.title}</h3>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-    );
-  }, [currentSong, isPlaying, audioPlayer]);
+              );
+            })}
+          </div>
+        </section>
+      );
+    },
+    [currentSong, isPlaying, audioPlayer]
+  );
+
   if (!hasMounted) return null;
 
 
 
- 
+   if (loading) {
+    return (
+      <div className="flex min-h-screen bg-black text-white items-center justify-center">
+        <div className="text-xl">Loading songs...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-black text-white">
       <Sidebar username={username} />
       <div className="flex flex-col flex-1 min-w-0">
         <NavBar role="listener" />
         <main className="p-6 overflow-auto">
+          <SongGallerySection
+            title="Recently Added"
+            items={songs.slice(0, 5)}
+          />
+          <SongGallerySection title="Popular Songs" items={songs.slice(0, 5)} />
+          <SongGallerySection title="Your Library" items={songs.slice(0, 5)} />
+          <SongGallerySection
+            title="Recommended For You"
+            items={songs.slice(0, 5)}
+          />
           <SongGallerySection title="Recommended For You" items={songs} />
         </main>
       </div>
