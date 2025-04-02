@@ -1,10 +1,13 @@
 "use client";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function UserStats() {
+  const { streamingHistory, following, playlists } = useUserStore();
+
   const stats = [
-    { label: "Songs Played", count: "532" },
-    { label: "Artists Followed", count: "104" },
-    { label: "Listening Hours", count: "216 hrs" },
+    { label: "Songs Played", count: streamingHistory.length },
+    { label: "Artists Followed", count: following },
+    { label: "Public Playlists", count: playlists.length },
   ];
 
   return (
@@ -12,10 +15,13 @@ export default function UserStats() {
       {stats.map((stat, i) => (
         <div
           key={i}
-          className="bg-gray-900 rounded-2xl p-5 text-center shadow-lg
-                     hover:-translate-y-2 transition-transform duration-300"
+          className="bg-black border border-white/10 rounded-2xl p-5 text-center shadow-lg
+          transition-transform duration-300 hover:-translate-y-2 hover:ring hover:ring-purple-500/40"
         >
-          <h3 className="text-3xl font-semibold mb-1">{stat.count}</h3>
+          <h3 className="text-3xl font-semibold mb-1 text-transparent bg-gradient-to-r from-purple-400 via-blue-400 to-white bg-clip-text">
+            {stat.count}
+          </h3>
+
           <p className="text-gray-400">{stat.label}</p>
         </div>
       ))}
