@@ -3,7 +3,7 @@ import UserCard from '../components/User/UserCard';
 import UserStats from '../components/User/UserStats';
 import ProfileSettingsButton from '../components/ProfileSettingsButton';
 import DeleteAccountButton from '../components/DeleteAccountButton';
-import UserAlbums from '../components/User/UserAlbums';
+import UserPlaylists from '../components/User/UserPlaylists';
 import ArtistsFollowing from '../components/User/ArtistsFollowing';
 import NavBar from '@/components/ui/NavBar';
 
@@ -20,7 +20,7 @@ export default function UserProfilePage() {
         <UserStats />
 
         {/* Albums section (includes the dedicated "Liked Songs" album) */}
-        <UserAlbums isArtist={false} />
+        <UserPlaylists isArtist={false} />
 
         {/* Artists the user follows */}
         <ArtistsFollowing />

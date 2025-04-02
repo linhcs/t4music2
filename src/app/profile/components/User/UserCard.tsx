@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useUserStore } from "@/app/store/userStore"; // Import Zustand store
+import { useUserStore } from "@/store/useUserStore";
 
 export default function UserCard() {
   const { username } = useUserStore(); // Retrieve username from store
