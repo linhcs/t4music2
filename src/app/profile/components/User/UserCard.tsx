@@ -1,38 +1,32 @@
 "use client";
+
 import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
 
 export default function UserCard() {
-  const { username } = useUserStore(); // Retrieve username from store
+  const { username, pfp, followers, following, playlistCount } = useUserStore();
 
   return (
-    <div className="relative w-full bg-black p-8">
-      <div className="flex items-center gap-6 mt-8">
-        {/* Avatar */}
-        <Image
-          src="/ed.jpeg"
-          alt="User Avatar"
-          width={120}
-          height={120}
-          className="rounded-full object-cover border-4 border-black shadow-md"
-          priority
-        />
+    <div className="relative w-full bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 px-10 py-12 rounded-b-xl shadow-md">
+      <div className="flex items-center gap-8">
+        {/* profile avatar */}
+        <div className="w-40 h-40 rounded-full bg-black border-4 border-white overflow-hidden shadow-xl">
+          <Image
+            src={pfp || "/default-pfp.jpg"}
+            alt="User Avatar"
+            width={160}
+            height={160}
+            className="object-cover w-full h-full"
+          />
+        </div>
 
-        {/* Text Info */}
-        <div className="flex flex-col">
-          {/* Small label above the username */}
-          <span className="text-white text-sm uppercase tracking-wide mb-1">
-            Profile
-          </span>
+        <div className="flex flex-col gap-2">
+          <span className="text-white text-sm uppercase tracking-wider">Profile</span>
+          <h1 className="text-6xl font-extrabold text-white">{username || "User"}</h1>
 
-          {/* Username (same as ListenerHome approach) */}
-          <h2 className="text-5xl font-extrabold text-white leading-none">
-            {username ? username : "User"}
-          </h2>
-
-          {/* Additional stats row */}
-          <p className="text-white text-sm mt-2">
-            16 Public Playlists • 2 Followers • 2 Following
+          {/* moved userstats under the username :p */}
+          <p className="text-white mt-1 text-sm sm:text-base">
+            {playlistCount} Public Playlists • {followers} Followers • {following} Following
           </p>
         </div>
       </div>
