@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 
 const Form: React.FC<{ onArrayChange: (arr: string[]) => void }> = ({ onArrayChange }) => {
 
@@ -11,6 +11,11 @@ const Form: React.FC<{ onArrayChange: (arr: string[]) => void }> = ({ onArrayCha
     const getArrayOfStrings = () => {
         return [defualt_d, from1_d, from2_d, year1_d, year2_d] 
     };
+
+    useEffect(() => {
+        const arrayOfStrings = getArrayOfStrings();
+        onArrayChange(arrayOfStrings);
+      }, [defualt_d, from1_d, from2_d, year1_d, year2_d]);
 
     let [isFirstDropdownSelected, setIsFirstDropdownSelected] = useState(false);
     const [isSecondDropdownSelected, setIsSecondDropdownSelected] = useState(false);

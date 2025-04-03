@@ -77,6 +77,17 @@ const DownloadPDFButton: React.FC<{ updatedArr : boolean[]; stringArr: string[] 
   const handleDownload = async () => {
     setLoading(true);
 
+    if (stringArr[0] === '' && (stringArr[1] === '' || stringArr[2] === '' || stringArr[3] === '' || stringArr[4] === '')) {
+      alert('Please make sure to select all options');
+      setLoading(false);
+      return;
+    }
+    if (stringArr[0] === '' && (stringArr[1] === '' || stringArr[2] === '' || stringArr[3] === '' || stringArr[4] === '')) {
+      alert('Please make a selection');
+      setLoading(false);
+      return;
+    }
+
     const response = await fetch('/api/pdfs/admin', {
       method: 'POST',  // Assuming a POST request
       headers: {
