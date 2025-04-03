@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 
 export default function Login() {
+  const { userId } = useUserStore();
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,7 @@ export default function Login() {
 
       // here im setting the global zustand store so we can use it
       const store = useUserStore.getState();
-      store.setUser(userData.username, userData.role);
+      store.setUser(userData.username, userData.role, userData.pfp || "", userData.userId);
       store.setLikedSongs(userData.likedSongs);
       store.setPlaylists(userData.playlists);
       store.setStreamingHistory(userData.streamingHistory);
@@ -54,7 +55,7 @@ export default function Login() {
       if (userData.role === "listener") {
         router.push("/home");
       } else if (userData.role === "artist") {
-        router.push("/profile/artist");
+        router.push(`/artist/${userId}`);
       } else if (userData.role === "admin") {
         router.push("/reportadmin");
       } else {

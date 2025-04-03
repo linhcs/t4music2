@@ -30,20 +30,22 @@ type FollowedArtist = {
   pfp?: string;
 };
 
-
 type UserStore = {
+  userId: number | null | undefined
   username: string;
   role: string;
   pfp?: string;
   followers: number;
   following: number;
+  followingList: number[];
   playlistCount: number;
   isLoggedIn: boolean;
   likedSongs: Song[];
   playlists: Playlist[];
   streamingHistory: Song[];
   followedArtists: FollowedArtist[];
-  setUser: (username: string, role: string, pfp?: string) => void;
+
+  setUser: (username: string, role: string, pfp?: string, userId?: number | null) => void;
   setLikedSongs: (songs: Song[]) => void;
   setPlaylists: (lists: Playlist[]) => void;
   setStreamingHistory: (songs: Song[]) => void;
@@ -51,18 +53,22 @@ type UserStore = {
   setFollowing: (count: number) => void;
   setPlaylistCount: (count: number) => void;
   setFollowedArtists: (artists: FollowedArtist[]) => void;
-  logout: () => void;
+  setFollowingList: (ids: number[]) => void;
+  setUserId: (id: number) => void;
+  clearUser: () => void;
   toggleLike: (song: Song) => void;
 };
 
 export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
+      userId: null,
       username: "",
       role: "",
       pfp: "",
       followers: 0,
       following: 0,
+      followingList: [],
       playlistCount: 0,
       isLoggedIn: false,
       likedSongs: [],
@@ -70,9 +76,10 @@ export const useUserStore = create<UserStore>()(
       streamingHistory: [],
       followedArtists: [],
 
-      setUser: (username, role, pfp = "") =>
-        set({ username, role, isLoggedIn: true, pfp }),
+      setUser: (username, role, pfp = "", userId = null) =>
+        set({ username, role, isLoggedIn: true, pfp, userId }),
 
+      setUserId: (id) => set({ userId: id }),
       setLikedSongs: (songs) => set({ likedSongs: songs }),
       setPlaylists: (lists) => set({ playlists: lists }),
       setStreamingHistory: (songs) => set({ streamingHistory: songs }),
@@ -80,14 +87,17 @@ export const useUserStore = create<UserStore>()(
       setFollowing: (count) => set({ following: count }),
       setPlaylistCount: (count) => set({ playlistCount: count }),
       setFollowedArtists: (artists) => set({ followedArtists: artists }),
+      setFollowingList: (ids) => set({ followingList: ids }),
 
-      logout: () =>
+      clearUser: () =>
         set({
+          userId: null,
           username: "",
           role: "",
           pfp: "",
           followers: 0,
           following: 0,
+          followingList: [],
           playlistCount: 0,
           isLoggedIn: false,
           likedSongs: [],

@@ -57,6 +57,7 @@ export async function POST(request: Request) {
       {
         message: "Login successful",
         role: userData.role,
+        userId: userData.id, // need to pass user for ANYTHIGN TO WORK lmao
       },
       { status: 200 }
     );

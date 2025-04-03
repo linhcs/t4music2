@@ -75,6 +75,7 @@ export async function POST(req: Request) {
     `);
 
     return NextResponse.json({
+      userId,
       username: user[0].username,
       email: user[0].email,
       role: user[0].role,

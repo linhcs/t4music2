@@ -1,54 +1,33 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function ArtistCard() {
-  const [isFollowing, setIsFollowing] = useState(false);
-
-  const handleFollow = () => {
-    // Toggle follow state; later, add API integration.
-    setIsFollowing(!isFollowing);
-  };
+  const { username, pfp } = useUserStore();
 
   return (
-    <div className="relative w-full h-80 overflow-hidden bg-black">
-      {/* Background Image */}
-      <Image
-        src="artist-banner.jpg"
-        alt="Artist Banner"
-        className="absolute inset-0 w-full h-full object-cover opacity-70"
-        width={1920}
-        height={1080}
-        priority
-      />
-
-      {/* Bottom Gradient Overlay */}
-      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-b from-transparent to-black" />
-
-      {/* Foreground Content (Avatar, Artist Details & Follow Button) */}
-      <div className="relative z-10 flex items-end h-full px-8 pb-6">
-        <div className="flex items-center gap-6">
+    <div className="relative w-full bg-black px-10 py-12 rounded-b-xl shadow-md border-b border-gray-800">
+      <div className="flex items-center gap-8">
+        {/* profile avatar */}
+        <div className="w-40 h-40 rounded-full bg-black border-4 border-white overflow-hidden shadow-xl">
           <Image
-            src="/artist-default.jpg"
+            src={pfp || "/default-pfp.jpg"}
             alt="Artist Avatar"
-            className="w-32 h-32 rounded-full object-cover border-4 border-black shadow-xl"
-            width={128}
-            height={128}
+            width={160}
+            height={160}
+            className="object-cover w-full h-full"
           />
-          <div className="flex flex-col">
-            <h1 className="text-4xl font-extrabold text-white">Artist Name</h1>
-            <p className="text-gray-300 mt-1">10,532,242 monthly listeners</p>
-            <div className="flex items-center gap-4 mt-2">
-              <p className="text-gray-400 text-sm">Pop • Songwriter</p>
-              <button
-                onClick={handleFollow}
-                className="px-4 py-1 bg-gradient-to-r from-blue-500 to-green-500 rounded-full text-white font-semibold shadow hover:opacity-90 transition"
-              >
-                {isFollowing ? "Following" : "Follow"}
-              </button>
-            </div>
-          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <span className="text-white text-sm uppercase tracking-wider">
+            Artist Profile
+          </span>
+
+          <h1 className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-purple-500 to-blue-500 animate-gradient drop-shadow-md">
+            {username || "Artist"}
+          </h1>
         </div>
       </div>
     </div>
