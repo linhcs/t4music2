@@ -13,13 +13,14 @@ export default function Login() {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-  
+
     try {
-      // authenticating data
+      // ✅ First authenticate
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,23 +28,23 @@ export default function Login() {
       });
 
       const loginData = await res.json();
-
       if (!res.ok) throw new Error(loginData.error || "Invalid credentials");
 
-      // getting full user data
+      // ✅ Set Zustand user_id, username, and role
+      const store = useUserStore.getState();
+      store.setUser(loginData.user_id, loginData.username, loginData.role);
+      console.log("👤 Zustand user_id set to:", loginData.user_id);
+
+      // ✅ Then fetch extra data (liked songs, playlists, etc.)
       const userRes = await fetch("/api/user/data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: formData.username }),
+        body: JSON.stringify({ username: loginData.username }),
       });
 
       const userData = await userRes.json();
-
       if (!userRes.ok) throw new Error("Failed to load user data");
 
-      // here im setting the global zustand store so we can use it
-      const store = useUserStore.getState();
-      store.setUser(userData.username, userData.role);
       store.setLikedSongs(userData.likedSongs);
       store.setPlaylists(userData.playlists);
       store.setStreamingHistory(userData.streamingHistory);
@@ -60,6 +61,7 @@ export default function Login() {
       } else {
         router.push("/home"); // fallback if anything goes wrong
       }
+      
     } catch (error) {
       if (error instanceof Error) setError(error.message);
       else setError("Unknown error occurred");
@@ -67,7 +69,6 @@ export default function Login() {
       setLoading(false);
     }
   };
-  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
@@ -86,7 +87,7 @@ export default function Login() {
             value={formData.username}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
           <input
             type="password"
@@ -95,12 +96,12 @@ export default function Login() {
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
           <button
             type="submit"
-            className="w-full py-3 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 text-white font-medium rounded-lg hover:scale-105 transition-all duration-300 glow-button animate-gradient"
             disabled={loading}
+            className="w-full py-3 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 text-white font-medium rounded-lg hover:scale-105 transition-all duration-300"
           >
             {loading ? "Logging in..." : "Sign in"}
           </button>
@@ -108,11 +109,7 @@ export default function Login() {
 
         <p className="mt-4 text-gray-400">
           New to Amplifi?{" "}
-          <Link
-            href="/signup"
-            className="relative text-transparent bg-gradient-to-r from-purple-400 via-blue-400 to-white bg-clip-text before:absolute before:left-0 before:bottom-0 before:w-full before:h-[2px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-white before:content-[''] before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100"
-            style={{ animationDuration: "700ms" }}
-          >
+          <Link href="/signup" className="text-blue-400 hover:underline">
             Join the party!
           </Link>
         </p>

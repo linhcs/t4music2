@@ -2,7 +2,7 @@
 import UserCard from '../components/User/UserCard';
 import ProfileSettingsButton from '../components/ProfileSettingsButton';
 import DeleteAccountButton from '../components/DeleteAccountButton';
-import UserAlbums from '../components/User/UserAlbums';
+import UserPlaylists from '../components/User/UserPlaylists';
 import ArtistsFollowing from '../components/User/ArtistsFollowing';
 import NavBar from '@/components/ui/NavBar';
 import TopArtists from "../components/User/TopArtists";
@@ -21,9 +21,9 @@ export default function UserProfilePage() {
       <div className="relative max-w-6xl mx-auto px-6 pb-10 space-y-12 mt-6">
       {/* i removed the user stats and instead put it right below the username*/}
 
-        {/* Albums section (peter is doing this part so im leaving it here alone) */}
-        <UserAlbums isArtist={false} />
 
+        {/* Albums section (includes the dedicated "Liked Songs" album) */}
+        <UserPlaylists isArtist={false} />
         {/* Artists the user follows */}
         <ArtistsFollowing />
 
