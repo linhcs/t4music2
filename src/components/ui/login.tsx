@@ -55,7 +55,7 @@ export default function Login() {
       if (userData.role === "listener") {
         router.push("/home");
       } else if (userData.role === "artist") {
-        router.push(`/artist/${userId}`);
+        router.push("/profile/artist");
       } else if (userData.role === "admin") {
         router.push("/reportadmin");
       } else {
