@@ -30,8 +30,8 @@ type FollowedArtist = {
   pfp?: string;
 };
 
-
 type UserStore = {
+  user_id: number;
   username: string;
   role: string;
   pfp?: string;
@@ -43,7 +43,7 @@ type UserStore = {
   playlists: Playlist[];
   streamingHistory: Song[];
   followedArtists: FollowedArtist[];
-  setUser: (username: string, role: string, pfp?: string) => void;
+  setUser: (user_id: number, username: string, role: string, pfp?: string) => void;
   setLikedSongs: (songs: Song[]) => void;
   setPlaylists: (lists: Playlist[]) => void;
   setStreamingHistory: (songs: Song[]) => void;
@@ -58,6 +58,7 @@ type UserStore = {
 export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
+      user_id: -1,
       username: "",
       role: "",
       pfp: "",
@@ -70,8 +71,8 @@ export const useUserStore = create<UserStore>()(
       streamingHistory: [],
       followedArtists: [],
 
-      setUser: (username, role, pfp = "") =>
-        set({ username, role, isLoggedIn: true, pfp }),
+      setUser: (user_id, username, role, pfp = "") =>
+        set({ user_id, username, role, isLoggedIn: true, pfp }),
 
       setLikedSongs: (songs) => set({ likedSongs: songs }),
       setPlaylists: (lists) => set({ playlists: lists }),
@@ -83,6 +84,7 @@ export const useUserStore = create<UserStore>()(
 
       logout: () =>
         set({
+          user_id: -1,
           username: "",
           role: "",
           pfp: "",

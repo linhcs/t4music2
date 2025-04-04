@@ -3,7 +3,7 @@ import { prisma } from "../../../../prisma/script";
 import bcrypt from "bcryptjs";
 
 type User = {
-  id: string;
+  user_id: number;
   username: string;
   password_hash: string;
   email?: string;
@@ -12,7 +12,7 @@ type User = {
 
 export async function POST(request: Request) {
   try {
-    const { username, password } = await request.json();
+    const {username, password } = await request.json();
     console.log(" Logging in:", username);
 
     if (!username || !password) {
@@ -56,6 +56,8 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         message: "Login successful",
+        user_id: userData.user_id,
+        username: userData.username, 
         role: userData.role,
       },
       { status: 200 }
@@ -67,4 +69,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+};

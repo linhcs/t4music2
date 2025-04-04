@@ -47,30 +47,32 @@ export default function Signup() {
         }),
       });
 
-      if (!signupRes.ok) {
-        const errorData = await signupRes.json();
-        throw new Error(errorData.error || "Signup failed.");
-      }
+      const userData = await signupRes.json();
+      if (!signupRes.ok) throw new Error(userData.error || "Signup failed");
 
-      const userRes = await fetch("/api/user/data", {
+      // ✅ Set Zustand user info from signup response
+      const store = useUserStore.getState();
+      store.setUser(userData.user_id, userData.username, userData.role);
+
+      // ✅ Optional: load extra user data (liked songs, playlists, history)
+      const extraRes = await fetch("/api/user/data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: formData.username }),
+        body: JSON.stringify({ username: userData.username }),
       });
 
-      const userData = await userRes.json();
-      if (!userRes.ok) throw new Error("Failed to load user data.");
-
-      const store = useUserStore.getState();
-      store.setUser(userData.username, userData.role);
-      store.setLikedSongs(userData.likedSongs);
-      store.setPlaylists(userData.playlists);
-      store.setStreamingHistory(userData.streamingHistory);
+      const extra = await extraRes.json();
+      if (extraRes.ok) {
+        store.setLikedSongs(extra.likedSongs || []);
+        store.setPlaylists(extra.playlists || []);
+        store.setStreamingHistory(extra.streamingHistory || []);
+      }
 
       alert("Signup successful! Welcome to Amplifi 🎧");
 
       if (userData.role === "artist") router.push("/profile/artist");
       else if (userData.role === "listener") router.push("/home");
+
       else router.push("/home");
     } catch (err) {
       if (err instanceof Error) setError(err.message);
@@ -93,7 +95,7 @@ export default function Signup() {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
           <input
             type="text"
@@ -102,7 +104,7 @@ export default function Signup() {
             value={formData.username}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
           <input
             type="password"
@@ -111,7 +113,7 @@ export default function Signup() {
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
           <input
             type="password"
@@ -120,18 +122,18 @@ export default function Signup() {
             value={formData.confirmPassword}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+            className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
 
-          {/* i added the role buttons here instead */}
+          {/* Role selector */}
           <h2 className="text-center text-lg font-semibold bg-gradient-to-r from-pink-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mt-4">
-             Decide your fate...
+            Decide your fate...
           </h2>
           <div className="flex justify-between gap-4 mt-2">
             <button
               type="button"
               onClick={() => setFormData({ ...formData, role: "listener" })}
-              className={`w-full py-3 rounded-lg font-semibold text-white text-center transition-all duration-300 ${
+              className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-300 ${
                 formData.role === "listener"
                   ? "bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400"
                   : "bg-gray-800 hover:bg-gray-700"
@@ -142,7 +144,7 @@ export default function Signup() {
             <button
               type="button"
               onClick={() => setFormData({ ...formData, role: "artist" })}
-              className={`w-full py-3 rounded-lg font-semibold text-white text-center transition-all duration-300 ${
+              className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-300 ${
                 formData.role === "artist"
                   ? "bg-gradient-to-r from-purple-500 via-blue-400 to-pink-500"
                   : "bg-gray-800 hover:bg-gray-700"
@@ -156,7 +158,7 @@ export default function Signup() {
 
           <button
             type="submit"
-            className="w-full py-3 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 text-white font-medium rounded-lg hover:scale-105 transition-all duration-300 glow-button animate-gradient"
+            className="w-full py-3 mt-2 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 text-white font-medium rounded-lg hover:scale-105 transition-all duration-300 glow-button animate-gradient"
           >
             Sign up
           </button>
@@ -166,8 +168,7 @@ export default function Signup() {
           Already have an account?{" "}
           <Link
             href="/login"
-            className="relative text-transparent bg-gradient-to-r from-purple-400 via-blue-400 to-white bg-clip-text before:absolute before:left-0 before:bottom-0 before:w-full before:h-[2px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-white before:content-[''] before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100"
-            style={{ animationDuration: "700ms" }}
+            className="relative text-transparent bg-gradient-to-r from-purple-400 via-blue-400 to-white bg-clip-text before:absolute before:left-0 before:bottom-0 before:w-full before:h-[2px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-white before:opacity-0 hover:before:opacity-100"
           >
             Log in here!
           </Link>
