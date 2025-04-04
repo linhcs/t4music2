@@ -3,7 +3,8 @@ import { prisma } from "../../../../prisma/script";
 import bcrypt from "bcryptjs";
 
 type User = {
-  id: string;
+  user_id: number;
+  // id: string;
   username: string;
   password_hash: string;
   email?: string;
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
       {
         message: "Login successful",
         role: userData.role,
-        userId: userData.id, // need to pass user for ANYTHIGN TO WORK lmao
+        userId: userData.user_id, // need to pass user for ANYTHIGN TO WORK lmao
       },
       { status: 200 }
     );

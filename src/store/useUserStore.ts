@@ -31,9 +31,12 @@ type FollowedArtist = {
 };
 
 type UserStore = {
-  userId: number | null | undefined
+  userId : number | null | undefined;
+  user_id: number | null | undefined
   username: string;
   role: string;
+  topTracks: Song[];
+  setTopTracks: (songs: Song[]) => void;
   pfp?: string;
   followers: number;
   following: number;
@@ -63,11 +66,14 @@ export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
       userId: null,
+      user_id: null,
       username: "",
       role: "",
       pfp: "",
       followers: 0,
       following: 0,
+      topTracks: [],
+setTopTracks: (songs) => set({ topTracks: songs }),
       followingList: [],
       playlistCount: 0,
       isLoggedIn: false,
@@ -103,6 +109,7 @@ export const useUserStore = create<UserStore>()(
           likedSongs: [],
           playlists: [],
           streamingHistory: [],
+          topTracks: [],
           followedArtists: [],
         }),
 

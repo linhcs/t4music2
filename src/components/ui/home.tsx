@@ -95,9 +95,22 @@ import { getPlaybackURL } from "@/app/api/misc/actions";
       setCurrentSong(song);
       setIsPlaying(true);
       setProgress(0);
-      audioRef.current
-        .play()
-        .catch((error) => console.error("Playback failed:", error));
+      try {
+        await audioRef.current.play();
+  
+        // recording streaming history AFTER playback starts
+        await fetch("/api/streaming/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: useUserStore.getState().userId,
+            songId: song.song_id,
+            artistId: song.user_id,
+          }),
+        });
+      } catch (err) {
+        console.error("Playback or stream logging failed:", err);
+      }
     },
     [currentSong, updateProgress]
   );
