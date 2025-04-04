@@ -13,7 +13,7 @@ type User = {
 
 export async function POST(request: Request) {
   try {
-    const { username, password } = await request.json();
+    const {username, password } = await request.json();
     console.log(" Logging in:", username);
 
     if (!username || !password) {
@@ -57,6 +57,8 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         message: "Login successful",
+        user_id: userData.user_id,
+        username: userData.username, 
         role: userData.role,
         userId: userData.user_id, // need to pass user for ANYTHIGN TO WORK lmao
       },
@@ -69,4 +71,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+};

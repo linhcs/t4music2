@@ -7,11 +7,12 @@ import { useUserStore } from "@/store/useUserStore";
 import UserCard from "../../../profile/components/User/UserCard";
 import ProfileSettingsButton from "../../../profile/components/ProfileSettingsButton";
 import DeleteAccountButton from "../../../profile/components/DeleteAccountButton";
-import UserAlbums from "../../../profile/components/User/UserAlbums";
+import UserAlbums from "../../../profile/components/User/UserPlaylists";
 import ArtistsFollowing from "../../../profile/components/User/ArtistsFollowing";
 import NavBar from "@/components/ui/NavBar";
 import TopArtists from "../../../profile/components/User/TopArtists";
 import TopTracks from "../../../profile/components/User/TopTracks";
+import UserPlaylists from "../../../profile/components/User/UserPlaylists";
 
 export default function UserProfilePage() {
   const { userId } = useParams();
@@ -60,7 +61,7 @@ export default function UserProfilePage() {
         <ArtistsFollowing />
 
         {/* Albums section */}
-        <UserAlbums isArtist={false} />
+        <UserPlaylists/>
 
         {/* Profile settings and account management */}
         <div className="flex flex-wrap gap-6 justify-center">

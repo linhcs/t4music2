@@ -64,12 +64,15 @@ import { getPlaybackURL } from "@/app/api/misc/actions";
   //audio control
   const audioPlayer = useCallback(
     async (song: Song) => {
-      if (!audioRef.current) {
-        audioRef.current = new Audio();
-        audioRef.current.addEventListener("timeupdate", updateProgress);
+      if (audioRef.current) {
+        audioRef.current.pause(); // Stop previous song
+        audioRef.current.removeEventListener("timeupdate", updateProgress);
       }
-
-      //play/pause same song
+  
+      audioRef.current = new Audio();
+      audioRef.current.addEventListener("timeupdate", updateProgress);
+  
+      // Play/pause same song
       if (currentSong?.song_id === song.song_id) {
         if (audioRef.current.paused) {
           audioRef.current.play().then(() => setIsPlaying(true));
@@ -79,31 +82,29 @@ import { getPlaybackURL } from "@/app/api/misc/actions";
         }
         return;
       }
-
-      //change to another song
-      audioRef.current.pause();
-
+  
       // Get signed URL for playback
       const urlResult = await getPlaybackURL(song.file_path);
       if ("failure" in urlResult) {
         console.error("Failed to get playback URL:", urlResult.failure);
         return;
       }
-
+  
       audioRef.current.src = urlResult.success.url;
       audioRef.current.currentTime = 0;
       setCurrentSong(song);
       setIsPlaying(true);
       setProgress(0);
+  
       try {
         await audioRef.current.play();
   
-        // recording streaming history AFTER playback starts
+        // Log streaming history AFTER playback starts
         await fetch("/api/streaming/add", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userId: useUserStore.getState().userId,
+            userId: useUserStore.getState().user_id,
             songId: song.song_id,
             artistId: song.user_id,
           }),
@@ -114,8 +115,6 @@ import { getPlaybackURL } from "@/app/api/misc/actions";
     },
     [currentSong, updateProgress]
   );
-
-  //allow user to click on playbar to adjust
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!audioRef.current || !currentSong) return;

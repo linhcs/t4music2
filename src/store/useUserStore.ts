@@ -8,7 +8,7 @@ type Song = {
   file_path: string;
   liked_at?: string;
   played_at?: string;
-  user_id?: number;
+  userId?: number;
   users?: {
     username: string;
     pfp?: string;
@@ -25,14 +25,13 @@ type Playlist = {
 };
 
 type FollowedArtist = {
-  user_id: number;
+  userId: number;
   username: string;
   pfp?: string;
 };
 
 type UserStore = {
   userId : number | null | undefined;
-  user_id: number | null | undefined
   username: string;
   role: string;
   topTracks: Song[];
@@ -66,7 +65,6 @@ export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
       userId: null,
-      user_id: null,
       username: "",
       role: "",
       pfp: "",
