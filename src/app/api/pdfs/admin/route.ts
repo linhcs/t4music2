@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, streaming_history } from "@prisma/client";
 import { PDFDocument, rgb } from 'pdf-lib';
 import fs from 'fs';
 import path from 'path';
@@ -11,16 +11,30 @@ import { drawHeaders, addUserDataToPage, changearr } from '@/lib/tableutils';
 const prisma = new PrismaClient();
 
 interface User { email: string; role: string; user_id: number; username: string; created_at: Date; }
-interface result {
-  v: BigInt;
-}
+
+interface result {v: BigInt;}
+interface treresult {v1: BigInt; v2: BigInt; v3: BigInt; v4: BigInt; v5: BigInt; v6: BigInt; }
 
 export async function POST(req: Request) {
   try {
 
     const { updatedArr, stringArr } = await req.json();
 
-    console.log(stringArr);
+    console.log('stringArr: ',stringArr);
+
+    if(stringArr[0] == 'option11'){
+      stringArr[1] = 'option21';
+      stringArr[3] = 'option32';
+      stringArr[2] = 'option44';
+      stringArr[4] = 'option52';
+    } else if (stringArr[0] == 'option12'){
+      stringArr[1] = 'option21';
+      stringArr[3] = 'option32';
+      stringArr[2] = 'option42';
+      stringArr[4] = 'option52';
+    };
+
+    console.log('stringArr new: ',stringArr);
 
     const maping: { [key: string]: string } = {
       'option11': 'Year over Year',
@@ -39,7 +53,7 @@ export async function POST(req: Request) {
       'option52': '2025',
     };
     const mappedArr = stringArr.map((option: string) => option ? maping[option] : '');
-    console.log(mappedArr);
+    console.log("mappedArr",mappedArr);
 
     const noshot = "users";
     const rawquery = `SELECT * FROM ${noshot};`;
@@ -74,7 +88,7 @@ export async function POST(req: Request) {
         x: 44 - (i * 2),
         y: yPosition - 30 + (i * 2),
         size: 80,
-        opacity: 0.4 + (i * .2),
+        opacity: 0.4 + (i * .15),
         color: gradientColors[i], 
       });
     };
@@ -117,7 +131,6 @@ export async function POST(req: Request) {
     const subsection : string[] = [ ...pt1, ...pt2]
     console.log('subsection: ',subsection)
 
-    
     const tottablearr: [string[],string[],string[],string[],string[]] = 
     [['count(user_id) as v','users','created_at','AND role = "listener"']//listeners
     ,['floor(sum(duration)/60) as v','Hours','played_at','']//streaminghours
@@ -125,15 +138,59 @@ export async function POST(req: Request) {
     ,['count(like_id) as v','likes','liked_at','']//Likes
     ,['count(song_id) as v','songs','uploaded_at','']//Uploads
     ];
-    const totans: number[] = [0,0,0,0,0]
-;    const period : string = "'" + mappedArr[4] + "-" + subsection[0] + "-01' AND '" + mappedArr[4] + "-" + subsection[1] + "-" + subsection[2] + "'";
-    for (let i = 0; i < updatedArr.length; i++){
-      const tablequeries =`SELECT ${tottablearr[i][0]} from ${tottablearr[i][1]} WHERE ${tottablearr[i][2]} BETWEEN ${period}${tottablearr[i][3 ]};`;
-      const temp: result[] = await prisma.$queryRawUnsafe(tablequeries);
-      totans[i] = Number(temp[0].v)
-    };
-    console.log("totans: ",totans)
+    let totans: number[] = [0,0,0,0,0]
+    let newans: number[] = [0,0,0,0,0]
+    let growthans: number[] = [0,0,0,0,0]
+;   let period : string = "'" + mappedArr[3] + "-" + subsection[0] + "-01' AND '" + mappedArr[4] + "-" + subsection[1] + "-" + subsection[2] + "'";
+    
+    if(mappedArr[0] == 'y') {
+      for (let i = 0; i < totans.length; i++){
+        tottablearr[i][2] = 'year(' + tottablearr[i][2] + ')'
 
+        for (let i = 0; i < totans.length; i++){
+          const tablequeries =`SELECT ${tottablearr[i][0]} from ${tottablearr[i][1]} WHERE ${tottablearr[i][2]} <= 2025 ${tottablearr[i][3 ]};`;
+          const temp: result[] = await prisma.$queryRawUnsafe(tablequeries);
+          totans[i] = Number(temp[0].v)
+        };
+        console.log("totans: ",totans)
+        for (let i = 0; i < newans.length; i++){
+          const tablequeries =`SELECT ${tottablearr[i][0]} from ${tottablearr[i][1]} WHERE ${tottablearr[i][2]} BETWEEN 2024 AND 2025 ${tottablearr[i][3 ]};`;
+          const temp: result[] = await prisma.$queryRawUnsafe(tablequeries);
+          newans[i] = Number(temp[0].v)
+        };  
+        console.log("newans: ",newans)
+        for (let i = 0; i < growthans.length; i++){
+          growthans[i] = (totans[i] == newans[i]? 0 : Math.floor((totans[i] - newans[i])/newans[i] * 100))
+        };
+        console.log("growthans: ",growthans)
+        
+      };
+    } else {
+
+      for (let i = 0; i < totans.length; i++){
+        const tablequeries =`SELECT ${tottablearr[i][0]} from ${tottablearr[i][1]} WHERE ${tottablearr[i][2]} < '${mappedArr[4]}-${subsection[1]}-${subsection[2]}' ${tottablearr[i][3 ]};`;
+        const temp: result[] = await prisma.$queryRawUnsafe(tablequeries);
+        totans[i] = Number(temp[0].v)
+      };
+      console.log("totans: ",newans)
+      for (let i = 0; i < updatedArr.length; i++){
+        const tablequeries =`SELECT ${tottablearr[i][0]} from ${tottablearr[i][1]} WHERE ${tottablearr[i][2]} BETWEEN ${period}${tottablearr[i][3 ]};`;
+        const temp: result[] = await prisma.$queryRawUnsafe(tablequeries);
+        newans[i] = Number(temp[0].v)
+      };  
+      console.log("newans: ",newans)
+      for (let i = 0; i < growthans.length; i++){
+        growthans[i] = (totans[i] == newans[i]? 0 : Math.floor((totans[i] - newans[i])/newans[i] * 100))
+      };
+      console.log("growthans: ",growthans)
+
+    };
+    
+    page.drawText('At A Glance', {x: 253, y: 639, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('At A Glance', {x: 251, y: 639, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('At A Glance', {x: 251, y: 641, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('At A Glance', {x: 253, y: 641, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('At A Glance', { x: 252, y: 640,size: 20, });
 
     //table
     page.drawLine({ start: { x: 50, y: 480 }, end: { x: 562, y: 480 }, thickness: 3,});
@@ -153,27 +210,117 @@ export async function POST(req: Request) {
     page.drawLine({ start: { x: 459, y: 446 }, end: { x: 527, y: 446 }, thickness: 2,});
     // filler
     const end: string = stringArr[0] == '' ?  mappedArr[2] : (mappedArr[0] == 'Year over Year' ? '2025': 'Q2');
-    const tempdata : string = 'Null';
     //Listeners
     page.drawText('Total by ' + end + ' – ' + totans[0], { x:102, y: 565, font, size: 14, });
-    page.drawText('New users – ' + tempdata, { x:108, y: 535, font, size: 14, });
-    page.drawText('% Growth - ' + tempdata, { x:112, y: 505, font, size: 14, });
+    page.drawText('New users – ' + newans[0], { x:108, y: 535, font, size: 14, });
+    page.drawText('Growth - ' + growthans[0] + '%', { x:112, y: 505, font, size: 14, });
     //Streaming Hours
     page.drawText('Total by ' + end + ' – ' + totans[1], { x:382, y: 565, font, size: 14, });
-    page.drawText('New users – ' + tempdata, { x:388, y: 535, font, size: 14, });
-    page.drawText('% Growth - ' + tempdata, { x:392, y: 505, font, size: 14, });
+    page.drawText('New users – ' + newans[1], { x:388, y: 535, font, size: 14, });
+    page.drawText('Growth - ' + growthans[1] + '%', { x:392, y: 505, font, size: 14, });
     //Follows
     page.drawText('Total by ' + end + ' – ' + totans[2], { x:54, y: 415, font, size: 14, });
-    page.drawText('New users – ' + tempdata, { x:60, y: 385, font, size: 14, });
-    page.drawText('% Growth - ' + tempdata, { x:64, y: 355, font, size: 14, });
+    page.drawText('New users – ' + newans[2], { x:60, y: 385, font, size: 14, });
+    page.drawText('Growth - ' + growthans[2] + '%', { x:64, y: 355, font, size: 14, });
     //Likes
     page.drawText('Total by ' + end + ' – ' + totans[3], { x:251, y: 415, font, size: 14, });
-    page.drawText('New users – ' + tempdata, { x:257, y: 385, font, size: 14, });
-    page.drawText('% Growth - ' + tempdata, { x:261, y: 355, font, size: 14, });
+    page.drawText('New users – ' + newans[3], { x:257, y: 385, font, size: 14, });
+    page.drawText('Growth - ' + growthans[3] + '%', { x:261, y: 355, font, size: 14, });
     //Uploads
     page.drawText('Total by ' + end + ' – ' + totans[4], { x:437, y: 415, font, size: 14, });
-    page.drawText('New users – ' + tempdata, { x:443, y: 385, font, size: 14, });
-    page.drawText('% Growth - ' + tempdata, { x:447, y: 355, font, size: 14, });
+    page.drawText('New users – ' + newans[4], { x:443, y: 385, font, size: 14, });
+    page.drawText('Growth - ' + growthans[4] + '%', { x:447, y: 355, font, size: 14, });
+
+
+    page.drawText('Where we’re at', {x: 243, y: 309, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at', {x: 241, y: 311, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at', {x: 241, y: 309, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at', {x: 243, y: 311, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at', { x: 242, y: 310,size: 20, });
+
+
+    const todayqueries: string[] = [
+      `SELECT count(user_id) as v FROM users WHERE role='listener';`,
+      `SELECT count(DISTINCT user_id) as v FROM streaming_history;`,
+      `SELECT count(like_id) as v FROM likes;`,
+      `SELECT count(follow_id) as v FROM follows;`,
+      `SELECT floor(sum(duration)/60) as v FROM hours;`,
+      `SELECT count(song_id) as v FROM songs;`
+    ];
+    let todayans: number[] = [0,0,0,0,0,0]
+    for (let i = 0; i < todayans.length; i++){
+      const temp: result[] = await prisma.$queryRawUnsafe(todayqueries[i]);
+      todayans[i] = Number(temp[0].v)
+    }; 
+
+    page.drawText('Total Listeners - ' + todayans[0], { x:70, y: 270, font, size: 18, });
+    page.drawText('Active Listeners - ' + todayans[1], { x:340, y: 270, font, size: 18, });
+    page.drawText('Likes - ' + todayans[2], { x:70, y: 245, font, size: 18, });
+    page.drawText('Follows - ' + todayans[3], { x:340, y: 245, font, size: 18, });
+    page.drawText('Streamed Hours - ' + todayans[4], { x:70, y: 220, font, size: 18, });
+    page.drawText('Number of Songs - ' + todayans[5], { x:340, y: 220, font, size: 18, });
+
+    //const relativeq: string[] = [``,``,``,``,``];
+
+    const reltodayArr: [string[],string[],string[],string[],string[]] = 
+    [['count(user_id)','users','created_at']//listeners
+    ,['floor(sum(duration)/60)','hours','played_at']//streaminghours
+    ,['count(follow_id)','follows','follow_at']//Follows
+    ,['count(like_id)','likes','liked_at']//Likes
+    ,['count(song_id)','songs','uploaded_at']//Uploads
+    ];
+
+    const relativenew : [number[],number[],number[],number[],number[]] = [[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]];
+    for (let i = 0; i < reltodayArr.length; i++){
+      const tempeq = `WITH counts AS (
+        SELECT 
+		    (SELECT ${reltodayArr[i][0]}
+            FROM ${reltodayArr[i][1]}
+            WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 1 AND 3) AS v1,
+         (SELECT ${reltodayArr[i][0]} 
+         FROM ${reltodayArr[i][1]}
+         WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 4 AND 6) AS v2,
+        (SELECT ${reltodayArr[i][0]} 
+         FROM ${reltodayArr[i][1]}
+         WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 7 AND 9) AS v3,
+        (SELECT ${reltodayArr[i][0]} 
+         FROM ${reltodayArr[i][1]}
+         WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 10 AND 12) AS v4,
+         (SELECT ${reltodayArr[i][0]} 
+         FROM ${reltodayArr[i][1]}
+         WHERE year(${reltodayArr[i][2]}) = 2025 AND month(${reltodayArr[i][2]}) BETWEEN 1 AND 3) AS v5,
+         (SELECT ${reltodayArr[i][0]} 
+         FROM ${reltodayArr[i][1]}
+         WHERE year(${reltodayArr[i][2]}) = 2025 AND month(${reltodayArr[i][2]}) BETWEEN 4 AND 6) AS v6
+       )
+      SELECT * FROM counts;
+      `;
+      const temp: treresult[] = await prisma.$queryRawUnsafe(tempeq);
+      relativenew[i][0] = Number(temp[0].v1);
+      relativenew[i][1] = Number(temp[0].v2);
+      relativenew[i][2] = Number(temp[0].v3);
+      relativenew[i][3] = Number(temp[0].v4);
+      relativenew[i][4] = Number(temp[0].v5);
+      relativenew[i][5] = Number(temp[0].v6);
+      
+    }
+    console.log(relativenew);
+    //Q1-2024,
+
+    
+
+    /*
+    (Q2_count - Q1_count)/Q1_count * 100 AS 'Q2 - 2024 % Growth',
+    (Q3_count - Q2_count)/Q2_count * 100 AS 'Q3 - 2024 % Growth',
+    (Q4_count - Q3_count)/Q3_count * 100 AS 'Q4 - 2024 % Growth',
+    (Q12_count - Q4_count)/Q4_count * 100 AS 'Q4 - 2025 % Growth',
+    (Q22_count - Q12_count)/Q12_count * 100 AS 'Q4 - 2025 % Growth'
+    */
+
+
+
+
+
 
 
 
