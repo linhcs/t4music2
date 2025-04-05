@@ -9,7 +9,7 @@ import {
   FaBell,
   FaUserCircle,
 } from "react-icons/fa";
-import { useUserStore } from "@/store/useUserStore"; // update if path is different
+import { useUserStore } from "@/store/useUserStore";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -21,7 +21,7 @@ interface NavBarProps {
 
 export default function NavBar({ role = "listener" }: NavBarProps) {
   const pathname = usePathname();
-  const { username, userId, clearUser } = useUserStore();
+  const { username, clearUser } = useUserStore();
 
   const notifications = [
     { id: 1, message: "New song released: 'Summer Vibes'" },
@@ -109,11 +109,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
                 <Menu.Item>
                   {({ active }) => (
                     <Link
-                      href={
-                        role === "artist"
-                          ? `/artist/${userId}/profile`
-                          : `/listener/${userId}/profile`
-                      }
+                      href="/profile/user"
                       className={classNames(
                         active ? "bg-gray-700 text-white" : "text-gray-300",
                         "block px-4 py-2 text-sm"

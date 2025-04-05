@@ -29,9 +29,8 @@ type FollowedArtist = {
   username: string;
   pfp?: string;
 };
-
 type UserStore = {
-  userId : number | null | undefined;
+  userId : number | null;
   username: string;
   role: string;
   topTracks: Song[];

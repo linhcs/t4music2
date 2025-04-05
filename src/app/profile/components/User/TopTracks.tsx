@@ -18,7 +18,7 @@ export default function TopTracks() {
       {topTracks.map((track, i) => (
         <li
           key={track.song_id}
-          className="flex justify-between items-center bg-gray-900 rounded-lg px-4 py-3 shadow-md"
+          className="flex justify-between items-center bg-gradient-to-l from-pink-800 via-blue-800 to-purple-800 animate-gradient rounded-lg px-4 py-3 shadow-md"
         >
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-md overflow-hidden bg-gray-700">

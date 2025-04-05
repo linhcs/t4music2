@@ -40,7 +40,7 @@ export default function Login() {
       const loginData = await res.json();
       if (!res.ok) throw new Error(loginData.error || "Invalid credentials");
   
-      const userRes = await fetch(`/api/user/${loginData.userId}`);
+      const userRes = await fetch("/api/user/me");
       const userData = await userRes.json();
       if (!userRes.ok) throw new Error("Failed to load user data");
   

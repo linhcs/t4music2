@@ -1,9 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@prisma/script";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { userId, songId, artistId } = await req.json();
+    const { songId, artistId } = await req.json();
+
+    const userId = Number(req.cookies.get("user_id")?.value); // ✅ Fixed here
+
+    if (!userId || isNaN(userId)) {
+      return NextResponse.json({ error: "Not logged in" }, { status: 401 });
+    }
 
     await prisma.streaming_history.create({
       data: {
