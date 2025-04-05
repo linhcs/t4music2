@@ -1,11 +1,8 @@
 "use server";
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-} from "@aws-sdk/client-s3";
+
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { PrismaClient } from "@prisma/client"; // Correct import
+import { PrismaClient } from "@prisma/client";
 
 const s3 = new S3Client({
   region: "us-east-1",
@@ -15,7 +12,7 @@ const s3 = new S3Client({
   },
 });
 
-const prisma = new PrismaClient(); // Proper initialization
+const prisma = new PrismaClient();
 
 const acceptedTypes = ["audio/mpeg", "audio/ogg", "audio/wav"];
 const maxFileSize = 1024 * 1024 * 10;
@@ -27,7 +24,11 @@ const generateFileName = (type: string) => {
 export async function getSignedURL(
   type: string,
   size: number,
-  checksum: string
+  checksum: string,
+  songName: string,
+  artistName: string,
+  genre: string = "Pop",
+  duration: number = 180
 ) {
   if (!acceptedTypes.includes(type) || size > maxFileSize) {
     return { failure: "Invalid file or file size!" };
@@ -46,12 +47,11 @@ export async function getSignedURL(
   try {
     const signedURL = await getSignedUrl(s3, putObj, { expiresIn: 5400 });
 
-    // Create song with necessary data
     const song = await prisma.songs.create({
       data: {
-        title: "test",
-        genre: "Pop",
-        duration: 180,
+        title: songName,
+        genre: genre,
+        duration: duration,
         file_path: fileKey,
         file_format: type.split("/")[1],
         user_id: 1,
@@ -77,7 +77,7 @@ export async function getPlaybackURL(fileKey: string) {
       Key: fileKey,
     });
 
-    const signedURL = await getSignedUrl(s3, getObj, { expiresIn: 3600 }); // 1 hour expiry for playback
+    const signedURL = await getSignedUrl(s3, getObj, { expiresIn: 3600 });
 
     return { success: { url: signedURL } };
   } catch (error) {
