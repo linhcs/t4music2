@@ -7,10 +7,13 @@ import * as fontkit from 'fontkit';
 // Import utility functions for drawing the table
 import { drawHeaders, addUserDataToPage, changearr } from '@/lib/tableutils';
 
+
 const prisma = new PrismaClient();
 
 interface User { email: string; role: string; user_id: number; username: string; created_at: Date; }
-
+interface result {
+  v: BigInt;
+}
 
 export async function POST(req: Request) {
   try {
@@ -91,26 +94,86 @@ export async function POST(req: Request) {
       page.drawText(mappedArr[0], { x:330, y: yPosition-5, font, size: 25, });
     };
 
+    
+    const startmap: { [key: string]: string } = {
+      'option21': '01',
+      'option22': '04',
+      'option23': '07',
+      'option24': '10',
+      'option41': '03',
+      'option42': '06',
+      'option43': '09',
+      'option44': '12',
+    };
+    const edaymap: { [key: string]: string } = {
+      'option41': '31',
+      'option42': '30',
+      'option43': '30',
+      'option44': '31',
+    };
+
+    const pt1 : string[] = [stringArr[1],stringArr[2]].map((option: string) => option ? startmap[option] : '');
+    const pt2 : string[]= [stringArr[2]].map((option: string) => option ? edaymap[option] : '');
+    const subsection : string[] = [ ...pt1, ...pt2]
+    console.log('subsection: ',subsection)
+
+    
+    const tottablearr: [string[],string[],string[],string[],string[]] = 
+    [['count(user_id) as v','users','created_at','AND role = "listener"']//listeners
+    ,['floor(sum(duration)/60) as v','Hours','played_at','']//streaminghours
+    ,['count(follow_id) as v','follows','follow_at','']//Follows
+    ,['count(like_id) as v','likes','liked_at','']//Likes
+    ,['count(song_id) as v','songs','uploaded_at','']//Uploads
+    ];
+    const totans: number[] = [0,0,0,0,0]
+;    const period : string = "'" + mappedArr[4] + "-" + subsection[0] + "-01' AND '" + mappedArr[4] + "-" + subsection[1] + "-" + subsection[2] + "'";
+    for (let i = 0; i < updatedArr.length; i++){
+      const tablequeries =`SELECT ${tottablearr[i][0]} from ${tottablearr[i][1]} WHERE ${tottablearr[i][2]} BETWEEN ${period}${tottablearr[i][3 ]};`;
+      const temp: result[] = await prisma.$queryRawUnsafe(tablequeries);
+      totans[i] = Number(temp[0].v)
+    };
+    console.log("totans: ",totans)
+
+
     //table
     page.drawLine({ start: { x: 50, y: 480 }, end: { x: 562, y: 480 }, thickness: 3,});
     page.drawLine({ start: { x: 306, y: 620 }, end: { x: 306, y: 480 }, thickness: 3,});
     page.drawLine({ start: { x: 210, y: 340 }, end: { x: 210, y: 480 }, thickness: 3,});
     page.drawLine({ start: { x: 400, y: 340  }, end: { x:400, y: 480 }, thickness: 3,});
     //headers
-    page.drawText('Listeners', { x:125, y: 600, font, size: 20, });
-    page.drawLine({ start: { x: 123, y: 596 }, end: { x: 215, y: 596 }, thickness: 2,});
+    page.drawText('Listeners', { x:115, y: 600, font, size: 20, });
+    page.drawLine({ start: { x: 113, y: 596 }, end: { x: 205, y: 596 }, thickness: 2,});
     page.drawText('Streaming Hours', { x:360, y: 600, font, size: 20, });
-    page.drawLine({ start: { x: 360 - 2, y: 596 }, end: { x: 520, y: 596 }, thickness: 2,});
+    page.drawLine({ start: { x: 358, y: 596 }, end: { x: 520, y: 596 }, thickness: 2,});
     page.drawText('Follows', { x:80, y: 450, font, size: 18, });
     page.drawLine({ start: { x: 78, y: 446 }, end: { x: 143, y: 446 }, thickness: 2,});
     page.drawText('Likes', { x:285, y: 450, font, size: 18, });
     page.drawLine({ start: { x: 283, y: 446 }, end: { x: 332, y: 446 }, thickness: 2,});
     page.drawText('Uploads', { x:460, y: 450, font, size: 18, });
     page.drawLine({ start: { x: 459, y: 446 }, end: { x: 527, y: 446 }, thickness: 2,});
-
-
-
-
+    // filler
+    const end: string = stringArr[0] == '' ?  mappedArr[2] : (mappedArr[0] == 'Year over Year' ? '2025': 'Q2');
+    const tempdata : string = 'Null';
+    //Listeners
+    page.drawText('Total by ' + end + ' – ' + totans[0], { x:102, y: 565, font, size: 14, });
+    page.drawText('New users – ' + tempdata, { x:108, y: 535, font, size: 14, });
+    page.drawText('% Growth - ' + tempdata, { x:112, y: 505, font, size: 14, });
+    //Streaming Hours
+    page.drawText('Total by ' + end + ' – ' + totans[1], { x:382, y: 565, font, size: 14, });
+    page.drawText('New users – ' + tempdata, { x:388, y: 535, font, size: 14, });
+    page.drawText('% Growth - ' + tempdata, { x:392, y: 505, font, size: 14, });
+    //Follows
+    page.drawText('Total by ' + end + ' – ' + totans[2], { x:54, y: 415, font, size: 14, });
+    page.drawText('New users – ' + tempdata, { x:60, y: 385, font, size: 14, });
+    page.drawText('% Growth - ' + tempdata, { x:64, y: 355, font, size: 14, });
+    //Likes
+    page.drawText('Total by ' + end + ' – ' + totans[3], { x:251, y: 415, font, size: 14, });
+    page.drawText('New users – ' + tempdata, { x:257, y: 385, font, size: 14, });
+    page.drawText('% Growth - ' + tempdata, { x:261, y: 355, font, size: 14, });
+    //Uploads
+    page.drawText('Total by ' + end + ' – ' + totans[4], { x:437, y: 415, font, size: 14, });
+    page.drawText('New users – ' + tempdata, { x:443, y: 385, font, size: 14, });
+    page.drawText('% Growth - ' + tempdata, { x:447, y: 355, font, size: 14, });
 
 
 

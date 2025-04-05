@@ -79,9 +79,9 @@ const Form: React.FC<{ onArrayChange: (arr: string[]) => void }> = ({ onArrayCha
         setFirst('');
         if (event.target.value == 'option51') {
             if (Number(from1_d[7]) >= Number(from2_d[7]))
-                setFourth('option44')
+                setFourth('')
         } else {
-            setFourth('option42')
+            setFourth('')
         };
         console.log("year2_d: " + event.target.value);
         const arrayOfStrings = getArrayOfStrings();
@@ -133,7 +133,7 @@ const Form: React.FC<{ onArrayChange: (arr: string[]) => void }> = ({ onArrayCha
                     >
                         <option value="" disabled={year1_d !== '' || year2_d !== '' || from1_d !== '' || from2_d !== ''}>Select</option>
                         <option value="option31">2024</option>
-                        <option value="option32">2025</option>
+                        <option value="option32" disabled={from1_d !== 'option21'}>2025</option>
                     </select>
                 </div>
             </div>

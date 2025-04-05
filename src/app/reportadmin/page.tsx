@@ -25,12 +25,20 @@ interface albums {
   title: string;
 }
 
-type PassedObj = listeners | artists | albums;
+interface songs {
+  song_id: number;
+  title: string;
+}
+
+type PassedObj = listeners | artists | albums | songs;
 
 // Type guard to check if the object is an album
 function isAlbum(obj: PassedObj): obj is albums {
-  return (obj as albums).title !== undefined;
-  
+  return (obj as albums).album_id !== undefined && (obj as albums).title !== undefined;
+}
+
+function isSong(obj: PassedObj): obj is songs {
+  return (obj as songs).song_id !== undefined && (obj as songs).title !== undefined;
 }
 
 function isUser(obj: PassedObj): obj is listeners | artists {
@@ -139,7 +147,8 @@ const ReportAdminPage = () => {
   const [listeners, setListeners] = useState<listeners[]>([]);
   const [artists, setartists] = useState<artists[]>([]);
   const [albums, setalbums] = useState<albums[]>([]);
-  const [selectedobj, setSelectedobj] = useState<listeners | artists | albums | null>(null);
+  const [songs, setsongs] = useState<songs[]>([]);
+  const [selectedobj, setSelectedobj] = useState<listeners | artists | albums | songs |null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -154,6 +163,10 @@ const ReportAdminPage = () => {
       const responseAlbums = await fetch('/api/adminpage/albums');
       const dataAlbums: albums[] = await responseAlbums.json();
       setalbums(dataAlbums); // Set the albums data
+
+      const responseSongs = await fetch('/api/adminpage/songs');
+      const dataSongs: songs[] = await responseSongs.json();
+      setsongs(dataSongs); // Set the songs data
     };
 
     fetchData(); // Fetch the data when the component mounts
@@ -166,11 +179,11 @@ const ReportAdminPage = () => {
   };
 
   // Handle selecting a user
-  const handleUserClick = (obj: listeners | artists | albums) => {
+  const handleUserClick = (obj: listeners | artists | albums | songs) => {
     if (selectedobj === obj) {
       setSelectedobj(null);
     } else {
-      setSelectedobj(obj);  // Set the clicked user as selected
+      setSelectedobj(obj); 
     }
   };
 
@@ -206,8 +219,7 @@ const ReportAdminPage = () => {
         } else {
           alert("Action canceled.");
         }
-      }
-     else if (isUser(selectedobj)) {
+      } else if (isUser(selectedobj)) {
       
         const confirmed = window.confirm(`Are you sure you want to Delete ${selectedobj.username}?`);
         
@@ -235,13 +247,41 @@ const ReportAdminPage = () => {
         } else {
           alert("Action canceled.");
         }
-     }
+      } else if (isSong(selectedobj)) {
+
+        const confirmed = window.confirm(`Are you sure you want to Delete ${selectedobj.title}?`);
+        
+        if (confirmed) {
+          // Send the delete request to the server
+          const response = await fetch('/api/adminpage/delete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ selectedobj }), // Send the selected object to delete
+          });
+
+          if (response.ok) {
+            alert(`${selectedobj.title} has been removed`);
+
+            // Clear the selected user
+            setSelectedobj(null);
+
+            // Fetch updated data after deletion
+            await fetchData();
+          } else {
+            alert("Action Failed.");
+          }
+        } else {
+          alert("Action canceled.");
+        }
+      }
     } else {
       alert("Please select something first.");
     }
   };
 
-  // Fetch the updated data for listeners, artists, and albums after deletion
+  // Fetch the updated data for listeners, artists, albums and songs after deletion
   const fetchData = async () => {
     const responseListeners = await fetch('/api/adminpage/listeners');
     const dataListeners: listeners[] = await responseListeners.json();
@@ -254,6 +294,10 @@ const ReportAdminPage = () => {
     const responseAlbums = await fetch('/api/adminpage/albums');
     const dataAlbums: albums[] = await responseAlbums.json();
     setalbums(dataAlbums);
+
+    const responseSongs = await fetch('/api/adminpage/songs');
+    const dataSongs: songs[] = await responseSongs.json();
+    setsongs(dataSongs);
   };
 
 
@@ -271,7 +315,6 @@ const ReportAdminPage = () => {
         </motion.h1>
       </header>
       <div className="flex space-x-10 justify-center py-20">
-        {/* Window 1: Users */}
         <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
           <h3 className="text-center text-lg font-bold">Listeners</h3>
           <ul>
@@ -311,6 +354,21 @@ const ReportAdminPage = () => {
               >
         
                 {`${album.album_id} - ${album.title.slice(0, 13)}`}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
+          <h3 className="text-center text-lg font-bold">Songs</h3>
+          <ul>
+            {songs.map((song) => (
+              <li
+                key={song.song_id}
+                className={`py-1 cursor-pointer ${song === selectedobj ? "border-2 border-red-500" : ""}`}
+                onClick={() => handleUserClick(song)}
+              >
+        
+                {`${song.song_id} - ${song.title.slice(0, 13)}`}
               </li>
             ))}
           </ul>
