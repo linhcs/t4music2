@@ -12,7 +12,7 @@ export default function UserCard() {
         {/* profile avatar */}
         <div className="w-40 h-40 rounded-full bg-black border-4 border-white overflow-hidden shadow-xl">
           <Image
-            src={pfp || "/default-pfp.jpg"}
+            src={pfp || "/default_pfp.jpg"}
             alt="User Avatar"
             width={160}
             height={160}

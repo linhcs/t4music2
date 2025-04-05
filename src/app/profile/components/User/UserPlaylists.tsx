@@ -65,7 +65,7 @@ export default function UserPlaylists() {
             <Link href={`/playlists/${playlist.playlist_id}`} className="flex flex-col items-center">
               <div className="h-36 w-36 bg-gray-800 rounded-xl overflow-hidden">
                 <Image
-                  src={playlist.playlist_art || "/artist-placeholder.jpg"}
+                  src={playlist.playlist_art || "/albumArt/defaultAlbumArt.png"}
                   alt={playlist.name}
                   width={144}
                   height={144}
