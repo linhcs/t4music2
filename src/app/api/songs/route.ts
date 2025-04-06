@@ -11,17 +11,10 @@ export async function GET() {
         uploaded_at: "desc",
       },
     });
+
     return NextResponse.json(songs);
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error(error.message);
-    } else {
-      console.error("An unknown error occurred");
-    }
-
-    return NextResponse.json(
-      { error: "Failed to fetch songs" },
-      { status: 500 }
-    );
+    console.error("❌ Failed to fetch songs:", error);
+    return NextResponse.json({ error: "Failed to fetch songs" }, { status: 500 });
   }
 }
