@@ -2,22 +2,18 @@
 
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
 import { useUserStore } from "@/store/useUserStore";
-import PlayBar from "@/components/ui/playBar";
-import { useRouter } from "next/navigation"; 
-import { getPlaybackURL } from "@/app/api/misc/actions";
+import { useRouter } from "next/navigation";
 import { Song } from "../../../types";
+import { useAudioPlayer } from "@/context/AudioContext"; // Global audio player hook
+import PlayBar from "@/components/ui/playBar"; // Import PlayBar component
 
 const ListenerHome = () => {
   const router = useRouter();
   const { username, toggleLike, likedSongs, playlists } = useUserStore();
   const [songs, setSongs] = useState<Song[]>([]);
-  const [currentSong, setCurrentSong] = useState<Song | null>(null);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [progress, setProgress] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [contextMenu, setContextMenu] = useState<{
@@ -28,11 +24,17 @@ const ListenerHome = () => {
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState<Song | null>(null);
 
+  const {
+    currentSong,
+    isPlaying,
+    playSong,
+    progress,
+  } = useAudioPlayer(); // Use the global play/pause functionality
+
   useEffect(() => {
     async function fetchUserData() {
-      const res = await fetch("/api/user/me", { cache: "no-store" });
+      const res = await fetch("/api/user/profile", { cache: "no-store" });
       if (!res.ok) return;
-
       const data = await res.json();
       const store = useUserStore.getState();
       store.setUser(data.username, data.role, data.pfp, data.user_id);
@@ -43,7 +45,6 @@ const ListenerHome = () => {
       store.setFollowers(data.followers);
       store.setFollowing(data.following);
     }
-
     fetchUserData();
   }, []);
 
@@ -52,9 +53,7 @@ const ListenerHome = () => {
     const fetchData = async () => {
       try {
         const response = await fetch("/api/songs");
-        if (!response.ok) {
-          throw new Error("Failed to fetch songs");
-        }
+        if (!response.ok) throw new Error("Failed to fetch songs");
         const data: Song[] = await response.json();
         setSongs(data);
       } catch (error) {
@@ -66,143 +65,50 @@ const ListenerHome = () => {
     fetchData();
   }, []);
 
-  const updateProgress = useCallback(() => {
-    if (audioRef.current && !isNaN(audioRef.current.duration)) {
-      setProgress(
-        (audioRef.current.currentTime / audioRef.current.duration) * 100
-      );
-    }
-  }, []);
+  const SongGallerySection = ({ title, items }: { title: string; items: Song[] }) => (
+    <section className="w-full max-w-7xl">
+      <h2 className="text-xl font-bold text-white mt-8 mb-3">{title}</h2>
+      <div className="grid grid-cols-5 gap-4">
+        {items.map((song) => {
+          const album_art = song.album?.album_art || "";
+          const isSongCurrentlyPlaying = currentSong?.song_id === song.song_id && isPlaying;
 
-  const audioPlayer = useCallback(
-    async (song: Song) => {
-      if (!audioRef.current) {
-        audioRef.current = new Audio();
-        audioRef.current.addEventListener("timeupdate", updateProgress);
-      }
-  
-      const urlResult = await getPlaybackURL(song.file_path);
-      if ("failure" in urlResult) {
-        console.error("Failed to get playback URL:", urlResult.failure);
-        return;
-      }
-  
-      // Check if same song and toggle play/pause
-      if (currentSong?.song_id === song.song_id) {
-        if (audioRef.current.paused) {
-          audioRef.current.play().then(() => setIsPlaying(true));
-        } else {
-          audioRef.current.pause();
-          setIsPlaying(false);
-        }
-        return;
-      }
-  
-      // New song
-      audioRef.current.src = urlResult.success.url;
-      audioRef.current.currentTime = 0;
-      setCurrentSong(song);
-      setProgress(0);
-  
-      try {
-        await audioRef.current.play();
-        setIsPlaying(true);
-      } catch (err) {
-        console.error("Audio playback failed:", err);
-        setIsPlaying(false);
-      }
-  
-      // Log the stream and refresh user info
-      try {
-        await fetch("/api/streaming/add", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: useUserStore.getState().userId,
-            songId: song.song_id,
-            artistId: song.user_id,
-          }),
-        });
-  
-        const updatedRes = await fetch("/api/user/me", { cache: "no-store" });
-        const updatedData = await updatedRes.json();
-        const store = useUserStore.getState();
-        store.setStreamingHistory(updatedData.streamingHistory);
-        store.setTopTracks(updatedData.topTracks);
-      } catch (err) {
-        console.error("Stream logging failed:", err);
-      }
-    },
-    [currentSong, updateProgress]
-  );
-  
-  const handleSeek = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!audioRef.current || !currentSong) return;
-
-      const ProgressBar = e.currentTarget;
-      const clickPosition =
-        e.clientX - ProgressBar.getBoundingClientRect().left;
-      const progressBarWidth = ProgressBar.clientWidth;
-      const seekPercentage = (clickPosition / progressBarWidth) * 100;
-      const seekTime = (audioRef.current.duration * seekPercentage) / 100;
-
-      audioRef.current.currentTime = seekTime;
-      setProgress(seekPercentage);
-    },
-    [currentSong]
-  );
-
-  const SongGallerySection = useCallback(
-    ({ title, items }: { title: string; items: Song[] }) => (
-      <section className="w-full max-w-7xl">
-        <h2 className="text-xl font-bold text-white mt-8 mb-3">{title}</h2>
-        <div className="grid grid-cols-5 gap-4">
-          {items.map((song) => {
-            const album_art = song.album?.album_art || "";
-            const isSongCurrentlyPlaying =
-              currentSong?.song_id === song.song_id && isPlaying;
-
-            return (
-              <div
-                key={song.song_id}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  setContextMenu({ x: e.clientX, y: e.clientY, song });
-                }}
-                onClick={() => audioPlayer(song)}
-                className="group relative rounded-lg overflow-hidden shadow-md no-flicker"
-                style={{
-                  backgroundImage: `url(${album_art})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  width: "60%",
-                  paddingTop: "60%",
-                }}
-              >
-                <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out flex items-center justify-center">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      audioPlayer(song);
-                    }}
-                    className="text-5xl text-white transition-transform duration-100 hover:scale-105"
-                  >
-                    {isSongCurrentlyPlaying ? <FiPauseCircle /> : <FiPlayCircle />}
-                  </button>
-                </div>
-                <div className="absolute bottom-0 w-full bg-black bg-opacity-50 px-2 py-1">
-                  <h3 className="text-white text-sm font-semibold truncate">
-                    {song.title}
-                  </h3>
-                </div>
+          return (
+            <div
+              key={song.song_id}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setContextMenu({ x: e.clientX, y: e.clientY, song });
+              }}
+              onClick={() => playSong(song)}
+              className="group relative rounded-lg overflow-hidden shadow-md no-flicker"
+              style={{
+                backgroundImage: `url(${album_art})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                width: "60%",
+                paddingTop: "60%",
+              }}
+            >
+              <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out flex items-center justify-center">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    playSong(song);
+                  }}
+                  className="text-5xl text-white transition-transform duration-100 hover:scale-105"
+                >
+                  {isSongCurrentlyPlaying ? <FiPauseCircle /> : <FiPlayCircle />}
+                </button>
               </div>
-            );
-          })}
-        </div>
-      </section>
-    ),
-    [currentSong, isPlaying, audioPlayer]
+              <div className="absolute bottom-0 w-full bg-black bg-opacity-50 px-2 py-1">
+                <h3 className="text-white text-sm font-semibold truncate">{song.title}</h3>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 
   if (!hasMounted) return null;
@@ -228,14 +134,6 @@ const ListenerHome = () => {
         </main>
       </div>
 
-      <PlayBar
-        currentSong={currentSong}
-        isPlaying={isPlaying}
-        progress={progress}
-        onPlayPause={() => currentSong && audioPlayer(currentSong)}
-        onSeek={handleSeek}
-      />
-
       {contextMenu && (
         <div
           className="fixed bg-gray-800 text-white rounded shadow-lg z-50"
@@ -252,10 +150,7 @@ const ListenerHome = () => {
                   await fetch("/api/likes/toggle", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      username,
-                      songId: song.song_id,
-                    }),
+                    body: JSON.stringify({ username, songId: song.song_id }),
                   });
                 } catch (err) {
                   console.error("Failed to sync like to DB:", err);
@@ -305,15 +200,28 @@ const ListenerHome = () => {
             ))}
             <button
               className="w-full mt-2 py-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 rounded text-white font-medium"
-              onClick={() => {
-                router.push("/listener/my-playlists?create=true");
-              }}
+              onClick={() => router.push("/listener/my-playlists?create=true")}
             >
               + Create New Playlist
             </button>
           </div>
         </div>
       )}
+
+      {/* Include the PlayBar here */}
+      <PlayBar
+        currentSong={currentSong}
+        isPlaying={isPlaying}
+        progress={progress}
+        onPlayPause={() => currentSong && playSong(currentSong)}
+        onSeek={(e) => {
+          if (!currentSong) return;
+          const bar = e.currentTarget;
+          const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
+          const currentTime = percent * currentSong.duration; // Assuming `duration` exists in the song object
+          playSong(currentSong); // This will trigger the song change, if needed
+        }}
+      />
     </div>
   );
 };

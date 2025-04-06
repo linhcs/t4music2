@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import TopTracks from "@/app/profile/components/User/TopTracks";
 import TopArtists from "@/app/profile/components/User/TopArtists";
 import UserPlaylists from "@/app/profile/components/User/UserPlaylists";
 import Sidebar from "@/components/ui/Sidebar";
 import NavBar from "@/components/ui/NavBar";
+import { useAudioPlayer } from "@/context/AudioContext"; // Global hook for audio player
+import PlayBar from "@/components/ui/playBar"; // Import the PlayBar component
 
 export default function ListenerUserProfile() {
   const {
@@ -25,6 +27,10 @@ export default function ListenerUserProfile() {
     setFollowing,
   } = useUserStore();
 
+  const { currentSong, isPlaying, progress, playSong } = useAudioPlayer(); // Access global audio player state
+
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     async function fetchUserData() {
       const res = await fetch("/api/user/me", { cache: "no-store" });
@@ -38,6 +44,8 @@ export default function ListenerUserProfile() {
       setTopTracks(data.topTracks);
       setFollowers(data.followers);
       setFollowing(data.following);
+
+      setLoading(false);
     }
 
     fetchUserData();
@@ -50,6 +58,14 @@ export default function ListenerUserProfile() {
     setFollowers,
     setFollowing,
   ]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black text-white">
+        <div className="text-lg">Loading profile...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-black text-white">
@@ -93,6 +109,21 @@ export default function ListenerUserProfile() {
           </section>
         </main>
       </div>
+
+      {/* Add the PlayBar component here */}
+      <PlayBar
+        currentSong={currentSong}
+        isPlaying={isPlaying}
+        progress={progress}
+        onPlayPause={() => currentSong && playSong(currentSong)}
+        onSeek={(e) => {
+          if (!currentSong) return;
+          const bar = e.currentTarget;
+          const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
+          const currentTime = percent * currentSong.duration; // Assuming `duration` exists in the song object
+          playSong(currentSong);
+        }}
+      />
     </div>
   );
 }

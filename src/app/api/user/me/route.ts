@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const userId = Number(req.cookies.get("user_id")?.value); // ✅ Fixed usage
+    const userId = Number(req.cookies.get("user_id")?.value);
 
     if (!userId || isNaN(userId)) {
       return NextResponse.json({ error: "Not logged in" }, { status: 401 });
@@ -17,19 +17,33 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const likedSongs = await prisma.$queryRaw`
-      SELECT s.song_id, s.title, s.genre, s.file_path, l.liked_at 
-      FROM likes l 
-      JOIN songs s ON l.song_id = s.song_id 
+    // ✅ Liked Songs - Includes artist data inline
+    const likedSongs = await prisma.$queryRawUnsafe(`
+      SELECT 
+        s.song_id,
+        s.title,
+        s.genre,
+        s.duration,
+        s.file_format,
+        s.file_path,
+        s.user_id,
+        l.liked_at,
+        u.username AS artist_username,
+        u.pfp AS artist_pfp
+      FROM likes l
+      JOIN songs s ON l.song_id = s.song_id
+      JOIN users u ON s.user_id = u.user_id
       WHERE l.listener_id = ${userId}
-    `;
+    `);
 
+    // ✅ User's playlists
     const playlists = await prisma.$queryRaw`
       SELECT playlist_id, name, playlist_art 
       FROM playlists 
       WHERE user_id = ${userId}
     `;
 
+    // ✅ Recent history
     const streamingHistory = await prisma.$queryRaw`
       SELECT s.song_id, s.title, s.genre, s.file_path, sh.played_at 
       FROM streaming_history sh 
@@ -39,13 +53,11 @@ export async function GET(req: NextRequest) {
       LIMIT 10
     `;
 
-    const followers = await prisma.follows.findMany({
-      where: { user_id_b: userId },
-    });
+    // ✅ Followers and Following
+    const followers = await prisma.follows.findMany({ where: { user_id_b: userId } });
+    const following = await prisma.follows.findMany({ where: { user_id_a: userId } });
 
-    const following = await prisma.follows.findMany({
-      where: { user_id_a: userId },
-    });
+    // ✅ Top Tracks
     const topTracks = await prisma.streaming_history.groupBy({
       by: ["song_id"],
       where: { listener_id: userId },
@@ -53,12 +65,10 @@ export async function GET(req: NextRequest) {
       orderBy: { _count: { song_id: "desc" } },
       take: 5,
     });
-    
+
     const topTrackDetails = await prisma.songs.findMany({
       where: {
-        song_id: {
-          in: topTracks.map((t) => t.song_id),
-        },
+        song_id: { in: topTracks.map((t) => t.song_id) },
       },
       include: {
         album: true,
@@ -70,6 +80,8 @@ export async function GET(req: NextRequest) {
         },
       },
     });
+
+    // ✅ Top Artists
     const topArtists = await prisma.streaming_history.groupBy({
       by: ["user_id"],
       where: { listener_id: userId },
@@ -77,7 +89,7 @@ export async function GET(req: NextRequest) {
       orderBy: { _count: { user_id: "desc" } },
       take: 5,
     });
-    
+
     const topArtistDetails = await prisma.users.findMany({
       where: {
         user_id: {
@@ -90,6 +102,8 @@ export async function GET(req: NextRequest) {
         pfp: true,
       },
     });
+
+    // ✅ Return everything
     return NextResponse.json({
       user_id: user.user_id,
       username: user.username,
@@ -103,7 +117,7 @@ export async function GET(req: NextRequest) {
       topTracks: topTrackDetails,
       topArtists: topArtistDetails,
     });
-    
+
   } catch (err) {
     console.error("/api/user/me error:", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
