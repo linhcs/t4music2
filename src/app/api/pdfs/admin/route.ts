@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient, streaming_history } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { PDFDocument, rgb } from 'pdf-lib';
 import fs from 'fs';
 import path from 'path';
@@ -10,10 +10,12 @@ import { drawHeaders, addUserDataToPage, changearr } from '@/lib/tableutils';
 
 const prisma = new PrismaClient();
 
-interface User { email: string; role: string; user_id: number; username: string; created_at: Date; }
+interface User { email: string; role: string; user_id: number; username: string; created_at: Date; };
 
-interface result {v: BigInt;}
-interface treresult {v1: BigInt; v2: BigInt; v3: BigInt; v4: BigInt; v5: BigInt; v6: BigInt; }
+interface result {v: BigInt;};
+interface treresult {v1: BigInt; v2: BigInt; v3: BigInt; v4: BigInt; v5: BigInt; v6: BigInt; };
+interface artresult {id: number; name: string; f: BigInt; l: BigInt; sh: BigInt};
+
 
 export async function POST(req: Request) {
   try {
@@ -73,6 +75,10 @@ export async function POST(req: Request) {
     const comicSansPath = path.resolve('public/fonts/comic.ttf');
     const comicSansBytes = fs.readFileSync(comicSansPath);
     const font = await pdfDoc.embedFont(comicSansBytes);
+    const imagepath = path.resolve('public/even lighter.jpg');
+    const imageBytes = fs.readFileSync(imagepath);
+    const image = await pdfDoc.embedJpg(imageBytes);
+    page.drawImage(image);
 
     let yPosition = 720;
     
@@ -186,62 +192,62 @@ export async function POST(req: Request) {
 
     };
     
-    page.drawText('At A Glance', {x: 253, y: 639, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('At A Glance', {x: 251, y: 639, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('At A Glance', {x: 251, y: 641, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('At A Glance', {x: 253, y: 641, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('At A Glance', { x: 252, y: 640,size: 20, });
+    page.drawText('At A Glance', {x: 243, y: 619, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('At A Glance', {x: 241, y: 619, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('At A Glance', {x: 241, y: 621, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('At A Glance', {x: 243, y: 621, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('At A Glance', { x: 242, y: 620,size: 22, });
 
     //table
-    page.drawLine({ start: { x: 50, y: 480 }, end: { x: 562, y: 480 }, thickness: 3,});
-    page.drawLine({ start: { x: 306, y: 620 }, end: { x: 306, y: 480 }, thickness: 3,});
-    page.drawLine({ start: { x: 210, y: 340 }, end: { x: 210, y: 480 }, thickness: 3,});
-    page.drawLine({ start: { x: 400, y: 340  }, end: { x:400, y: 480 }, thickness: 3,});
+    page.drawLine({ start: { x: 50, y: 450 }, end: { x: 562, y: 450 }, thickness: 3,});
+    page.drawLine({ start: { x: 306, y: 590 }, end: { x: 306, y: 450 }, thickness: 3,});
+    page.drawLine({ start: { x: 210, y: 310 }, end: { x: 210, y: 450 }, thickness: 3,});
+    page.drawLine({ start: { x: 400, y: 310  }, end: { x:400, y: 450 }, thickness: 3,});
     //headers
-    page.drawText('Listeners', { x:115, y: 600, font, size: 20, });
-    page.drawLine({ start: { x: 113, y: 596 }, end: { x: 205, y: 596 }, thickness: 2,});
-    page.drawText('Streaming Hours', { x:360, y: 600, font, size: 20, });
-    page.drawLine({ start: { x: 358, y: 596 }, end: { x: 520, y: 596 }, thickness: 2,});
-    page.drawText('Follows', { x:80, y: 450, font, size: 18, });
-    page.drawLine({ start: { x: 78, y: 446 }, end: { x: 143, y: 446 }, thickness: 2,});
-    page.drawText('Likes', { x:285, y: 450, font, size: 18, });
-    page.drawLine({ start: { x: 283, y: 446 }, end: { x: 332, y: 446 }, thickness: 2,});
-    page.drawText('Uploads', { x:460, y: 450, font, size: 18, });
-    page.drawLine({ start: { x: 459, y: 446 }, end: { x: 527, y: 446 }, thickness: 2,});
+    page.drawText('Listeners', { x:115, y: 570, font, size: 20, });
+    page.drawLine({ start: { x: 113, y: 566 }, end: { x: 205, y: 566 }, thickness: 2,});
+    page.drawText('Streaming Hours', { x:360, y: 570, font, size: 20, });
+    page.drawLine({ start: { x: 358, y: 566 }, end: { x: 520, y: 566 }, thickness: 2,});
+    page.drawText('Follows', { x:80, y: 410, font, size: 18, });
+    page.drawLine({ start: { x: 78, y: 406 }, end: { x: 143, y: 406 }, thickness: 2,});
+    page.drawText('Likes', { x:285, y: 410, font, size: 18, });
+    page.drawLine({ start: { x: 283, y: 406 }, end: { x: 332, y: 406 }, thickness: 2,});
+    page.drawText('Uploads', { x:460, y: 410, font, size: 18, });
+    page.drawLine({ start: { x: 459, y: 406 }, end: { x: 527, y: 406 }, thickness: 2,});
     // filler
     const end: string = stringArr[0] == '' ?  mappedArr[2] : (mappedArr[0] == 'Year over Year' ? '2025': 'Q2');
     //Listeners
-    page.drawText('Total by ' + end + ' – ' + totans[0], { x:102, y: 565, font, size: 14, });
-    page.drawText('New users – ' + newans[0], { x:108, y: 535, font, size: 14, });
-    page.drawText('Growth - ' + growthans[0] + '%', { x:112, y: 505, font, size: 14, });
+    page.drawText('Total by ' + end + ' – ' + totans[0], { x:102, y: 535, font, size: 14, });
+    page.drawText('New users – ' + newans[0], { x:108, y: 505, font, size: 14, });
+    page.drawText('Growth - ' + growthans[0] + '%', { x:112, y: 475, font, size: 14, });
     //Streaming Hours
-    page.drawText('Total by ' + end + ' – ' + totans[1], { x:382, y: 565, font, size: 14, });
-    page.drawText('New users – ' + newans[1], { x:388, y: 535, font, size: 14, });
-    page.drawText('Growth - ' + growthans[1] + '%', { x:392, y: 505, font, size: 14, });
+    page.drawText('Total by ' + end + ' – ' + totans[1], { x:382, y: 535, font, size: 14, });
+    page.drawText('New users – ' + newans[1], { x:388, y: 505, font, size: 14, });
+    page.drawText('Growth - ' + growthans[1] + '%', { x:392, y: 475, font, size: 14, });
     //Follows
-    page.drawText('Total by ' + end + ' – ' + totans[2], { x:54, y: 415, font, size: 14, });
-    page.drawText('New users – ' + newans[2], { x:60, y: 385, font, size: 14, });
-    page.drawText('Growth - ' + growthans[2] + '%', { x:64, y: 355, font, size: 14, });
+    page.drawText('Total by ' + end + ' – ' + totans[2], { x:54, y: 375, font, size: 14, });
+    page.drawText('New users – ' + newans[2], { x:60, y: 335, font, size: 14, });
+    page.drawText('Growth - ' + growthans[2] + '%', { x:64, y: 295, font, size: 14, });
     //Likes
-    page.drawText('Total by ' + end + ' – ' + totans[3], { x:251, y: 415, font, size: 14, });
-    page.drawText('New users – ' + newans[3], { x:257, y: 385, font, size: 14, });
-    page.drawText('Growth - ' + growthans[3] + '%', { x:261, y: 355, font, size: 14, });
+    page.drawText('Total by ' + end + ' – ' + totans[3], { x:251, y: 375, font, size: 14, });
+    page.drawText('New users – ' + newans[3], { x:257, y: 335, font, size: 14, });
+    page.drawText('Growth - ' + growthans[3] + '%', { x:261, y: 295, font, size: 14, });
     //Uploads
-    page.drawText('Total by ' + end + ' – ' + totans[4], { x:437, y: 415, font, size: 14, });
-    page.drawText('New users – ' + newans[4], { x:443, y: 385, font, size: 14, });
-    page.drawText('Growth - ' + growthans[4] + '%', { x:447, y: 355, font, size: 14, });
+    page.drawText('Total by ' + end + ' – ' + totans[4], { x:437, y: 375, font, size: 14, });
+    page.drawText('New users – ' + newans[4], { x:443, y: 335, font, size: 14, });
+    page.drawText('Growth - ' + growthans[4] + '%', { x:447, y: 295, font, size: 14, });
 
 
-    page.drawText('Where we’re at', {x: 243, y: 309, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('Where we’re at', {x: 241, y: 311, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('Where we’re at', {x: 241, y: 309, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('Where we’re at', {x: 243, y: 311, size: 20, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('Where we’re at', { x: 242, y: 310,size: 20, });
+    page.drawText('Where we’re at Today', {x: 203, y: 229, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at Today', {x: 201, y: 231, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at Today', {x: 201, y: 229, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at Today', {x: 203, y: 231, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at Today', { x: 202, y: 230,size: 22, });
 
 
     const todayqueries: string[] = [
       `SELECT count(user_id) as v FROM users WHERE role='listener';`,
-      `SELECT count(DISTINCT user_id) as v FROM streaming_history;`,
+      `SELECT count(DISTINCT user_id) as v FROM streaming_history WHERE year(played_at) = 2025 AND month(played_at) > 2;`,
       `SELECT count(like_id) as v FROM likes;`,
       `SELECT count(follow_id) as v FROM follows;`,
       `SELECT floor(sum(duration)/60) as v FROM hours;`,
@@ -253,81 +259,179 @@ export async function POST(req: Request) {
       todayans[i] = Number(temp[0].v)
     }; 
 
-    page.drawText('Total Listeners - ' + todayans[0], { x:70, y: 270, font, size: 18, });
-    page.drawText('Active Listeners - ' + todayans[1], { x:340, y: 270, font, size: 18, });
-    page.drawText('Likes - ' + todayans[2], { x:70, y: 245, font, size: 18, });
-    page.drawText('Follows - ' + todayans[3], { x:340, y: 245, font, size: 18, });
-    page.drawText('Streamed Hours - ' + todayans[4], { x:70, y: 220, font, size: 18, });
-    page.drawText('Number of Songs - ' + todayans[5], { x:340, y: 220, font, size: 18, });
+    page.drawText('Total Listeners - ' + todayans[0], { x:70, y: 170, font, size: 18, });
+    page.drawText('Active Listeners - ' + todayans[1], { x:340, y: 170, font, size: 18, });
+    page.drawText('Likes - ' + todayans[2], { x:70, y: 110, font, size: 18, });
+    page.drawText('Follows - ' + todayans[3], { x:340, y: 110, font, size: 18, });
+    page.drawText('Streamed Hours - ' + todayans[4], { x:70, y: 50, font, size: 18, });
+    page.drawText('Number of Songs - ' + todayans[5], { x:340, y: 50, font, size: 18, });
 
-    //const relativeq: string[] = [``,``,``,``,``];
+    //page 2 start
+    page = pdfDoc.addPage([612, 792]);
+    page.drawImage(image);
 
-    const reltodayArr: [string[],string[],string[],string[],string[]] = 
-    [['count(user_id)','users','created_at']//listeners
-    ,['floor(sum(duration)/60)','hours','played_at']//streaminghours
-    ,['count(follow_id)','follows','follow_at']//Follows
-    ,['count(like_id)','likes','liked_at']//Likes
-    ,['count(song_id)','songs','uploaded_at']//Uploads
-    ];
+    page.drawText('Our Artists', {x: 253, y: 729, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Our Artists', {x: 251, y: 731, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Our Artists', {x: 251, y: 729, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Our Artists', {x: 253, y: 731, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Our Artists', { x: 252, y: 730,size: 22, });
 
-    const relativenew : [number[],number[],number[],number[],number[]] = [[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]];
-    for (let i = 0; i < reltodayArr.length; i++){
-      const tempeq = `WITH counts AS (
-        SELECT 
-		    (SELECT ${reltodayArr[i][0]}
-            FROM ${reltodayArr[i][1]}
-            WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 1 AND 3) AS v1,
-         (SELECT ${reltodayArr[i][0]} 
-         FROM ${reltodayArr[i][1]}
-         WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 4 AND 6) AS v2,
-        (SELECT ${reltodayArr[i][0]} 
-         FROM ${reltodayArr[i][1]}
-         WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 7 AND 9) AS v3,
-        (SELECT ${reltodayArr[i][0]} 
-         FROM ${reltodayArr[i][1]}
-         WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 10 AND 12) AS v4,
-         (SELECT ${reltodayArr[i][0]} 
-         FROM ${reltodayArr[i][1]}
-         WHERE year(${reltodayArr[i][2]}) = 2025 AND month(${reltodayArr[i][2]}) BETWEEN 1 AND 3) AS v5,
-         (SELECT ${reltodayArr[i][0]} 
-         FROM ${reltodayArr[i][1]}
-         WHERE year(${reltodayArr[i][2]}) = 2025 AND month(${reltodayArr[i][2]}) BETWEEN 4 AND 6) AS v6
-       )
-      SELECT * FROM counts;
-      `;
-      const temp: treresult[] = await prisma.$queryRawUnsafe(tempeq);
-      relativenew[i][0] = Number(temp[0].v1);
-      relativenew[i][1] = Number(temp[0].v2);
-      relativenew[i][2] = Number(temp[0].v3);
-      relativenew[i][3] = Number(temp[0].v4);
-      relativenew[i][4] = Number(temp[0].v5);
-      relativenew[i][5] = Number(temp[0].v6);
-      
-    }
-    console.log(relativenew);
-    //Q1-2024,
+    page.drawText('Top Artists', { x: 60, y: 710,size: 20, });
+    page.drawRectangle({ x: 50, y: 640, width: 512, height: 30, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('Total by ' + end, { x:76, y: 650, font, size: 14, });
+    page.drawRectangle({ x: 50, y: 610, width: 512, height: 30, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('New users', { x:80, y: 620, font, size: 14, });
+    page.drawRectangle({ x: 50, y: 580, width: 512, height: 30, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('Growth %', { x:82, y: 590, font, size: 14, });
+    page.drawRectangle({ x: 178, y: 580, width: 118, height: 120, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('Follows', { x:212, y: 680, font, size: 14, });
+    page.drawRectangle({ x: 296, y: 580, width: 88, height: 120, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('Likes', { x:324, y: 680, font, size: 14, });
+    page.drawRectangle({ x: 384, y: 580, width: 178, height: 120, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('Streaming Hours', { x:416, y: 680, font, size: 14, });
 
+    const totalart = `With atts AS (
+                      Select
+                        S.user_id,
+                        U.username,
+                        count(F.user_id_b) as tfollows,
+                        count(L.song_id) as tlikes,
+                        floor(sum(H.duration)/3600) as tstream
+                      FROM songs as S
+                        LEFT JOIN follows as F on F.user_id_b = S.user_id
+                        LEFT JOIN likes as L on L.song_id = S.song_id AND S.uploaded_at < '${mappedArr[4]}-${subsection[1]}-${subsection[2]}'
+                        LEFT JOIN Hours as H ON H.song_id = S.song_id AND H.played_at < '${mappedArr[4]}-${subsection[1]}-${subsection[2]}'
+                        Left JOIN users as U on S.user_id = U.user_id AND U.created_at < '${mappedArr[4]}-${subsection[1]}-${subsection[2]}'
+                        Group by S.user_id    
+                      )
+                      SELECT 
+                        user_id as 'id',
+                        username as 'name',
+                        tfollows as 'f',
+                        tlikes as 'l',
+                        tstream as 'sh'
+                      from atts;`;
+    const newart = `With atts AS (
+                      Select
+                        S.user_id,
+                        U.username,
+                        count(F.user_id_b) as tfollows,
+                        count(L.song_id) as tlikes,
+                        floor(sum(H.duration)/3600) as tstream
+                      FROM songs as S
+                        LEFT JOIN follows as F on F.user_id_b = S.user_id
+                        LEFT JOIN likes as L on L.song_id = S.song_id AND S.uploaded_at BETWEEN ${period}
+                        LEFT JOIN Hours as H ON H.song_id = S.song_id AND H.played_at BETWEEN ${period}
+                        Left JOIN users as U on S.user_id = U.user_id AND U.created_at BETWEEN ${period}
+                        Group by S.user_id    
+                      )
+                      SELECT 
+                        tfollows as 'f',
+                        tlikes as 'l',
+                        tstream as 'sh'
+                      from atts;`;
+    // artist name
+    const topinfo: artresult[] = await prisma.$queryRawUnsafe(totalart);
+    const topnewinfo: artresult[] = await prisma.$queryRawUnsafe(newart);
+    page.drawText(topinfo[0].name.slice(0,9), { x: 60, y: 680,size: 20, font,});
+    page.drawText('' + Number(topinfo[0].f), { x: 228, y: 650,size: 20, font,});
+    page.drawText('' + Number(topinfo[0].l), { x: 330, y: 650,size: 20, font,});
+    page.drawText( Number(topinfo[0].sh) + ' hours', { x: 430, y: 650,size: 20, font,});
+    page.drawText('' + Number(topnewinfo[0].f), { x: 228, y: 620,size: 20, font,});
+    page.drawText('' + Number(topnewinfo[0].l), { x: 330, y: 620,size: 20, font,});
+    page.drawText( Number(topnewinfo[0].sh) + ' hours', { x: 430, y: 620,size: 20, font,});
+    page.drawText((Number(topnewinfo[0].f) == 0 ? 0 : Math.floor((Number(topinfo[0].f) - Number(topnewinfo[0].f))/Number(topnewinfo[0].f) * 100)) + ' %', { x: 220, y: 590,size: 20, font,});
+    page.drawText((Number(topnewinfo[0].l) == 0 ? 0 : Math.floor((Number(topinfo[0].l) - Number(topnewinfo[0].l))/Number(topnewinfo[0].l)) * 100) + ' %', { x: 330, y: 590,size: 20, font,});
+    page.drawText((Number(topnewinfo[0].sh) == 0 ? 0 : Math.floor((Number(topinfo[0].sh) - Number(topnewinfo[0].sh))/Number(topnewinfo[0].sh)) * 100) + ' %', { x: 460, y: 590,size: 20, font,});
     
+    const s = 180;
+    //Average artist
+    page.drawText('Average Artists', { x: 60, y: 710 - s,size: 20, });
+    page.drawRectangle({ x: 50, y: 640 - s, width: 512, height: 30, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('Total by ' + end, { x:76, y: 650 - s, font, size: 14, });
+    page.drawRectangle({ x: 50, y: 610 - s, width: 512, height: 30, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('New users', { x:80, y: 620 - s, font, size: 14, });
+    page.drawRectangle({ x: 50, y: 580 - s, width: 512, height: 30, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('Growth %', { x:82, y: 590 - s, font, size: 14, });
+    page.drawRectangle({ x: 178, y: 580 - s, width: 118, height: 120, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('Follows', { x:212, y: 680 - s, font, size: 14, });
+    page.drawRectangle({ x: 296, y: 580 - s, width: 88, height: 120, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('Likes', { x:324, y: 680 - s, font, size: 14, });
+    page.drawRectangle({ x: 384, y: 580 - s, width: 178, height: 120, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('Streaming Hours', { x:416, y: 680 - s, font, size: 14, });
 
-    /*
-    (Q2_count - Q1_count)/Q1_count * 100 AS 'Q2 - 2024 % Growth',
-    (Q3_count - Q2_count)/Q2_count * 100 AS 'Q3 - 2024 % Growth',
-    (Q4_count - Q3_count)/Q3_count * 100 AS 'Q4 - 2024 % Growth',
-    (Q12_count - Q4_count)/Q4_count * 100 AS 'Q4 - 2025 % Growth',
-    (Q22_count - Q12_count)/Q12_count * 100 AS 'Q4 - 2025 % Growth'
-    */
+    const medianart = Math.ceil(topinfo.length/2) - 1;
+    page.drawText(topinfo[medianart].name.slice(0,9), { x: 60, y: 680 - s,size: 20, font,});
+    page.drawText('' + Number(topinfo[medianart].f), { x: 228, y: 650 - s,size: 20, font,});
+    page.drawText('' + Number(topinfo[medianart].l), { x: 330, y: 650 - s,size: 20, font,});
+    page.drawText( Number(topinfo[medianart].sh) + ' hours', { x: 430, y: 650 - s,size: 20, font,});
+    page.drawText('' + Number(topnewinfo[medianart].f), { x: 228, y: 620 - s,size: 20, font,});
+    page.drawText('' + Number(topnewinfo[medianart].l), { x: 330, y: 620 - s,size: 20, font,});
+    page.drawText( Number(topnewinfo[medianart].sh) + ' hours', { x: 430, y: 620 - s,size: 20, font,});
+    page.drawText((Number(topnewinfo[medianart].f) == 0 ? 0 : Math.floor((Number(topinfo[medianart].f) - Number(topnewinfo[medianart].f))/Number(topnewinfo[medianart].f) * 100)) + ' %', { x: 220, y: 590 - s,size: 20, font,});
+    page.drawText((Number(topnewinfo[medianart].l) == 0 ? 0 : Math.floor((Number(topinfo[medianart].l) - Number(topnewinfo[medianart].l))/Number(topnewinfo[medianart].l)) * 100) + ' %', { x: 330, y: 590 - s,size: 20, font,});
+    page.drawText((Number(topnewinfo[medianart].sh) == 0 ? 0 : Math.floor((Number(topinfo[medianart].sh) - Number(topnewinfo[medianart].sh))/Number(topnewinfo[medianart].sh)) * 100) + ' %', { x: 460, y: 590 - s,size: 20, font,});
+
+    page.drawText('Artists by Genere', { x: 60, y: 350,size: 20, });
+
+    page.drawRectangle({ x: 50, y: 50, width: 512, height: 288, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawRectangle({ x: 50, y: 82, width: 512, height: 32, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawRectangle({ x: 50, y: 146, width: 512, height: 32, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawRectangle({ x: 50, y: 210, width: 512, height: 32, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawRectangle({ x: 50, y: 274, width: 512, height: 32, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawRectangle({ x: 150, y: 50, width: 50, height: 288, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawRectangle({ x: 200, y: 50, width: 100, height: 288, borderWidth: 1, borderColor: rgb(0, 0, 0),});
+    page.drawText('Name', { x:82, y: 316, font, size: 14, });
+    page.drawText('Rank', { x:160, y: 316, font, size: 14, });
+    page.drawText('Genre', { x:230, y: 316, font, size: 14, });-
+    page.drawText('What they need to work on', { x:310, y: 316, font, size: 14, }); 
 
 
 
 
-
-
-
-
-
-
-
-
+    //This was code that I started working on
+    // const reltodayArr: [string[],string[],string[],string[],string[]] = 
+    // [['count(user_id)','users','created_at']//listeners
+    // ,['floor(sum(duration)/60)','hours','played_at']//streaminghours
+    // ,['count(follow_id)','follows','follow_at']//Follows
+    // ,['count(like_id)','likes','liked_at']//Likes
+    // ,['count(song_id)','songs','uploaded_at']//Uploads
+    // ];
+    // const relativenew : [number[],number[],number[],number[],number[]] = [[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]];
+    // for (let i = 0; i < reltodayArr.length; i++){
+    //   const tempeq = `WITH counts AS (
+    //     SELECT 
+		//     (SELECT ${reltodayArr[i][0]}
+    //         FROM ${reltodayArr[i][1]}
+    //         WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 1 AND 3) AS v1,
+    //      (SELECT ${reltodayArr[i][0]} 
+    //      FROM ${reltodayArr[i][1]}
+    //      WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 4 AND 6) AS v2,
+    //     (SELECT ${reltodayArr[i][0]} 
+    //      FROM ${reltodayArr[i][1]}
+    //      WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 7 AND 9) AS v3,
+    //     (SELECT ${reltodayArr[i][0]} 
+    //      FROM ${reltodayArr[i][1]}
+    //      WHERE year(${reltodayArr[i][2]}) = 2024 AND month(${reltodayArr[i][2]}) BETWEEN 10 AND 12) AS v4,
+    //      (SELECT ${reltodayArr[i][0]} 
+    //      FROM ${reltodayArr[i][1]}
+    //      WHERE year(${reltodayArr[i][2]}) = 2025 AND month(${reltodayArr[i][2]}) BETWEEN 1 AND 3) AS v5,
+    //      (SELECT ${reltodayArr[i][0]} 
+    //      FROM ${reltodayArr[i][1]}
+    //      WHERE year(${reltodayArr[i][2]}) = 2025 AND month(${reltodayArr[i][2]}) BETWEEN 4 AND 6) AS v6
+    //    )
+    //   SELECT * FROM counts;
+    //   `;
+    //   const temp: treresult[] = await prisma.$queryRawUnsafe(tempeq);
+    //   relativenew[i][0] = Number(temp[0].v1);
+    //   relativenew[i][1] = Number(temp[0].v2);
+    //   relativenew[i][2] = Number(temp[0].v3);
+    //   relativenew[i][3] = Number(temp[0].v4);
+    //   relativenew[i][4] = Number(temp[0].v5);
+    //   relativenew[i][5] = Number(temp[0].v6);
+      
+    // }
+    // console.log(relativenew);
 
 
     // User Log portion
@@ -340,6 +444,7 @@ export async function POST(req: Request) {
       //console.log(updatedArr[i]);
       if(updatedArr[i] === true) { allFalse = true;}
     };
+    let firstpage = true;
     for (let i = 0; i < users.length; i++) {
       if(!allFalse){
         const pdfBytes = await pdfDoc.save();
@@ -351,11 +456,17 @@ export async function POST(req: Request) {
           },
         });
       };
-      page = pdfDoc.addPage([612, 792]);
+      if(firstpage)
+      {
+        page = pdfDoc.addPage([612, 792]);
+        page.drawImage(image);
+        firstpage = false;
+      };
       const user = users[i];
 
       if (yPosition < 72) { // If there's not enough space on the current page, add a new one
-        page = pdfDoc.addPage([612, 792]); // Add a new page
+        page = pdfDoc.addPage([612, 792]);
+        page.drawImage(image);
         yPosition = 720; // Reset position for the new page
         // Draw headers again on the new page
         yPosition = drawHeaders(page, yPosition, font);
