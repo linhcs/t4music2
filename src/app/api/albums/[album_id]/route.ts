@@ -6,11 +6,16 @@ export async function GET(
   context: { params: { album_id: string } }
 ) {
   try {
-    const albumId = parseInt(context.params.album_id); 
+    const albumId = parseInt(context.params.album_id);
 
     const album = await prisma.album.findUnique({
       where: { album_id: albumId },
       include: {
+        users: { // Join with user who created it
+          select: {
+            username: true,
+          },
+        },
         album_songs: {
           include: {
             songs: {
@@ -36,6 +41,8 @@ export async function GET(
       album_id: album.album_id,
       title: album.title,
       album_art: album.album_art,
+      user_id: album.user_id,
+      creator: album.users?.username || "Unknown Artist",
       songs,
     });
   } catch (err) {

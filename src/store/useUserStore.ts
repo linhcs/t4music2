@@ -14,8 +14,18 @@ type Song = {
     pfp?: string;
   };
   album?: {
+    title: string;
     album_art?: string;
   };
+};
+type PlayerState = {
+  currentSong: Song | null;
+  isPlaying: boolean;
+  progress: number;
+  setSong: (song: Song) => void;
+  togglePlay: () => void;
+  setProgress: (progress: number) => void;
+  reset: () => void;
 };
 
 type Playlist = {
@@ -55,6 +65,16 @@ type UserStore = {
   toggleLike: (song: Song) => void;
 };
 
+export const usePlayerStore = create<PlayerState>((set) => ({
+  currentSong: null,
+  isPlaying: false,
+  progress: 0,
+  setSong: (song) => set({ currentSong: song, isPlaying: true, progress: 0 }),
+  togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  setProgress: (progress) => set({ progress }),
+  reset: () => set({ currentSong: null, isPlaying: false, progress: 0 }),
+}));
+
 export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
@@ -82,7 +102,8 @@ export const useUserStore = create<UserStore>()(
       setPlaylistCount: (count) => set({ playlistCount: count }),
       setFollowedArtists: (artists) => set({ followedArtists: artists }),
 
-      logout: () =>
+      logout: () =>{
+        usePlayerStore.getState().reset();
         set({
           user_id: -1,
           username: "",
@@ -96,7 +117,8 @@ export const useUserStore = create<UserStore>()(
           playlists: [],
           streamingHistory: [],
           followedArtists: [],
-        }),
+        });
+      },
 
       toggleLike: (song) => {
         const { likedSongs } = get();

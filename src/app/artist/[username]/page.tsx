@@ -1,5 +1,5 @@
-// app/artist/[username]/page.tsx
 "use client";
+
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import NavBar from "@/components/ui/NavBar";
@@ -28,8 +28,8 @@ export default function ArtistPage() {
       <NavBar role="listener" />
       <ArtistCard artist={artist} />
       <div className="relative max-w-6xl mx-auto px-6 pb-10 space-y-12 mt-8">
-        <ArtistAlbums artistId={artist.user_id} />
-        <TopTracks artistId={artist.user_id} />
+        <ArtistAlbums albums={artist.album} />
+        <TopTracks tracks={artist.songs} />
         <ArtistBio bio={artist.bio} />
       </div>
     </div>
