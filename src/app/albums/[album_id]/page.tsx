@@ -22,24 +22,18 @@ interface Album {
 export default function AlbumPage() {
   const params = useParams();
   const album_id = Array.isArray(params.album_id) ? params.album_id[0] : params.album_id;
-  const { user_id } = useUserStore();
+  const { username } = useUserStore();
   const [album, setAlbum] = useState<Album | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [audioPreviewUrl, setAudioPreviewUrl] = useState("");
-  const [nowPlayingTitle, setNowPlayingTitle] = useState("");
-
-  const [newSong, setNewSong] = useState({
-    title: "",
-    genre: "",
-    duration: "",
-    file_path: "",
-    file_format: "",
-  });
-
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [newSong, setNewSong] = useState({ title: "", genre: "" });
   const albumAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [nowPlayingTitle, setNowPlayingTitle] = useState("");
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   useEffect(() => {
     const fetchAlbum = async () => {
@@ -57,62 +51,62 @@ export default function AlbumPage() {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  const handleAddSong = async () => {
-    const { title, genre, duration, file_path, file_format } = newSong;
-    if (!title || !genre || !duration || !file_path || !file_format) {
-      return alert("Please fill out all fields");
-    }
-
-    setSubmitting(true);
-    const res = await fetch(`/api/albums/${album_id}/add-song`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...newSong, duration: parseInt(duration), user_id }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) return alert(data.error || "Failed to add song");
-
-    alert("✅ Song added!");
-    setAlbum((prev) => prev ? { ...prev, songs: [...prev.songs, data] } : null);
-    setNewSong({ title: "", genre: "", duration: "", file_path: "", file_format: "" });
-    setAudioPreviewUrl("");
-    setShowModal(false);
-    setSubmitting(false);
-  };
-
-  const handleDeleteSong = async (song_id: number) => {
-    if (!confirm("Delete this song?")) return;
-    const res = await fetch(`/api/songs/${song_id}`, { method: "DELETE" });
-    const data = await res.json();
-    if (!res.ok) return alert(data.error);
-    setAlbum((prev) => prev ? { ...prev, songs: prev.songs.filter((s) => s.song_id !== song_id) } : null);
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    const audio = new Audio(url);
-    audio.addEventListener("loadedmetadata", () => {
-      const seconds = Math.floor(audio.duration);
-      setNewSong((prev) => ({
-        ...prev,
-        file_path: url,
-        file_format: file.type.split("/")[1],
-        duration: seconds.toString(),
-      }));
-      setAudioPreviewUrl(url);
-    });
+    setSelectedFile(file);
   };
 
-  const playAlbum = () => {
-    if (!album || album.songs.length === 0) return;
-    const track = album.songs[0];
-    albumAudioRef.current!.src = track.file_path;
-    albumAudioRef.current!.play();
-    setNowPlayingTitle(track.title);
-    setCurrentTrackIndex(0);
+  const handleUpload = async () => {
+    if (!selectedFile || !newSong.title || !newSong.genre || !username || !album?.title) {
+      alert("Please fill out all fields and select a file");
+      return;
+    }
+  
+    setSubmitting(true);
+  
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("username", username);
+      formData.append("title", newSong.title);
+      formData.append("genre", newSong.genre);
+      formData.append("albumName", album.title);
+  
+      const res = await fetch(`/api/albums/${album.album_id}/add-song`, {
+        method: "POST",
+        body: formData,
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        throw new Error(data.error || "Upload failed");
+      }
+  
+      // Add the new song to album state
+      setAlbum((prev) =>
+        prev ? { ...prev, songs: [...prev.songs, data.song] } : null
+      );
+  
+      // Reset modal and form
+      setShowModal(false);
+      setNewSong({ title: "", genre: "" });
+      setSelectedFile(null);
+    } catch (error: any) {
+      alert(error.message || "Failed to upload");
+    } finally {
+      setSubmitting(false); // ✅ Always reset submitting
+    }
+  };
+  
+
+  const handleRemove = async (song_id: number) => {
+    if (!confirm("Delete this song?")) return;
+    const res = await fetch(`/api/songs/${song_id}`, { method: "DELETE" });
+    const result = await res.json();
+    if (!res.ok) return alert(result.error || "Failed to delete");
+    setAlbum((prev) => prev ? { ...prev, songs: prev.songs.filter((s) => s.song_id !== song_id) } : null);
   };
 
   const playSingle = (filePath: string, title: string) => {
@@ -123,14 +117,19 @@ export default function AlbumPage() {
     }
   };
 
+  const playAlbum = () => {
+    if (!album || album.songs.length === 0) return;
+    const track = album.songs[0];
+    playSingle(track.file_path, track.title);
+    setCurrentTrackIndex(0);
+  };
+
   const handleTrackEnd = () => {
     if (!album) return;
     const nextIndex = currentTrackIndex + 1;
     if (nextIndex < album.songs.length) {
       const track = album.songs[nextIndex];
-      albumAudioRef.current!.src = track.file_path;
-      albumAudioRef.current!.play();
-      setNowPlayingTitle(track.title);
+      playSingle(track.file_path, track.title);
       setCurrentTrackIndex(nextIndex);
     }
   };
@@ -139,7 +138,7 @@ export default function AlbumPage() {
   if (!album) return <div className="text-red-500 p-6">Album not found.</div>;
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white pb-20">
       <div className="p-8">
         <button onClick={() => window.history.back()} className="mb-6 text-gray-400 hover:text-white">
           ← Back
@@ -183,25 +182,25 @@ export default function AlbumPage() {
         {album.songs.map((track, i) => (
           <div
             key={track.song_id}
-            className="grid grid-cols-[auto_1fr_auto_auto] items-center px-4 py-3 border-b border-gray-800 hover:bg-gray-800 transition"
+            className="grid grid-cols-[auto_1fr_auto_auto] items-center px-4 py-3 border-b border-gray-800 hover:bg-gray-800 transition rounded-lg mb-2"
           >
             <span className="text-gray-400">{i + 1}</span>
             <div className="flex items-center gap-3">
-              {track.title}
+              <p className="font-medium text-white">{track.title}</p>
               <button
                 onClick={() => playSingle(track.file_path, track.title)}
-                className="bg-gray-800 text-white text-sm px-4 py-1 rounded-full hover:bg-green-500 hover:text-black transition"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full hover:scale-105 text-sm shadow"
               >
                 ▶ Play
               </button>
             </div>
             <span className="text-gray-400">{formatDuration(track.duration)}</span>
             <button
-              onClick={() => handleDeleteSong(track.song_id)}
-              className="ml-4 text-red-500 hover:text-red-700"
+              onClick={() => handleRemove(track.song_id)}
+              className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 text-sm shadow"
               title="Delete song"
             >
-              🗑️
+              ❌ Remove
             </button>
           </div>
         ))}
@@ -214,10 +213,42 @@ export default function AlbumPage() {
         </button>
       </div>
 
-      {/* Player */}
-      <audio ref={albumAudioRef} onEnded={handleTrackEnd} hidden />
+      <audio
+        ref={albumAudioRef}
+        onEnded={handleTrackEnd}
+        onTimeUpdate={() => setProgress(albumAudioRef.current?.currentTime || 0)}
+        onLoadedMetadata={() => setDuration(albumAudioRef.current?.duration || 0)}
+        hidden
+      />
 
-      {/* Modal */}
+      {nowPlayingTitle && (
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900/90 border-t border-gray-700 backdrop-blur-md shadow-xl z-50 px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <span className="text-white font-semibold text-sm truncate max-w-xs">
+              🎵 {nowPlayingTitle}
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => {
+                const audio = albumAudioRef.current;
+                if (!audio) return;
+                audio.paused ? audio.play() : audio.pause();
+              }}
+              className="bg-gray-700 hover:bg-green-500 hover:text-black px-4 py-1 rounded-full text-white font-bold transition"
+            >
+              ⏯️
+            </button>
+            <div className="w-48 h-2 bg-gray-600 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-green-400 transition-all"
+                style={{ width: `${(progress / duration) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
           <div className="bg-gray-900 p-8 rounded-lg w-full max-w-md shadow-lg">
@@ -242,19 +273,18 @@ export default function AlbumPage() {
               onChange={handleFileChange}
               className="w-full mb-3 px-4 py-2 bg-gray-800 rounded text-white"
             />
-            {audioPreviewUrl && (
-              <audio controls src={audioPreviewUrl} className="w-full mb-4 rounded" />
-            )}
             <div className="flex justify-end gap-4">
               <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                 Cancel
               </button>
               <button
-                onClick={handleAddSong}
-                disabled={submitting}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
+                onClick={handleUpload}
+                disabled={submitting || !selectedFile || !newSong.title || !newSong.genre}
+                className={`px-4 py-2 rounded text-white ${
+                  submitting ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                }`}
               >
-                {submitting ? "Adding..." : "Add Song"}
+                {submitting ? "Uploading..." : "Upload Song"}
               </button>
             </div>
           </div>
