@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, streaming_history } from "@prisma/client";
 import { PDFDocument, rgb } from 'pdf-lib';
 import fs from 'fs';
 import path from 'path';
@@ -13,7 +13,9 @@ const prisma = new PrismaClient();
 interface User { email: string; role: string; user_id: number; username: string; created_at: Date; };
 
 interface result {v: BigInt;};
-interface treresult {v1: BigInt; v2: BigInt; v3: BigInt; v4: BigInt; v5: BigInt; v6: BigInt; };
+interface idresult {id: number; name:string};
+interface genrelist{genre: string; count: BigInt};
+//interface treresult {v1: BigInt; v2: BigInt; v3: BigInt; v4: BigInt; v5: BigInt; v6: BigInt; };
 interface artresult {id: number; name: string; f: BigInt; l: BigInt; sh: BigInt};
 
 
@@ -374,6 +376,28 @@ export async function POST(req: Request) {
 
     page.drawText('Artists by Genere', { x: 60, y: 350,size: 20, });
 
+    const infoarr : string[] = [];
+    const genereid: idresult[] = await prisma.$queryRaw`select distinct S.user_id as id, username as name from songs AS S JOIN users as U on U.user_id = S.user_id; `;
+    for(let i = 0; i < genereid.length; i ++)
+    {
+      const top3: genrelist[] = await prisma.$queryRaw
+      `select genre, COUNT(*) AS 'count'
+        from songs 
+        where genre != '' AND user_id = ${genereid[i].id}
+        group by genre
+        ORDER by COUNT(*) DESC 
+        Limit 3;`;
+      infoarr.push(top3[0].genre);
+      if(Number(top3[1].count) > 4){infoarr.push(top3[1].genre)};
+      if(Number(top3[2].count) > 4){infoarr.push(top3[2].genre)};
+    }
+
+
+
+
+
+
+
     page.drawRectangle({ x: 50, y: 50, width: 512, height: 288, borderWidth: 1, borderColor: rgb(0, 0, 0),});
     page.drawRectangle({ x: 50, y: 82, width: 512, height: 32, borderWidth: 1, borderColor: rgb(0, 0, 0),});
     page.drawRectangle({ x: 50, y: 146, width: 512, height: 32, borderWidth: 1, borderColor: rgb(0, 0, 0),});
@@ -383,9 +407,16 @@ export async function POST(req: Request) {
     page.drawRectangle({ x: 200, y: 50, width: 100, height: 288, borderWidth: 1, borderColor: rgb(0, 0, 0),});
     page.drawText('Name', { x:82, y: 316, font, size: 14, });
     page.drawText('Rank', { x:160, y: 316, font, size: 14, });
-    page.drawText('Genre', { x:230, y: 316, font, size: 14, });-
-    page.drawText('What they need to work on', { x:310, y: 316, font, size: 14, }); 
-
+    page.drawText('Genre', { x:230, y: 316, font, size: 14, });
+    page.drawText('What they need to work on', { x:310, y: 316, font, size: 14, });
+    page.drawText('Pop', { x:234, y: 284, font, size: 14, });
+    page.drawText('Hip-hop', { x:226, y: 252, font, size: 14, });
+    page.drawText('Rap', { x:234, y: 220, font, size: 14, });
+    page.drawText('R&B', { x:234, y: 188, font, size: 14, });
+    page.drawText('Rock', { x:232, y: 156, font, size: 14, });
+    page.drawText('Counrty', { x:226, y: 124, font, size: 14, });
+    page.drawText('EDM', { x:234, y: 92, font, size: 14, });
+    page.drawText('Jazz', { x:232, y: 60, font, size: 14, });
 
 
 
