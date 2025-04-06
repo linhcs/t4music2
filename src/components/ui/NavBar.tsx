@@ -5,18 +5,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Menu } from "@headlessui/react";
 import { FaHome, FaSearch, FaBell, FaUserCircle } from "react-icons/fa";
-import { useUserStore } from "@/app/store/userStore";
+import { useUserStore } from "@/store/useUserStore";
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
-interface NavBarProps {
-  role?: "listener" | "artist" | "admin";
-}
-
-export default function NavBar({ role = "listener" }: NavBarProps) {
+export default function NavBar() {
   const router = useRouter();
+  const { role, logout } = useUserStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<{ username: string; user_id: number; pfp?: string }[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -155,8 +148,8 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
                 <Menu.Item>
                   <button
                     onClick={() => {
-                      useUserStore.getState().logout();
-                      window.location.href = "/";
+                      logout();
+                      router.push("/");
                     }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                   >

@@ -23,7 +23,7 @@ export default function UserProfilePage() {
 
 
         {/* Albums section (includes the dedicated "Liked Songs" album) */}
-        <UserPlaylists isArtist={false} />
+        <UserPlaylists />
         {/* Artists the user follows */}
         <ArtistsFollowing />
 
