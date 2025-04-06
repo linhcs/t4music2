@@ -53,6 +53,7 @@ type UserStore = {
   setFollowedArtists: (artists: FollowedArtist[]) => void;
   logout: () => void;
   toggleLike: (song: Song) => void;
+  setPfp: (pfp: string) => void; //new type for setting profile pictures (pfp is a url to an image in an azure blob)
 };
 
 export const useUserStore = create<UserStore>()(
@@ -97,6 +98,7 @@ export const useUserStore = create<UserStore>()(
           streamingHistory: [],
           followedArtists: [],
         }),
+        setPfp: (pfp) => set({ pfp }), //action to only update user profile picture
 
       toggleLike: (song) => {
         const { likedSongs } = get();
