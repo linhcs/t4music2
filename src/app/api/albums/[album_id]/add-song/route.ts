@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { uploadToAzureBlobFromServer } from "@/lib/azure-blob";
 import { parseBuffer } from "music-metadata";
 import prisma from "@/lib/prisma";
+import { writeFile } from "fs/promises";
+import path from "path";
+import { mkdirSync, existsSync } from "fs";
 
 export async function POST(req: Request, context: { params: { album_id: string } }) {
   try {
@@ -18,14 +20,25 @@ export async function POST(req: Request, context: { params: { album_id: string }
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Extract duration
     const metadata = await parseBuffer(buffer);
     const duration = metadata.format.duration ? Math.floor(metadata.format.duration) : 0;
 
-    const fileUrl = await uploadToAzureBlobFromServer(buffer, file.name);
+    // 🔧 Save locally to public/music for now
+    const uploadDir = path.join(process.cwd(), "public", "music");
+    if (!existsSync(uploadDir)) mkdirSync(uploadDir, { recursive: true });
+
+    const filename = `${Date.now()}_${file.name}`;
+    const filePath = path.join(uploadDir, filename);
+    await writeFile(filePath, buffer);
+
+    const fileUrl = `/music/${filename}`;
 
     const user = await prisma.users.findUnique({ where: { username } });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
+    // Save to songs table
     const newSong = await prisma.songs.create({
       data: {
         title,
@@ -37,6 +50,14 @@ export async function POST(req: Request, context: { params: { album_id: string }
         album_id,
         uploaded_at: new Date(),
         plays_count: 0,
+      },
+    });
+
+    await prisma.album_songs.create({
+      data: {
+        album_id,
+        song_id: newSong.song_id,
+        added_at: new Date(),
       },
     });
 

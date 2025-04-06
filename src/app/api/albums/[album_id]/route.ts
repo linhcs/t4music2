@@ -3,10 +3,10 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: { album_id: string } }
+  context: { params: { album_id: string } }
 ) {
   try {
-    const albumId = parseInt(params.album_id);
+    const albumId = parseInt(context.params.album_id); 
 
     const album = await prisma.album.findUnique({
       where: { album_id: albumId },
@@ -18,6 +18,7 @@ export async function GET(
                 song_id: true,
                 title: true,
                 duration: true,
+                file_path: true,
               },
             },
           },
