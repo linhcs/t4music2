@@ -58,7 +58,8 @@ export default function MyPlaylistsPage() {
           if (!currentSong) return;
           const bar = e.currentTarget;
           const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
-          const currentTime = percent * currentSong.duration; 
+          const currentTime = percent * currentSong.duration;
+          console.log(currentTime);// fixing error you can delete later
           playSong(currentSong); // This will trigger the song change, if needed
         }}
       />

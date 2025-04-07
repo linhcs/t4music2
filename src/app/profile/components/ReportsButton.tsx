@@ -5,7 +5,7 @@ import { useUserStore } from "@/store/useUserStore";
 
 const DownloadPDFButton: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const {username, user_id } = useUserStore();
+  const {username, userId } = useUserStore();
   
 
 
@@ -17,7 +17,7 @@ const DownloadPDFButton: React.FC = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username, user_id }),
+      body: JSON.stringify({ username, userId }),
     });
     if (response.ok) {
       const blob = await response.blob();

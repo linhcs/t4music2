@@ -123,6 +123,7 @@ export default function ListenerUserProfile() {
           const bar = e.currentTarget;
           const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
           const currentTime = percent * currentSong.duration; // Assuming `duration` exists in the song object
+          console.log(currentTime);// fixing error you can delete later
           playSong(currentSong);
         }}
       />

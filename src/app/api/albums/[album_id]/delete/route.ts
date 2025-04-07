@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function DELETE(
-  req: Request,
-  context: { params: { album_id: string } }
-) {
+export async function DELETE(req: Request) {
   try {
-    const albumId = parseInt(context.params.album_id);
+    const { albumId  } = await req.json();
 
     if (isNaN(albumId)) {
       return NextResponse.json({ error: "Invalid album ID" }, { status: 400 });

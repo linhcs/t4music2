@@ -13,7 +13,7 @@ interface albumtype {
 }
 
 export default function ArtistAlbums() {
-  const { user_id, isLoggedIn } = useUserStore();
+  const { userId, isLoggedIn } = useUserStore();
   const [albums, setAlbums] = useState<albumtype[]>([]);
   const [showModal, setShowModal] = useState(false); // optional for "add album" modal
 
@@ -21,13 +21,13 @@ export default function ArtistAlbums() {
 
   useEffect(() => {
     async function fetchAlbums() {
-      const res = await fetch(`/api/albums/user/${user_id}`);
+      const res = await fetch(`/api/albums/user/${userId}`);
       const data = await res.json();
       setAlbums(data);
     }
 
     if (isLoggedIn) fetchAlbums();
-  }, [user_id, isLoggedIn]);
+  }, [userId, isLoggedIn]);
 
   const handleDelete = async (albumId: number) => {
     const confirm = window.confirm("Are you sure you want to delete this album?");

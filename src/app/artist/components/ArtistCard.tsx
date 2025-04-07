@@ -1,9 +1,8 @@
 import { useState } from "react";
 import Image from "next/image";
-import { useUserStore } from "@/store/useUserStore";
 
 interface Artist {
-  user_id: number;
+  userId: number;
   username: string;
   pfp?: string; 
 }

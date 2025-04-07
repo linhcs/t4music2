@@ -7,6 +7,7 @@ import { useAudioPlayer } from "@/context/AudioContext";
 import { Song } from "@/types";
 import PlayBar from "@/components/ui/playBar";
 
+
 export default function LikedSongsPage() {
   const { likedSongs, username, role } = useUserStore();
   const { currentSong, isPlaying, progress, playSong } = useAudioPlayer();
@@ -78,6 +79,7 @@ export default function LikedSongsPage() {
           const bar = e.currentTarget;
           const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
           const currentTime = percent * currentSong.duration;
+          console.log(currentTime);// fixing error you can delete later
           playSong(currentSong); // you might want to call a seek function if you build one
         }}
       />
