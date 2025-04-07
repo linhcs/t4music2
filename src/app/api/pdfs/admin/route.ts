@@ -12,11 +12,11 @@ const prisma = new PrismaClient();
 
 interface User { email: string; role: string; user_id: number; username: string; created_at: Date; };
 
-interface result {v: BigInt;};
+interface result {v: bigint;};
 interface idresult {id: number; name: string; min: string;};
-interface genrelist{genre: string; count: BigInt};
-//interface treresult {v1: BigInt; v2: BigInt; v3: BigInt; v4: BigInt; v5: BigInt; v6: BigInt; };
-interface artresult {id: number; name: string; f: BigInt; l: BigInt; sh: BigInt};
+interface genrelist{genre: string; count: bigint};
+//interface treresult {v1: bigint; v2: bigint; v3: bigint; v4: bigint; v5: bigint; v6: bigint; };
+interface artresult {id: number; name: string; f: bigint; l: bigint; sh: bigint};
 
 function getCurrentDateFormatted(): string {
   const date = new Date();
@@ -154,10 +154,10 @@ export async function POST(req: Request) {
     ,['count(like_id) as v','likes','liked_at','']//Likes
     ,['count(song_id) as v','songs','uploaded_at','']//Uploads
     ];
-    let totans: number[] = [0,0,0,0,0]
-    let newans: number[] = [0,0,0,0,0]
-    let growthans: number[] = [0,0,0,0,0]
-;   let period : string = "'" + mappedArr[3] + "-" + subsection[0] + "-01' AND '" + mappedArr[4] + "-" + subsection[1] + "-" + subsection[2] + "'";
+    const totans: number[] = [0,0,0,0,0]
+    const newans: number[] = [0,0,0,0,0]
+    const growthans: number[] = [0,0,0,0,0]
+;   const period : string = "'" + mappedArr[3] + "-" + subsection[0] + "-01' AND '" + mappedArr[4] + "-" + subsection[1] + "-" + subsection[2] + "'";
     
     if(mappedArr[0] == 'y') {
       for (let i = 0; i < totans.length; i++){
@@ -264,7 +264,7 @@ export async function POST(req: Request) {
       `SELECT floor(sum(duration)/60) as v FROM hours;`,
       `SELECT count(song_id) as v FROM songs;`
     ];
-    let todayans: number[] = [0,0,0,0,0,0]
+    const todayans: number[] = [0,0,0,0,0,0]
     for (let i = 0; i < todayans.length; i++){
       const temp: result[] = await prisma.$queryRawUnsafe(todayqueries[i]);
       todayans[i] = Number(temp[0].v)
@@ -402,7 +402,7 @@ export async function POST(req: Request) {
         group by genre
         ORDER by COUNT(*) DESC 
         Limit 3;`;
-      let temp : string[] = [top3[0].genre];
+      const temp : string[] = [top3[0].genre];
       for(let j = 1; j < top3.length; j++)
       {
         if(Number(top3[j].count) > 4){temp.push(top3[j].genre)};
@@ -412,7 +412,7 @@ export async function POST(req: Request) {
     console.log('genereid: ',genereid);
     console.log('infoarr: ',infoarr);
 
-    let genereprinted : boolean[] = [false, false, false, false, false, false, false, false];
+    const genereprinted : boolean[] = [false, false, false, false, false, false, false, false];
     const generetype : string[] = ['Pop', 'Hip-hop', 'Rap', 'R&B', 'Rock', 'Counrty', 'EDM', 'Jazz'];
     const genrelocation : number[] = [284, 252, 220, 188, 156, 124, 92, 60];
     const response : string[] = ['They need more Followers','They need more Likes','They need more Streaming Hours'];

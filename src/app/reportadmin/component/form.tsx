@@ -17,7 +17,7 @@ const Form: React.FC<{ onArrayChange: (arr: string[]) => void }> = ({ onArrayCha
         onArrayChange(arrayOfStrings);
       }, [defualt_d, from1_d, from2_d, year1_d, year2_d]);
 
-    let [isFirstDropdownSelected, setIsFirstDropdownSelected] = useState(false);
+    const [isFirstDropdownSelected, setIsFirstDropdownSelected] = useState(false);
     const [isSecondDropdownSelected, setIsSecondDropdownSelected] = useState(false);
 
     const handleFirstChange = (event: React.ChangeEvent<HTMLSelectElement>) => {

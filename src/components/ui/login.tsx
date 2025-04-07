@@ -49,7 +49,7 @@ export default function Login() {
       store.setPlaylists(userData.playlists);
       store.setStreamingHistory(userData.streamingHistory);
 
-      // alert("Login successful! Welcome to Amplifi 🎧"); // is the emoji cringe idk kinda cute
+      alert("Login successful! Welcome to Amplifi 🎧"); // is the emoji cringe idk kinda cute
 
       // redirecting based on role
       if (userData.role === "listener") {
