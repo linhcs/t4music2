@@ -1,26 +1,33 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
-import { useState, useEffect } from "react";
-import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
+import { FiPlayCircle, FiPauseCircle, FiSearch } from "react-icons/fi";
 import { useUserStore } from "@/store/useUserStore";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Song } from "../../../types";
-import { useAudioPlayer } from "@/context/AudioContext"; // Global audio player hook
-import PlayBar from "@/components/ui/playBar"; // Import PlayBar component
+import { useAudioPlayer } from "@/context/AudioContext";
+import PlayBar from "@/components/ui/playBar";
 
 const ListenerHome = () => {
   const router = useRouter();
   const { username, toggleLike, likedSongs, playlists } = useUserStore();
+  const searchParams = useSearchParams();
+
   const [songs, setSongs] = useState<Song[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Song[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
   const [loading, setLoading] = useState(true);
+
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
     song: Song | null;
   } | null>(null);
+
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState<Song | null>(null);
 
@@ -29,7 +36,8 @@ const ListenerHome = () => {
     isPlaying,
     playSong,
     progress,
-  } = useAudioPlayer(); // Use the global play/pause functionality
+    handleSeek,
+  } = useAudioPlayer();
 
   useEffect(() => {
     async function fetchUserData() {
@@ -64,6 +72,41 @@ const ListenerHome = () => {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const search = searchParams.get("search");
+    if (search) {
+      setSearchQuery(search);
+      handleSearch(search);
+    }
+  }, [searchParams]);
+
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(`/api/songs/search?q=${encodeURIComponent(query)}`);
+      if (!response.ok) throw new Error("Search failed");
+      const data = await response.json();
+      setSearchResults(data.songs);
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      handleSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   const SongGallerySection = ({ title, items }: { title: string; items: Song[] }) => (
     <section className="w-full max-w-7xl">
@@ -111,9 +154,7 @@ const ListenerHome = () => {
     </section>
   );
 
-  if (!hasMounted) return null;
-
-  if (loading) {
+  if (!hasMounted || loading) {
     return (
       <div className="flex min-h-screen bg-black text-white items-center justify-center">
         <div className="text-xl">Loading songs...</div>
@@ -127,10 +168,33 @@ const ListenerHome = () => {
       <div className="flex flex-col flex-1 min-w-0">
         <NavBar role="listener" />
         <main className="p-6 overflow-auto">
-          <SongGallerySection title="Recently Added" items={songs.slice(0, 5)} />
-          <SongGallerySection title="Popular Songs" items={songs.slice(0, 5)} />
-          <SongGallerySection title="Your Library" items={songs.slice(0, 5)} />
-          <SongGallerySection title="Recommended For You" items={songs.slice(0, 5)} />
+          <div className="relative mb-8">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search songs, artists, or genres..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
+          </div>
+
+          {isSearching ? (
+            <div className="text-center py-8">Searching...</div>
+          ) : searchQuery && searchResults.length > 0 ? (
+            <SongGallerySection title="Search Results" items={searchResults} />
+          ) : searchQuery && !isSearching ? (
+            <div className="text-center py-8">No results found</div>
+          ) : (
+            <>
+              <SongGallerySection title="Recently Added" items={songs.slice(0, 5)} />
+              <SongGallerySection title="Popular Songs" items={songs.slice(0, 5)} />
+              <SongGallerySection title="Your Library" items={songs.slice(0, 5)} />
+              <SongGallerySection title="Recommended For You" items={songs.slice(0, 5)} />
+            </>
+          )}
         </main>
       </div>
 
@@ -208,19 +272,13 @@ const ListenerHome = () => {
         </div>
       )}
 
-      {/* Include the PlayBar here */}
+      {/* PlayBar (global player) */}
       <PlayBar
         currentSong={currentSong}
         isPlaying={isPlaying}
         progress={progress}
         onPlayPause={() => currentSong && playSong(currentSong)}
-        onSeek={(e) => {
-          if (!currentSong) return;
-          const bar = e.currentTarget;
-          const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
-          const currentTime = percent * currentSong.duration; // Assuming `duration` exists in the song object
-          playSong(currentSong); // This will trigger the song change, if needed
-        }}
+        onSeek={handleSeek}
       />
     </div>
   );

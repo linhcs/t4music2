@@ -29,12 +29,11 @@ type FollowedArtist = {
   username: string;
   pfp?: string;
 };
+
 type UserStore = {
-  userId : number | null;
+  userId: number | null;
   username: string;
   role: string;
-  topTracks: Song[];
-  setTopTracks: (songs: Song[]) => void;
   pfp?: string;
   followers: number;
   following: number;
@@ -45,8 +44,12 @@ type UserStore = {
   playlists: Playlist[];
   streamingHistory: Song[];
   followedArtists: FollowedArtist[];
+  topTracks: Song[];
 
+  // Actions
   setUser: (username: string, role: string, pfp?: string, userId?: number | null) => void;
+  setUserId: (id: number) => void;
+  setPfp: (pfp: string) => void;
   setLikedSongs: (songs: Song[]) => void;
   setPlaylists: (lists: Playlist[]) => void;
   setStreamingHistory: (songs: Song[]) => void;
@@ -55,8 +58,8 @@ type UserStore = {
   setPlaylistCount: (count: number) => void;
   setFollowedArtists: (artists: FollowedArtist[]) => void;
   setFollowingList: (ids: number[]) => void;
-  setUserId: (id: number) => void;
-  clearUser: () => void;
+  setTopTracks: (songs: Song[]) => void;
+  logout: () => void;
   toggleLike: (song: Song) => void;
 };
 
@@ -69,8 +72,6 @@ export const useUserStore = create<UserStore>()(
       pfp: "",
       followers: 0,
       following: 0,
-      topTracks: [],
-setTopTracks: (songs) => set({ topTracks: songs }),
       followingList: [],
       playlistCount: 0,
       isLoggedIn: false,
@@ -78,11 +79,13 @@ setTopTracks: (songs) => set({ topTracks: songs }),
       playlists: [],
       streamingHistory: [],
       followedArtists: [],
+      topTracks: [],
 
+      // Setters
       setUser: (username, role, pfp = "", userId = null) =>
-        set({ username, role, isLoggedIn: true, pfp, userId }),
-
+        set({ username, role, pfp, userId, isLoggedIn: true }),
       setUserId: (id) => set({ userId: id }),
+      setPfp: (pfp) => set({ pfp }),
       setLikedSongs: (songs) => set({ likedSongs: songs }),
       setPlaylists: (lists) => set({ playlists: lists }),
       setStreamingHistory: (songs) => set({ streamingHistory: songs }),
@@ -91,10 +94,12 @@ setTopTracks: (songs) => set({ topTracks: songs }),
       setPlaylistCount: (count) => set({ playlistCount: count }),
       setFollowedArtists: (artists) => set({ followedArtists: artists }),
       setFollowingList: (ids) => set({ followingList: ids }),
+      setTopTracks: (songs) => set({ topTracks: songs }),
 
-      clearUser: () =>
+      // Logout method
+      logout: () =>
         set({
-          userId: null,
+          userId: -1,
           username: "",
           role: "",
           pfp: "",
@@ -106,10 +111,11 @@ setTopTracks: (songs) => set({ topTracks: songs }),
           likedSongs: [],
           playlists: [],
           streamingHistory: [],
-          topTracks: [],
           followedArtists: [],
+          topTracks: [],
         }),
 
+      // Toggle like/unlike a song
       toggleLike: (song) => {
         const { likedSongs } = get();
         const isLiked = likedSongs.some((s) => s.song_id === song.song_id);

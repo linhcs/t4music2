@@ -1,24 +1,30 @@
 "use client";
 
-import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
+import ChangeProfilePic from "@/components/ui/changepfp";
+import { useEffect } from "react";
 
 export default function UserCard() {
-  const { username, pfp, followers, following, playlistCount } = useUserStore();
+  const { username, pfp, followers, following, playlistCount, user_id, setPfp } = useUserStore();
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      const response = await fetch(`/api/user/${user_id}`);
+      const userData = await response.json();
+      setPfp(userData.pfp);
+    };
+    loadUserData();
+  }, [user_id, setPfp]);
 
   return (
     <div className="relative w-full bg-black px-10 py-12 rounded-b-xl shadow-md border-b border-gray-800">
       <div className="flex items-center gap-8">
         {/* profile avatar */}
-        <div className="w-40 h-40 rounded-full bg-black border-4 border-white overflow-hidden shadow-xl">
-          <Image
-            src={pfp || "/default-pfp.jpg"}
-            alt="User Avatar"
-            width={160}
-            height={160}
-            className="object-cover w-full h-full"
+        <ChangeProfilePic
+          currentPfp={pfp || "/default_pfp.jpg"}
+          userId={user_id}
+          onUploadComplete={(url) => setPfp(url)}
           />
-        </div>
 
         <div className="flex flex-col gap-2">
           <span className="text-white text-sm uppercase tracking-wider">Profile</span>

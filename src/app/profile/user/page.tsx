@@ -22,6 +22,7 @@ export default function ListenerUserProfile() {
     setLikedSongs,
     setPlaylists,
     setStreamingHistory,
+    setPlaylistCount,
     setTopTracks,
     setFollowers,
     setFollowing,
@@ -42,8 +43,9 @@ export default function ListenerUserProfile() {
       setPlaylists(data.playlists);
       setStreamingHistory(data.streamingHistory);
       setTopTracks(data.topTracks);
-      setFollowers(data.followers);
+      setFollowers(data.followers.length); // idk if it should be length or just followers..
       setFollowing(data.following);
+      setPlaylistCount(data.playlists.length);
 
       setLoading(false);
     }

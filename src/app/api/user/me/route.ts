@@ -17,7 +17,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // ✅ Liked Songs - Includes artist data inline
     const likedSongs = await prisma.$queryRawUnsafe(`
       SELECT 
         s.song_id,
@@ -36,14 +35,12 @@ export async function GET(req: NextRequest) {
       WHERE l.listener_id = ${userId}
     `);
 
-    // ✅ User's playlists
     const playlists = await prisma.$queryRaw`
       SELECT playlist_id, name, playlist_art 
       FROM playlists 
       WHERE user_id = ${userId}
     `;
 
-    // ✅ Recent history
     const streamingHistory = await prisma.$queryRaw`
       SELECT s.song_id, s.title, s.genre, s.file_path, sh.played_at 
       FROM streaming_history sh 
@@ -53,11 +50,9 @@ export async function GET(req: NextRequest) {
       LIMIT 10
     `;
 
-    // ✅ Followers and Following
     const followers = await prisma.follows.findMany({ where: { user_id_b: userId } });
     const following = await prisma.follows.findMany({ where: { user_id_a: userId } });
 
-    // ✅ Top Tracks
     const topTracks = await prisma.streaming_history.groupBy({
       by: ["song_id"],
       where: { listener_id: userId },
@@ -81,7 +76,6 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // ✅ Top Artists
     const topArtists = await prisma.streaming_history.groupBy({
       by: ["user_id"],
       where: { listener_id: userId },
@@ -103,7 +97,6 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // ✅ Return everything
     return NextResponse.json({
       user_id: user.user_id,
       username: user.username,
