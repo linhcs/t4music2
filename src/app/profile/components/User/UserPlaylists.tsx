@@ -8,7 +8,7 @@ import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import CreatePlaylistModal from "./CreatePlaylistModal";
 
 export default function UserPlaylists() {
-  const { username, isLoggedIn, user_id } = useUserStore();
+  const { username, isLoggedIn, userId } = useUserStore();
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
 
@@ -23,7 +23,7 @@ export default function UserPlaylists() {
   }, [username, isLoggedIn]);
 
   const handleCreatePlaylist = async (name: string, playlist_art: string) => {
-    const newPlaylist = await createPlaylist(name, user_id, playlist_art);
+    const newPlaylist = await createPlaylist(name, userId, playlist_art);
     setPlaylists([...playlists, newPlaylist]);
   };
 
@@ -80,7 +80,7 @@ export default function UserPlaylists() {
         {/* ➕ Add Button */}
         <button onClick={() => setShowModal(true)}>
           <div className="min-w-[180px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center py-4">
-            <div className="h-36 w-36 bg-gradient-to-br from-green-500 to-blue-500 rounded-xl flex items-center justify-center">
+            <div className="h-36 w-36 bg-gradient-to-b from-purple-500 via-pink-500 to-blue-400 animate-gradient rounded-xl flex items-center justify-center">
               <FaPlus size={48} className="text-white" />
             </div>
             <p className="text-center py-3 font-semibold">Add Playlist</p>

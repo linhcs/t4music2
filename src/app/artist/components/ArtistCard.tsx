@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function ArtistCard({ artist }: { artist: any }) {
   const [isFollowing, setIsFollowing] = useState(false);
