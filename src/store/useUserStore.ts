@@ -103,7 +103,7 @@ export const useUserStore = create<UserStore>()(
       setPlaylistCount: (count) => set({ playlistCount: count }),
       setFollowedArtists: (artists) => set({ followedArtists: artists }),
 
-      logout: () =>{
+      logout: () => {
         usePlayerStore.getState().reset();
         set({
           user_id: -1,
@@ -118,7 +118,8 @@ export const useUserStore = create<UserStore>()(
           playlists: [],
           streamingHistory: [],
           followedArtists: [],
-        }),
+        });
+      },
         setPfp: (pfp) => set({ pfp }), //action to only update user profile picture
 
       toggleLike: (song) => {
