@@ -57,8 +57,7 @@ No top artists yet! Start listening to music! ✩°｡⋆⸜ 🎧✮      </p>
             <p className="text-sm text-gray-400">{data.count} plays</p>
           </div>
         </Link>
-      );
-      })}
+      ))}
     </div>
   );
 }
