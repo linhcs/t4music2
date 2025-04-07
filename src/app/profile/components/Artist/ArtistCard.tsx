@@ -1,10 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useUserStore } from "@/store/useUserStore"; // Unified path if possible
+import { useUserStore } from "@/store/useUserStore";
 
-export default function ArtistCard() {
-  const { username } = useUserStore();
+interface ArtistCardProps {
+  albumCount: number;
+  songCount: number;
+}
+
+export default function ArtistCard({ albumCount, songCount }: ArtistCardProps) {
+  const { username, pfp } = useUserStore();
 
   return (
     <div className="relative w-full bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 px-10 py-12 rounded-b-xl shadow-md">
@@ -12,7 +17,7 @@ export default function ArtistCard() {
         {/* Avatar */}
         <div className="w-40 h-40 rounded-full bg-black border-4 border-white overflow-hidden shadow-xl">
           <Image
-            src="/ed.jpeg" // You can make this dynamic via `pfp || "/default_artist.jpg"` if needed
+            src={pfp || "/artist-default.jpg"}
             alt="Artist Avatar"
             width={160}
             height={160}
@@ -26,7 +31,8 @@ export default function ArtistCard() {
           <span className="text-white text-sm uppercase tracking-wider">Artist</span>
           <h1 className="text-6xl font-extrabold text-white">{username || "Artist Name"}</h1>
           <p className="text-white mt-1 text-sm sm:text-base">
-            32 Tracks • 5 Albums • 10,000 Followers
+            {songCount} {songCount === 1 ? "Track" : "Tracks"} •{" "}
+            {albumCount} {albumCount === 1 ? "Album" : "Albums"}
           </p>
         </div>
       </div>

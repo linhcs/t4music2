@@ -7,19 +7,22 @@ import ArtistCard from "../components/ArtistCard";
 import ArtistAlbums from "../components/ArtistAlbums";
 import TopTracks from "../components/TopTracks";
 import ArtistBio from "../components/ArtistBio";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function ArtistPage() {
   const { username } = useParams<{ username: string }>();
   const [artist, setArtist] = useState<any>(null);
+  const { user_id } = useUserStore();
 
   useEffect(() => {
     const fetchArtist = async () => {
-      const res = await fetch(`/api/artists/${username}`);
+      const res = await fetch(`/api/artists/${username}?viewer=${user_id}`);
       const data = await res.json();
       setArtist(data);
     };
-    if (username) fetchArtist();
-  }, [username]);
+    if (username && user_id !== -1) fetchArtist();
+  }, [username, user_id]);
+  
 
   if (!artist) return <div className="text-white p-6">Loading artist profile...</div>;
 

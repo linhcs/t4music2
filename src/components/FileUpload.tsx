@@ -98,7 +98,8 @@ export default function FileUpload() {
         songName,
         artistName,
         genre,
-        duration
+        duration,
+        
       );
 
       if ("failure" in urlresult) {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useUserStore, usePlayerStore } from "@/store/useUserStore";
 
+
 interface Song {
   song_id: number;
   title: string;
