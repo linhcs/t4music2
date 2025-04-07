@@ -1,7 +1,12 @@
 "use client";
 import { useState } from 'react';
 
-export default function ArtistBio() {
+interface artistbiotype {
+  bio: string;
+}
+
+export default function ArtistBio({ bio }: artistbiotype) {
+  console.log(bio);
   const [expanded, setExpanded] = useState(false);
 
   return (

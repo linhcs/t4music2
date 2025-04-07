@@ -7,9 +7,16 @@ import Image from "next/image";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import CreatePlaylistModal from "./CreatePlaylistModal";
 
+interface playlisttype {
+  playlist_id: number;
+  playlist_art: string;
+  name: string; 
+}
+
+
 export default function UserPlaylists() {
   const { username, isLoggedIn, user_id } = useUserStore();
-  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [playlists, setPlaylists] = useState<playlisttype[]>([]);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {

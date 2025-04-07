@@ -10,6 +10,7 @@ import { useUserStore } from "@/app/store/userStore";
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
+console.log(classNames); // just resolve error you may delete
 
 interface NavBarProps {
   role?: "listener" | "artist" | "admin";

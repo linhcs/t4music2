@@ -37,8 +37,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(artists);
-  } catch (error: any) {
-    const errMsg = error?.message || JSON.stringify(error) || "Unknown error";
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
     console.error("❌ Artist search route error:", errMsg);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

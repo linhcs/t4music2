@@ -5,17 +5,34 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import AddSongModal from "@/app/profile/components/User/AddSongModal";
 
+interface songtype {
+  song_id: number;
+  title: string;  
+  genre: string;  
+  file_path: string;
+}
+
+interface playlisttype {
+  playlist_id: number;
+  playlist_art: string | null;
+  name: string;
+  created_id: number;
+  updated_at: string;
+  user_id: number;
+  playlist_songs: { songs: songtype }[];
+};
+
 export default function PlaylistPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
-  const [playlist, setPlaylist] = useState<any>(null);
+  const [playlist, setPlaylist] = useState< playlisttype | null>(null);
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const fetchPlaylist = async () => {
     const res = await fetch(`/api/playlists/${id}`);
-    const data = await res.json();
+    const data: playlisttype = await res.json();
     setPlaylist(data);
   };
 
@@ -88,7 +105,7 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
         {playlist.playlist_songs.length === 0 ? (
           <p className="text-gray-500">No songs yet. Add some!</p>
         ) : (
-          playlist.playlist_songs.map((entry: any, i: number) => {
+          playlist.playlist_songs.map((entry, i) => {
             const song = entry.songs;
             const filePath = song.file_path;
             return (

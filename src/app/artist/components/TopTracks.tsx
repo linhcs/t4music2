@@ -1,6 +1,11 @@
 import Image from 'next/image';
 
-export default function TopTracks() {
+interface toptrackstype {
+  artistId: number;
+}
+
+export default function TopTracks({ artistId }: toptrackstype) {
+  console.log(artistId);
   const tracks = [
     { title: "Track One", img: "/artist-placeholder.jpg" },
     { title: "Track Two", img: "/artist-placeholder.jpg" },

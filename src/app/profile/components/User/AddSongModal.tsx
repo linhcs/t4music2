@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 
+interface songtype {
+  song_id: number;
+  genre: string;
+  title: string;
+};
+
 export default function AddSongModal({
   onClose,
   onAdd,
@@ -11,9 +17,9 @@ export default function AddSongModal({
   onAdd: (songId: number) => void;
   playlistId: number;
 }) {
-  const [songs, setSongs] = useState<any[]>([]);
+  const [songs, setSongs] = useState<songtype[]>([]);
   const [search, setSearch] = useState("");
-  const [filtered, setFiltered] = useState<any[]>([]);
+  const [filtered, setFiltered] = useState<songtype[]>([]);
 
   useEffect(() => {
     const fetchSongs = async () => {

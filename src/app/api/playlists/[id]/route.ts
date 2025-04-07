@@ -3,7 +3,7 @@ import { prisma } from "@prisma/script";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request, context: { params: { id: string } }) {
-  const { id } = context.params;
+  const { id } = await context.params;
 
   const playlist = await prisma.playlists.findUnique({
     where: { playlist_id: parseInt(id) },

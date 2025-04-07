@@ -41,8 +41,10 @@ No top artists yet! Start listening to music! ✩°｡⋆⸜ 🎧✮      </p>
 
   return (
     <div className="flex gap-6 overflow-x-auto scrollbar-hide">
-      {topArtists.map(([_, data]) => (
-        <Link key={data.id} href={`/artist/${data.id}`}>
+      {topArtists.map(([_, data]) => {
+        console.log('waste', _);
+        return (
+        <Link key={data.id} href={`/artist/${data.id}` }>
           <div className="text-center hover:scale-105 transition-transform duration-300 cursor-pointer">
             <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-800 shadow-xl mx-auto">
               <Image
@@ -57,7 +59,8 @@ No top artists yet! Start listening to music! ✩°｡⋆⸜ 🎧✮      </p>
             <p className="text-sm text-gray-400">{data.count} plays</p>
           </div>
         </Link>
-      ))}
+      );
+      })}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 // src/app/actions/createPlaylist.ts
-export async function createPlaylist(name: string, user_id: number) {
+export async function createPlaylist(name: string, user_id: number, playlist_art: string) {
   console.log("Sending playlist to API:", { name, user_id });
 
   const res = await fetch("/api/playlists", {

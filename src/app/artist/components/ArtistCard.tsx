@@ -1,7 +1,14 @@
 import { useState } from "react";
 import Image from "next/image";
 
-export default function ArtistCard({ artist }: { artist: any }) {
+interface Artist {
+  user_id: number;
+  username: string;
+  pfp?: string; 
+}
+
+
+export default function ArtistCard({ artist }: { artist: Artist }) {
   const [isFollowing, setIsFollowing] = useState(false);
 
   const handleFollow = () => {

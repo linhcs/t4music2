@@ -2,7 +2,12 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default function ArtistAlbums() {
+interface toptrackstype {
+  artistId: number;
+}
+
+export default function ArtistAlbums({ artistId }: toptrackstype) {
+  console.log(artistId);
   // Static album data for now; in the future, replace with dynamic backend data.
   const artistAlbums = [
     { id: "debut-album", name: "Debut Album", img: "/artist-placeholder.jpg" },

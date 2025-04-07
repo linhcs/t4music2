@@ -7,6 +7,7 @@ import * as fontkit from 'fontkit';
 
 const prisma = new PrismaClient();
 interface pfpresult {v: string;};
+interface pfpresult {v: string;};
 
 function getCurrentDateFormatted(): string {
   const date = new Date();
@@ -27,7 +28,7 @@ export async function POST(req: Request) {
     
     //new PDF 
     const pdfDoc = await PDFDocument.create();
-    let page = pdfDoc.addPage([612, 792]); // letters size
+    const page = pdfDoc.addPage([612, 792]); // letters size
 
     //runing ignore becasue it says its a problem but it works so idk
     //@ts-expect-error: this is not cuaisng issues typescript is just for lame lamos
@@ -51,7 +52,7 @@ export async function POST(req: Request) {
       pfpimage = await pdfDoc.embedJpg(new Uint8Array(pfpBytes));
     } else {
 
-      let pfppath = "public/default_pfp.jpg";
+      const pfppath = "public/default_pfp.jpg";
       const pfpBytes = fs.readFileSync(pfppath);
       pfpimage = await pdfDoc.embedJpg(pfpBytes);
     };

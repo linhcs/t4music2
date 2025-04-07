@@ -8,9 +8,16 @@ import ArtistAlbums from "../components/ArtistAlbums";
 import TopTracks from "../components/TopTracks";
 import ArtistBio from "../components/ArtistBio";
 
+interface Artist {
+  user_id: number;
+  username: string;
+  pfp: string;
+  bio: string;
+}
+
 export default function ArtistPage() {
   const { username } = useParams<{ username: string }>();
-  const [artist, setArtist] = useState<any>(null);
+  const [artist, setArtist] = useState< Artist | null>(null);
 
   useEffect(() => {
     const fetchArtist = async () => {
