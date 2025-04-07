@@ -30,7 +30,7 @@ export default function FileUpload() {
         resolve(Math.round(audio.duration));
       };
 
-      const handleError = (error: Event) => {
+      const handleError = () => {
         URL.revokeObjectURL(objectUrl);
         audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
         audio.removeEventListener('error', handleError);

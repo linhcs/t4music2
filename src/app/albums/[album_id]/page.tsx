@@ -70,9 +70,14 @@ export default function AlbumPage() {
       setShowModal(false);
       setNewSong({ title: "", genre: "" });
       setSelectedFile(null);
-    } catch (err: any) {
-      alert(err.message || "Upload failed");
-    } finally {
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(err.message || "Upload failed");
+      } else {
+        alert("Upload failed");
+      }
+    }
+     finally {
       setSubmitting(false);
     }
   };

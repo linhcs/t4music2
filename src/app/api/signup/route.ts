@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       VALUES (${username}, ${email || `${username}@example.com`}, ${hashedPassword}, ${role})
     `;
 
-    const user = await prisma.$queryRawUnsafe<any[]>(`
+const user = await prisma.$queryRawUnsafe<{ user_id: number; username: string; role: string }[]>(`
       SELECT user_id, username, role FROM users WHERE username = '${username}'
     `);
 

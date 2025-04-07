@@ -4,11 +4,28 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import AddSongModal from "@/app/profile/components/User/AddSongModal";
+import Image from "next/image";
+
+type Song = {
+  song_id: number;
+  title: string;
+  genre?: string;
+  file_path: string;
+};
+
+type Playlist = {
+  playlist_id: number;
+  name: string;
+  playlist_art?: string;
+  playlist_songs: {
+    songs: Song;
+  }[];
+};
 
 export default function PlaylistPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
-  const [playlist, setPlaylist] = useState<any>(null);
+  const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -20,9 +37,14 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
   };
 
   useEffect(() => {
+    const fetchPlaylist = async () => {
+      const res = await fetch(`/api/playlists/${id}`);
+      const data = await res.json();
+      setPlaylist(data);
+    };
     fetchPlaylist();
   }, [id]);
-
+  
   const handlePlay = (filePath: string) => {
     const url = `/${filePath}`;
     setCurrentTrack(url);
@@ -65,11 +87,13 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
       </button>
 
       <div className="flex gap-6 items-center">
-        <img
-          src={playlist.playlist_art || "/artist-banner.jpg"}
-          alt="Cover"
-          className="w-40 h-40 object-cover rounded shadow-lg"
-        />
+      <Image
+        src={playlist.playlist_art || "/artist-banner.jpg"}
+        alt="Cover"
+        width={160}
+        height={160}
+        className="w-40 h-40 object-cover rounded shadow-lg"
+      />
         <div>
           <h1 className="text-4xl font-extrabold bg-gradient-to-r from-purple-400 via-pink-500 to-blue-400 text-transparent bg-clip-text">
             {playlist.name}
@@ -88,7 +112,7 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
         {playlist.playlist_songs.length === 0 ? (
           <p className="text-gray-500">No songs yet. Add some!</p>
         ) : (
-          playlist.playlist_songs.map((entry: any, i: number) => {
+          playlist.playlist_songs.map((entry: { songs: Song }, i) => {
             const song = entry.songs;
             const filePath = song.file_path;
             return (

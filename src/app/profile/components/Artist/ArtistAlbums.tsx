@@ -5,10 +5,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 
+type Album = {
+  album_id: number;
+  title: string;
+  album_art?: string;
+};
+
 export default function ArtistAlbums() {
   const { user_id, isLoggedIn } = useUserStore();
-  const [albums, setAlbums] = useState<any[]>([]);
-  const [showModal, setShowModal] = useState(false); // optional for "add album" modal
+  const [albums, setAlbums] = useState<Album[]>([]);
+  //const [showModal, setShowModal] = useState(false); // optional for "add album" modal
 
   useEffect(() => {
     async function fetchAlbums() {

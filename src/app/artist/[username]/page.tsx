@@ -9,9 +9,29 @@ import TopTracks from "../components/TopTracks";
 import ArtistBio from "../components/ArtistBio";
 import { useUserStore } from "@/store/useUserStore";
 
+type Song = {
+  song_id: number;
+  title: string;
+  duration: number;
+  file_path: string;
+};
+
+type Album = {
+  album_id: number;
+  title: string;
+  album_art?: string;
+};
+
+type Artist = {
+  album: Album[];
+  songs: Song[];
+  bio: string;
+};
+
+
 export default function ArtistPage() {
   const { username } = useParams<{ username: string }>();
-  const [artist, setArtist] = useState<any>(null);
+  const [artist, setArtist] = useState<Artist | null>(null);
   const { user_id } = useUserStore();
 
   useEffect(() => {

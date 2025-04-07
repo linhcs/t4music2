@@ -1,9 +1,19 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
 
-export default function ArtistCard({ artist }: { artist: any }) {
+type Artist = {
+  user_id: number;
+  username: string;
+  pfp?: string;
+  followers?: number;
+  isFollowing?: boolean;
+  songs?: { song_id: number }[];
+  playlists?: { playlist_id: number }[];
+};
+
+export default function ArtistCard({ artist }: { artist: Artist }) {
   const { user_id } = useUserStore();
   const [isFollowing, setIsFollowing] = useState(artist.isFollowing || false);
   const [followers, setFollowers] = useState(artist.followers || 0);
