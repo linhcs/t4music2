@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "../../../../prisma/script";
 import bcrypt from "bcryptjs";
 
+interface users {user_id: number; username: string; role: string;};
+
 export async function POST(request: Request) {
   try {
     const { username, email, password, role } = await request.json();
@@ -33,7 +35,7 @@ export async function POST(request: Request) {
       VALUES (${username}, ${email || `${username}@example.com`}, ${hashedPassword}, ${role})
     `;
 
-const user = await prisma.$queryRawUnsafe<{ user_id: number; username: string; role: string }[]>(`
+    const user: users[] = await prisma.$queryRawUnsafe(`
       SELECT user_id, username, role FROM users WHERE username = '${username}'
     `);
 

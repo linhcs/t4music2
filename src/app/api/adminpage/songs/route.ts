@@ -1,20 +1,19 @@
 import { NextResponse } from 'next/server'
 import { prisma } from "../../../../../prisma/script";
 
-  interface album {
-    user_id: number;
-    album_id: number;
+interface song {
+    song_id: number;
     title: string;
   }
-
+  
 export async function GET() {
   try {
     // Query the database for some data
-    const albums: album[] = await prisma.$queryRaw`
-    SELECT user_id, album_id, title FROM album;`;
+    const songs: song[] = await prisma.$queryRaw`
+    SELECT song_id, title FROM songs;`;
 
-    return NextResponse.json(albums)
-  } catch (error: unknown) {
+    return NextResponse.json(songs)
+  } catch (error:unknown) {
     console.error("Signup Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
