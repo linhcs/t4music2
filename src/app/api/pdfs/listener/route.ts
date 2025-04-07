@@ -78,8 +78,9 @@ export async function POST(req: Request) {
       };
     };
 
-    page.drawText(username, { x:240, y:710, font, size: 24, });
+    page.drawText(username, { x:240, y:700, font, size: 32, });
     page.drawText(currentDate, { x: 540, y:752, size: 14, opacity:0.5});
+    page.drawText('Overall Rank - ', { x:320, y:700, font, size: 20, });
 
 
 
