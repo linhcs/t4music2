@@ -303,7 +303,7 @@ const ReportAdminPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-black">
-      // /<>InactivityTimer </>
+      <InactivityTimer />
       <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1">
         <motion.h1
             initial={{ opacity: 0, y: -500 }}
@@ -382,7 +382,7 @@ const ReportAdminPage = () => {
           variant="outline"
           className="rounded-full text-[17px] text-white border border-white/10 transition-all duration-300 hover:scale-90 bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 animate-gradient"
         >
-          Delete User
+          Delete Selection
         </Button>
       </div>
       <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1 mb-10">

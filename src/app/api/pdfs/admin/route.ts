@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient, streaming_history } from "@prisma/client";
+import { PrismaClient} from "@prisma/client";
 import { PDFDocument, rgb } from 'pdf-lib';
 import fs from 'fs';
 import path from 'path';
@@ -13,10 +13,18 @@ const prisma = new PrismaClient();
 interface User { email: string; role: string; user_id: number; username: string; created_at: Date; };
 
 interface result {v: BigInt;};
-interface idresult {id: number; name:string};
+interface idresult {id: number; name: string; min: string;};
 interface genrelist{genre: string; count: BigInt};
 //interface treresult {v1: BigInt; v2: BigInt; v3: BigInt; v4: BigInt; v5: BigInt; v6: BigInt; };
 interface artresult {id: number; name: string; f: BigInt; l: BigInt; sh: BigInt};
+
+function getCurrentDateFormatted(): string {
+  const date = new Date();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Get month (1-12), and pad to ensure 2 digits
+  const year = date.getFullYear().toString().slice(-2); // Get last two digits of the year
+
+  return `${month}-${year}`;
+}
 
 
 export async function POST(req: Request) {
@@ -239,12 +247,13 @@ export async function POST(req: Request) {
     page.drawText('New users – ' + newans[4], { x:443, y: 335, font, size: 14, });
     page.drawText('Growth - ' + growthans[4] + '%', { x:447, y: 295, font, size: 14, });
 
+    const currentDate = getCurrentDateFormatted();
 
-    page.drawText('Where we’re at Today', {x: 203, y: 229, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('Where we’re at Today', {x: 201, y: 231, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('Where we’re at Today', {x: 201, y: 229, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('Where we’re at Today', {x: 203, y: 231, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
-    page.drawText('Where we’re at Today', { x: 202, y: 230,size: 22, });
+    page.drawText('Where we’re at Today ' + currentDate, {x: 163, y: 229, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at Today ' + currentDate, {x: 161, y: 231, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at Today ' + currentDate, {x: 161, y: 229, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at Today ' + currentDate, {x: 163, y: 231, size: 22, opacity: 0.25, color: rgb(252/255, 142/255, 246/255), });
+    page.drawText('Where we’re at Today ' + currentDate, { x: 162, y: 230,size: 22, });
 
 
     const todayqueries: string[] = [
@@ -294,7 +303,7 @@ export async function POST(req: Request) {
 
     const totalart = `With atts AS (
                       Select
-                        S.user_id,
+                        DISTINCT S.user_id,
                         U.username,
                         count(F.user_id_b) as tfollows,
                         count(L.song_id) as tlikes,
@@ -335,6 +344,12 @@ export async function POST(req: Request) {
     // artist name
     const topinfo: artresult[] = await prisma.$queryRawUnsafe(totalart);
     const topnewinfo: artresult[] = await prisma.$queryRawUnsafe(newart);
+    for(let i = 0; i < topnewinfo.length; i ++)
+    {
+      if(topinfo[i].name === null){topinfo[i].name = 'Na'}
+    }
+    console.log('topinfo: ', topinfo);
+    console.log('topnewinfo: ', topnewinfo);
     page.drawText(topinfo[0].name.slice(0,9), { x: 60, y: 680,size: 20, font,});
     page.drawText('' + Number(topinfo[0].f), { x: 228, y: 650,size: 20, font,});
     page.drawText('' + Number(topinfo[0].l), { x: 330, y: 650,size: 20, font,});
@@ -374,10 +389,10 @@ export async function POST(req: Request) {
     page.drawText((Number(topnewinfo[medianart].l) == 0 ? 0 : Math.floor((Number(topinfo[medianart].l) - Number(topnewinfo[medianart].l))/Number(topnewinfo[medianart].l)) * 100) + ' %', { x: 330, y: 590 - s,size: 20, font,});
     page.drawText((Number(topnewinfo[medianart].sh) == 0 ? 0 : Math.floor((Number(topinfo[medianart].sh) - Number(topnewinfo[medianart].sh))/Number(topnewinfo[medianart].sh)) * 100) + ' %', { x: 460, y: 590 - s,size: 20, font,});
 
-    page.drawText('Artists by Genere', { x: 60, y: 350,size: 20, });
+    page.drawText('Artists by Genre Today ' + currentDate, { x: 60, y: 350,size: 20, });
 
-    const infoarr : string[] = [];
-    const genereid: idresult[] = await prisma.$queryRaw`select distinct S.user_id as id, username as name from songs AS S JOIN users as U on U.user_id = S.user_id; `;
+    const infoarr : [string[]] = [[]];
+    const genereid: idresult[] = await prisma.$queryRaw`select distinct user_id as id, username as name, min from ranking limit 50;`;
     for(let i = 0; i < genereid.length; i ++)
     {
       const top3: genrelist[] = await prisma.$queryRaw
@@ -387,15 +402,46 @@ export async function POST(req: Request) {
         group by genre
         ORDER by COUNT(*) DESC 
         Limit 3;`;
-      infoarr.push(top3[0].genre);
-      if(Number(top3[1].count) > 4){infoarr.push(top3[1].genre)};
-      if(Number(top3[2].count) > 4){infoarr.push(top3[2].genre)};
-    }
+      let temp : string[] = [top3[0].genre];
+      for(let j = 1; j < top3.length; j++)
+      {
+        if(Number(top3[j].count) > 4){temp.push(top3[j].genre)};
+      }
+      infoarr.push(temp);
+    };
+    console.log('genereid: ',genereid);
+    console.log('infoarr: ',infoarr);
 
-
-
-
-
+    let genereprinted : boolean[] = [false, false, false, false, false, false, false, false];
+    const generetype : string[] = ['Pop', 'Hip-hop', 'Rap', 'R&B', 'Rock', 'Counrty', 'EDM', 'Jazz'];
+    const genrelocation : number[] = [284, 252, 220, 188, 156, 124, 92, 60];
+    const response : string[] = ['They need more Followers','They need more Likes','They need more Streaming Hours'];
+    
+    for(let i = 1; i < infoarr.length; i++)
+    {
+      for(let j = 0; j < infoarr[i].length; j ++)
+      {
+        for(let k = 0; k < 8; k++) // triple for loop . . . this just seems wrong right xD
+        {
+          //
+          if(infoarr[i][j] == generetype[k] && !genereprinted[k]){
+            page.drawText(genereid[i-1].name, { x:60, y: genrelocation[k], font, size: 14, });
+            page.drawText(' ' + i, { x:165, y: genrelocation[k], font, size: 14, });
+            const temp : number = (genereid[i-1].min == 'follows' ? 0 :(genereid[i-1].min == 'likes'? 1 : 2));
+            page.drawText(response[temp], { x:320, y: genrelocation[k], font, size: 14, });
+            genereprinted[k] = true;
+          };
+        };
+      };
+    };
+    for(let i = 0; i < 8; i ++)
+    {
+      if(!genereprinted[i])
+      {
+        page.drawText('None so Far!', { x:60, y: genrelocation[i], font, size: 14, });
+        page.drawText('Na', { x:165, y: genrelocation[i], font, size: 14, });
+      }
+    };
 
 
     page.drawRectangle({ x: 50, y: 50, width: 512, height: 288, borderWidth: 1, borderColor: rgb(0, 0, 0),});
@@ -417,8 +463,6 @@ export async function POST(req: Request) {
     page.drawText('Counrty', { x:226, y: 124, font, size: 14, });
     page.drawText('EDM', { x:234, y: 92, font, size: 14, });
     page.drawText('Jazz', { x:232, y: 60, font, size: 14, });
-
-
 
     //This was code that I started working on
     // const reltodayArr: [string[],string[],string[],string[],string[]] = 
@@ -467,7 +511,6 @@ export async function POST(req: Request) {
 
     // User Log portion
     changearr(updatedArr);
-    yPosition = drawHeaders(page, yPosition, font);
     // limits pages if blank
     let allFalse = false;
     for (let i = 0; i < updatedArr.length; i++)
@@ -491,6 +534,7 @@ export async function POST(req: Request) {
       {
         page = pdfDoc.addPage([612, 792]);
         page.drawImage(image);
+        yPosition = drawHeaders(page, yPosition, font);
         firstpage = false;
       };
       const user = users[i];
