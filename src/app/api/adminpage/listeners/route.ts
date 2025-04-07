@@ -10,7 +10,7 @@ export async function GET() {
   try {
     // Query the database for some data
     const listeners: listener[] = await prisma.$queryRaw`
-    SELECT * FROM users
+    SELECT user_id, username FROM users
     WHERE role = 'listener';`;
 
     return NextResponse.json(listeners)
