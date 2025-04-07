@@ -29,29 +29,26 @@ export default function PlayBar() {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-gray-900/80 border-t border-gray-700/50 p-4 z-50">
       <div className="max-w-7xl mx-auto flex items-center gap-4">
-        {currentSong?.album?.album_art && (
+        {currentSong.album?.album_art && (
           <Image
             src={currentSong.album.album_art}
-            className="w-16 h-16 rounded-md"
-            alt={currentSong.album.title}
+            alt={currentSong.album.title || "Album Art"}
             width={64}
             height={64}
+            className="w-16 h-16 rounded-md object-cover"
             unoptimized
           />
         )}
-
         <div className="flex-1 min-w-0">
           <h3 className="text-white font-medium truncate">{currentSong.title}</h3>
           <p className="text-gray-400 text-sm truncate">
-            {currentSong.users?.username || "Unknown artist"}
+            {currentSong.users?.username || "Unknown Artist"}
           </p>
         </div>
-
         <div className="flex items-center gap-4">
           <button onClick={togglePlay} className="text-3xl text-white">
             {isPlaying ? <FiPauseCircle /> : <FiPlayCircle />}
           </button>
-
           <button
             onClick={handleLike}
             className="text-xl hover:scale-110 transition-transform"
@@ -66,6 +63,7 @@ export default function PlayBar() {
         </div>
       </div>
 
+      {/* Progress bar */}
       <div className="max-w-7xl mx-auto mt-2 cursor-pointer">
         <div className="h-1 bg-gray-700 rounded-full w-full">
           <div

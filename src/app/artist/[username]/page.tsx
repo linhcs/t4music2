@@ -8,26 +8,7 @@ import ArtistAlbums from "../components/ArtistAlbums";
 import TopTracks from "../components/TopTracks";
 import ArtistBio from "../components/ArtistBio";
 import { useUserStore } from "@/store/useUserStore";
-
-type Song = {
-  song_id: number;
-  title: string;
-  duration: number;
-  file_path: string;
-};
-
-type Album = {
-  album_id: number;
-  title: string;
-  album_art?: string;
-};
-
-type Artist = {
-  album: Album[];
-  songs: Song[];
-  bio: string;
-};
-
+import type { Artist } from "../components/ArtistCard"; // ✅ Only keep this
 
 export default function ArtistPage() {
   const { username } = useParams<{ username: string }>();
@@ -42,18 +23,17 @@ export default function ArtistPage() {
     };
     if (username && user_id !== -1) fetchArtist();
   }, [username, user_id]);
-  
 
   if (!artist) return <div className="text-white p-6">Loading artist profile...</div>;
 
   return (
     <div className="bg-black min-h-screen text-white">
-      <NavBar role="listener" />
+      <NavBar />
       <ArtistCard artist={artist} />
       <div className="relative max-w-6xl mx-auto px-6 pb-10 space-y-12 mt-8">
         <ArtistAlbums albums={artist.album} />
         <TopTracks tracks={artist.songs} />
-        <ArtistBio bio={artist.bio} />
+        <ArtistBio />
       </div>
     </div>
   );
