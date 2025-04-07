@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@prisma/script";
+import { prisma } from "@/lib/prisma";
+import { extractParamFromUrl } from "@/lib/utils";
 
-export async function GET(
-  req: Request,
-  context: { params: { username: string } }
-) {
-  // ✅ Destructure *inside* the function body to avoid Next.js warnings
-  const { username } = await context.params;
-
+export async function GET(req: Request) {
   try {
+    const username = extractParamFromUrl(req.url, "user");
+
+    if (!username) {
+      return NextResponse.json({ error: "Username is required" }, { status: 400 });
+    }
+
     const user = await prisma.users.findUnique({
       where: { username },
     });
@@ -24,7 +25,7 @@ export async function GET(
 
     return NextResponse.json(playlists);
   } catch (err) {
-    console.error("Error fetching playlists:", err);
+    console.error("❌ Error fetching playlists:", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -5,9 +5,11 @@ import { writeFile } from "fs/promises";
 import path from "path";
 import { mkdirSync, existsSync } from "fs";
 
-export async function POST(req: Request, context: { params: { album_id: string } }) {
+export async function POST(req: Request) {
   try {
-    const album_id = parseInt(context.params.album_id);
+    const url = new URL(req.url);
+    const album_id = parseInt(url.pathname.split("/").at(-2) || ""); // "add-song" is the last segment
+
     const formData = await req.formData();
 
     const file = formData.get("file") as File;
@@ -21,11 +23,9 @@ export async function POST(req: Request, context: { params: { album_id: string }
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Extract duration
     const metadata = await parseBuffer(buffer);
     const duration = metadata.format.duration ? Math.floor(metadata.format.duration) : 0;
 
-    // 🔧 Save locally to public/music for now
     const uploadDir = path.join(process.cwd(), "public", "music");
     if (!existsSync(uploadDir)) mkdirSync(uploadDir, { recursive: true });
 
@@ -38,7 +38,6 @@ export async function POST(req: Request, context: { params: { album_id: string }
     const user = await prisma.users.findUnique({ where: { username } });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    // Save to songs table
     const newSong = await prisma.songs.create({
       data: {
         title,

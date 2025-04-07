@@ -1,20 +1,21 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET(
-  req: Request,
-  context: { params: { album_id: string } }
-) {
+export async function GET(req: Request) {
   try {
-    const albumId = parseInt(context.params.album_id);
+    const url = new URL(req.url);
+    const match = url.pathname.match(/\/albums\/(\d+)/);
+    const albumId = match ? parseInt(match[1]) : NaN;
+
+    if (isNaN(albumId)) {
+      return NextResponse.json({ error: "Invalid album ID" }, { status: 400 });
+    }
 
     const album = await prisma.album.findUnique({
       where: { album_id: albumId },
       include: {
-        users: { // Join with user who created it
-          select: {
-            username: true,
-          },
+        users: {
+          select: { username: true },
         },
         album_songs: {
           include: {

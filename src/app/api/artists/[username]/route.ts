@@ -1,15 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { extractParamFromUrl } from "@/lib/utils";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { username: string } }
-) {
+export async function GET(req: Request) {
   try {
-    const { username } = params;
-
+    const username = extractParamFromUrl(req.url, "artists");
     const { searchParams } = new URL(req.url);
     const viewer = Number(searchParams.get("viewer"));
+
+    if (!username) {
+      return NextResponse.json({ error: "Username is required" }, { status: 400 });
+    }
 
     const user = await prisma.users.findUnique({
       where: { username },
