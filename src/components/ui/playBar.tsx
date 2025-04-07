@@ -1,12 +1,10 @@
 "use client";
 
-import Image from 'next/image';
-import { Song } from "../../../types";
-import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { Song } from "@/types";
 import { useUserStore } from "@/store/useUserStore";
+import { FiPlayCircle, FiPauseCircle } from "react-icons/fi"; // Import cute icons for play and pause
 
-//playBar "structure"
 interface PlayBarProps {
   currentSong: Song | null;
   isPlaying: boolean;
@@ -15,7 +13,7 @@ interface PlayBarProps {
   onSeek: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-export default function PlayBar({ currentSong, isPlaying, progress, onPlayPause, onSeek }: PlayBarProps) {
+const PlayBar = ({ currentSong, isPlaying, progress, onPlayPause, onSeek }: PlayBarProps) => {
   const { likedSongs, toggleLike, username } = useUserStore();
 
   if (!currentSong) return null;
@@ -38,51 +36,37 @@ export default function PlayBar({ currentSong, isPlaying, progress, onPlayPause,
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-gray-900/80 border-t border-gray-700/50 p-4">
       <div className="max-w-7xl mx-auto flex items-center gap-4">
-        
-        {/* display album art in playbar */}
         {currentSong?.album?.album_art && (
-          <Image
+          <img
             src={currentSong.album.album_art}
             className="w-16 h-16 rounded-md"
             alt={currentSong.album.title}
             width={64}
             height={64}
-                    unoptimized={true}
           />
         )}
 
         <div className="flex-1 min-w-0">
-          {/* display song name and artist name */}
-          <h3 className="text-white font-medium truncate">
-            {currentSong?.title || "No song currently playing"}
-          </h3>
-          <p className="text-gray-400 text-sm truncate">
-            {currentSong?.users?.username || "Unknown artist"}
-          </p>
+          <h3 className="text-white font-medium truncate">{currentSong?.title}</h3>
+          <p className="text-gray-400 text-sm truncate">{currentSong?.users?.username || "Unknown artist"}</p>
         </div>
 
         <div className="flex items-center gap-4">
-          {/* display controls */}
-          <button
-            onClick={onPlayPause}
-            className="text-3xl text-white"
-          >
-            {isPlaying ? <FiPauseCircle /> : <FiPlayCircle />}
+          <button onClick={onPlayPause} className="text-3xl text-white">
+            {isPlaying ? (
+              <FiPauseCircle className="text-white" />
+            ) : (
+              <FiPlayCircle className="text-white" />
+            )}
           </button>
 
-          {/* like button */}
           <button onClick={handleLike} className="text-xl hover:scale-110 transition-transform">
-            {isLiked ? (
-              <FaHeart className="text-pink-500" />
-            ) : (
-              <FaRegHeart className="text-white" />
-            )}
+            {isLiked ? <FaHeart className="text-pink-500" /> : <FaRegHeart className="text-white" />}
           </button>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto mt-2 cursor-pointer" onClick={onSeek}>
-        {/* progress bar */}
         <div className="h-1 bg-gray-700 rounded-full w-full">
           <div
             className="h-full bg-gradient-to-r from-pink-300 via-blue-400 to-purple-500 rounded-full transition-all duration-300 will-change-[width]"
@@ -92,4 +76,6 @@ export default function PlayBar({ currentSong, isPlaying, progress, onPlayPause,
       </div>
     </div>
   );
-}
+};
+
+export default PlayBar;

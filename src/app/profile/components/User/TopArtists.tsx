@@ -13,7 +13,7 @@ export default function TopArtists() {
 
   for (const song of streamingHistory) {
     const artistName = song.users?.username || "Unknown";
-    const artistId = song.user_id || 0;
+    const artistId = song.userId || 0;
     const pfp = song.users?.pfp;
 
     if (!artistMap.has(artistId.toString())) {
@@ -41,10 +41,8 @@ No top artists yet! Start listening to music! ✩°｡⋆⸜ 🎧✮      </p>
 
   return (
     <div className="flex gap-6 overflow-x-auto scrollbar-hide">
-      {topArtists.map(([_, data]) => {
-        console.log('waste', _);
-        return (
-        <Link key={data.id} href={`/artist/${data.id}` }>
+      {topArtists.map(([,data]) => (
+        <Link key={data.id} href={`/artist/${data.id}`}>
           <div className="text-center hover:scale-105 transition-transform duration-300 cursor-pointer">
             <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-800 shadow-xl mx-auto">
               <Image
