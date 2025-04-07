@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, context: { params: { username: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { username: string } }
+) {
   try {
-    const { username } = context.params;
+    const { username } = params;
 
     const { searchParams } = new URL(req.url);
     const viewer = Number(searchParams.get("viewer"));
@@ -40,12 +43,10 @@ export async function GET(req: Request, context: { params: { username: string } 
       return NextResponse.json({ error: "Artist not found" }, { status: 404 });
     }
 
-    // Count followers
     const followerCount = await prisma.follows.count({
       where: { user_id_b: user.user_id },
     });
 
-    // Check if viewer follows this artist
     const isFollowing = viewer
       ? !!(await prisma.follows.findFirst({
           where: {
