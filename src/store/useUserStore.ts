@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { Song as song2 } from "@/types";
 
-type Song = {
+export type Song = {
   song_id: number;
   title: string;
   genre?: string;
@@ -14,8 +15,19 @@ type Song = {
     pfp?: string;
   };
   album?: {
+    title?: string;
     album_art?: string;
   };
+};
+
+type PlayerState = {
+  currentSong: Song | null;
+  isPlaying: boolean;
+  progress: number;
+  setSong: (song: Song) => void;
+  togglePlay: () => void;
+  setProgress: (progress: number) => void;
+  reset: () => void;
 };
 
 type Playlist = {
@@ -44,7 +56,7 @@ type UserStore = {
   playlists: Playlist[];
   streamingHistory: Song[];
   followedArtists: FollowedArtist[];
-  topTracks: Song[];
+  topTracks: song2[];
 
   // Actions
   setUser: (username: string, role: string, pfp?: string, user_id?: number | null) => void;
@@ -58,10 +70,20 @@ type UserStore = {
   setPlaylistCount: (count: number) => void;
   setFollowedArtists: (artists: FollowedArtist[]) => void;
   setFollowingList: (ids: number[]) => void;
-  setTopTracks: (songs: Song[]) => void;
+  setTopTracks: (songs: song2[]) => void;
   logout: () => void;
   toggleLike: (song: Song) => void;
 };
+
+export const usePlayerStore = create<PlayerState>((set) => ({
+  currentSong: null,
+  isPlaying: false,
+  progress: 0,
+  setSong: (song) => set({ currentSong: song, isPlaying: true, progress: 0 }),
+  togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  setProgress: (progress) => set({ progress }),
+  reset: () => set({ currentSong: null, isPlaying: false, progress: 0 }),
+}));
 
 export const useUserStore = create<UserStore>()(
   persist(
@@ -96,8 +118,8 @@ export const useUserStore = create<UserStore>()(
       setFollowingList: (ids) => set({ followingList: ids }),
       setTopTracks: (songs) => set({ topTracks: songs }),
 
-      // Logout method
-      logout: () =>
+      logout: () => {
+        usePlayerStore.getState().reset();
         set({
           user_id: -1,
           username: "",
@@ -113,8 +135,8 @@ export const useUserStore = create<UserStore>()(
           streamingHistory: [],
           followedArtists: [],
           topTracks: [],
-        }),
-
+        });
+      },
       // Toggle like/unlike a song
       toggleLike: (song) => {
         const { likedSongs } = get();

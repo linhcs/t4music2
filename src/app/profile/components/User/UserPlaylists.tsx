@@ -7,16 +7,15 @@ import Image from "next/image";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import CreatePlaylistModal from "./CreatePlaylistModal";
 
-interface playlisttype {
+type Playlist = {
   playlist_id: number;
-  playlist_art: string;
-  name: string; 
-}
-
+  name: string;
+  playlist_art?: string;
+};
 
 export default function UserPlaylists() {
-  const { username, isLoggedIn, userId } = useUserStore();
-  const [playlists, setPlaylists] = useState<playlisttype[]>([]);
+  const { username, isLoggedIn, user_id } = useUserStore();
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -30,9 +29,10 @@ export default function UserPlaylists() {
   }, [username, isLoggedIn]);
 
   const handleCreatePlaylist = async (name: string, playlist_art: string) => {
-    if(userId !== null){
-      const newPlaylist = await createPlaylist(name, userId, playlist_art);
-    setPlaylists([...playlists, newPlaylist]);
+    if(user_id !== null)
+    {
+      const newPlaylist = await createPlaylist(name, user_id, playlist_art);
+      setPlaylists([...playlists, newPlaylist]);
     }
   };
 

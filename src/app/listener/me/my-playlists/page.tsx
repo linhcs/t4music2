@@ -16,7 +16,7 @@ export default function MyPlaylistsPage() {
       <Sidebar username={username} />
 
       <div className="flex flex-col flex-1 min-w-0">
-        <NavBar role="listener" />
+        <NavBar />
 
         <main className="p-6 overflow-auto">
           <div className="bg-gradient-to-br from-pink-500 via-blue-400 to-purple-600 p-6 rounded-lg shadow-md mb-8">
@@ -59,7 +59,7 @@ export default function MyPlaylistsPage() {
           const bar = e.currentTarget;
           const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
           const currentTime = percent * currentSong.duration;
-          console.log(currentTime);// fixing error you can delete later
+          console.log(currentTime)// feel free to delete later
           playSong(currentSong); // This will trigger the song change, if needed
         }}
       />

@@ -41,18 +41,18 @@ export default function Sidebar({ username, role = "listener" }: Sidebaruser) {
 
       <nav className="flex flex-col space-y-2 px-4">
       <Link href="/listener/me/liked-songs"
-      className="flex items-center gap-3 hover:text-pink-400">
+      className="flex items-center gap-3 hover:text-pink-400 transition-all duration-100 ease-in-out"> {/*added transition effects to all when hovering*/}
           <FaHeart />
           {isOpen && <span>Liked Songs</span>}
         </Link>
         <Link href="/listener/me/my-playlists"
-        className="flex items-center gap-3 hover:text-blue-400">
+        className="flex items-center gap-3 hover:text-blue-400 transition-all duration-100 ease-in-out">
           <FaListUl />
           {isOpen && <span>My Playlists</span>}
         </Link>
         <Link
           href="/home"
-          className="flex items-center gap-3 hover:text-purple-400"
+          className="flex items-center gap-3 hover:text-purple-400 transition-all duration-100 ease-in-out"
         >
           <FaMusic />
           {isOpen && <span>Browse Music</span>}

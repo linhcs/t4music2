@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
-import { FiPlayCircle, FiPauseCircle, FiSearch } from "react-icons/fi";
-import { useUserStore } from "@/store/useUserStore";
+import { FiPlayCircle, FiPauseCircle, FiSearch,  } from "react-icons/fi";
+import { FaTimes } from "react-icons/fa";
+import { useUserStore, usePlayerStore } from "@/store/useUserStore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Song } from "../../../types";
 import { useAudioPlayer } from "@/context/AudioContext";
@@ -13,7 +14,9 @@ import PlayBar from "@/components/ui/playBar";
 const ListenerHome = () => {
   const router = useRouter();
   const { username, toggleLike, likedSongs, playlists } = useUserStore();
+  const { setSong } = usePlayerStore();
   const searchParams = useSearchParams();
+  console.log(setSong)// can delete later
 
   const [songs, setSongs] = useState<Song[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,7 +64,6 @@ const ListenerHome = () => {
     const fetchData = async () => {
       try {
         const response = await fetch("/api/songs");
-        if (!response.ok) throw new Error("Failed to fetch songs");
         const data: Song[] = await response.json();
         setSongs(data);
       } catch (error) {
@@ -91,7 +93,6 @@ const ListenerHome = () => {
     setIsSearching(true);
     try {
       const response = await fetch(`/api/songs/search?q=${encodeURIComponent(query)}`);
-      if (!response.ok) throw new Error("Search failed");
       const data = await response.json();
       setSearchResults(data.songs);
     } catch (error) {
@@ -100,6 +101,16 @@ const ListenerHome = () => {
       setIsSearching(false);
     }
   };
+
+  useEffect(() => {
+    const search = searchParams.get("search");
+    if (search) {
+      setSearchQuery(search);
+      handleSearch(search);
+    }
+  }, [searchParams, handleSearch]);
+
+
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -166,18 +177,29 @@ const ListenerHome = () => {
     <div className="flex min-h-screen bg-black text-white">
       <Sidebar username={username} />
       <div className="flex flex-col flex-1 min-w-0">
-        <NavBar role="listener" />
+        <NavBar />
         <main className="p-6 overflow-auto">
-          <div className="relative mb-8">
-            <div className="relative">
+          <div className="relative mb-8 group">
+            <div className="relative flex items-center group">
               <input
                 type="text"
                 placeholder="Search songs, artists, or genres..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg 
+                focus:outline-none focus:ring-4 focus:ring-white-500 border 
+                border-gray-700 hover:border-gray-600 transition-all 
+                duration-300 group-hover:shadow-lg group-hover:shadow-white/50 truncate"
               />
               <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              {searchQuery && (
+                <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-10 text-gray-400 hover:text-white transition-colors"
+                aria-label="Clear search" >
+                  <FaTimes />
+                </button>
+              )}
             </div>
           </div>
 
@@ -217,7 +239,7 @@ const ListenerHome = () => {
                     body: JSON.stringify({ username, songId: song.song_id }),
                   });
                 } catch (err) {
-                  console.error("Failed to sync like to DB:", err);
+                  console.error("Failed to sync like:", err);
                 }
                 setContextMenu(null);
               }}

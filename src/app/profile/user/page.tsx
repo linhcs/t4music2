@@ -27,6 +27,7 @@ export default function ListenerUserProfile() {
     setFollowers,
     setFollowing,
   } = useUserStore();
+  console.log(role)// you can delete later
 
   const { currentSong, isPlaying, progress, playSong } = useAudioPlayer(); // Access global audio player state
 
@@ -44,7 +45,7 @@ export default function ListenerUserProfile() {
       setStreamingHistory(data.streamingHistory);
       setTopTracks(data.topTracks);
       setFollowers(data.followers.length); // idk if it should be length or just followers..
-      setFollowing(data.following);
+      setFollowing(data.following.length);
       setPlaylistCount(data.playlists.length);
 
       setLoading(false);
@@ -73,7 +74,7 @@ export default function ListenerUserProfile() {
     <div className="flex min-h-screen bg-black text-white">
       <Sidebar username={username} />
       <div className="flex flex-col flex-1 min-w-0">
-        <NavBar role={role as "listener" | "artist" | "admin"} />
+        <NavBar />
         <main className="p-6 space-y-10">
           <div className="flex gap-6 items-center">
             <img
@@ -123,7 +124,11 @@ export default function ListenerUserProfile() {
           const bar = e.currentTarget;
           const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
           const currentTime = percent * currentSong.duration; // Assuming `duration` exists in the song object
+<<<<<<< HEAD
           console.log(currentTime);// fixing error you can delete later
+=======
+          console.log(currentTime)// can be deleted later
+>>>>>>> 13bdd3376bd81576d72479f8259ba2eb9be422b0
           playSong(currentSong);
         }}
       />

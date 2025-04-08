@@ -22,7 +22,7 @@ export default function UserCard() {
         {/* profile avatar */}
         <ChangeProfilePic
           currentPfp={pfp || "/default_pfp.jpg"}
-          userId={user_id}
+          userId={user_id? user_id : 1}
           onUploadComplete={(url) => setPfp(url)}
           />
 

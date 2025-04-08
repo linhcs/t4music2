@@ -3,13 +3,14 @@ import prisma from "@/lib/prisma";
 
 export async function DELETE(req: Request) {
   try {
-    const { albumId  } = await req.json();
+    const url = new URL(req.url);
+    const match = url.pathname.match(/\/albums\/(\d+)\/delete/);
+    const albumId = match ? parseInt(match[1]) : NaN;
 
     if (isNaN(albumId)) {
       return NextResponse.json({ error: "Invalid album ID" }, { status: 400 });
     }
 
-    // Delete the album
     await prisma.album.delete({
       where: { album_id: albumId },
     });
