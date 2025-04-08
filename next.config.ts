@@ -5,8 +5,13 @@ const nextConfig: NextConfig = {
     AZURE_STORAGE_CONNECTION_STRING: process.env.AZURE_STORAGE_CONNECTION_STRING,
   },
   images: {
-    domains: ["musiclibraryfiles.blob.core.windows.net"], 
-  },
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'musiclibraryfiles.blob.core.windows.net',
+      },
+    ],
+  }
 };
 
 export default nextConfig;

@@ -3,7 +3,7 @@
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { Song } from "@/types";
 import { useUserStore } from "@/store/useUserStore";
-import { FiPlayCircle, FiPauseCircle } from "react-icons/fi"; // Import cute icons for play and pause
+import { FiPlayCircle, FiPauseCircle, FiSkipBack, FiSkipForward } from "react-icons/fi"; // Import cute icons for play and pause
 
 interface PlayBarProps {
   currentSong: Song | null;
@@ -11,9 +11,12 @@ interface PlayBarProps {
   progress: number;
   onPlayPause: () => void;
   onSeek: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onSkipNext?: () => void; //if it is a single song (will just restart song)
+  onSkipPrevious?: () => void;
+  isPlaylist?: boolean; //if its a playlist (can skip)
 }
 
-const PlayBar = ({ currentSong, isPlaying, progress, onPlayPause, onSeek }: PlayBarProps) => {
+const PlayBar = ({ currentSong, isPlaying, progress, onPlayPause, onSeek, onSkipNext, onSkipPrevious, isPlaylist = false }: PlayBarProps) => {
   const { likedSongs, toggleLike, username } = useUserStore();
 
   if (!currentSong) return null;
@@ -30,6 +33,22 @@ const PlayBar = ({ currentSong, isPlaying, progress, onPlayPause, onSeek }: Play
       });
     } catch (err) {
       console.error("Failed to update like:", err);
+    }
+  };
+
+  const handleSkipNext = () => {
+    if (isPlaylist && onSkipNext) {
+      onSkipNext();
+    } else {
+      onSeek({ currentTarget: { getBoundingClientRect: () => ({ left: 0 }), clientWidth: 100 } } as React.MouseEvent<HTMLDivElement>);
+    }
+  };
+
+  const handleSkipPrevious = () => {
+    if (isPlaylist && onSkipPrevious) {
+      onSkipPrevious();
+    } else {
+      onSeek({ currentTarget: { getBoundingClientRect: () => ({ left: 0 }), clientWidth: 100 } } as React.MouseEvent<HTMLDivElement>);
     }
   };
 
@@ -52,12 +71,28 @@ const PlayBar = ({ currentSong, isPlaying, progress, onPlayPause, onSeek }: Play
         </div>
 
         <div className="flex items-center gap-4">
+        <button 
+            onClick={handleSkipPrevious}
+            className="text-xl text-white hover:text-purple-400 transition-colors"
+            aria-label="Previous track"
+          >
+            <FiSkipBack />
+          </button>
+
           <button onClick={onPlayPause} className="text-3xl text-white">
             {isPlaying ? (
               <FiPauseCircle className="text-white" />
             ) : (
               <FiPlayCircle className="text-white" />
             )}
+          </button>
+
+          <button 
+            onClick={handleSkipNext}
+            className="text-xl text-white hover:text-purple-400 transition-colors"
+            aria-label="Next track"
+          >
+            <FiSkipForward />
           </button>
 
           <button onClick={handleLike} className="text-xl hover:scale-110 transition-transform">

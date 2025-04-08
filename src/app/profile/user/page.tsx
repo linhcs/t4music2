@@ -57,7 +57,6 @@ export default function ListenerUserProfile() {
       setFollowing(data.following.length);
       setPlaylistCount(data.playlists.length);
       setPfp(data.pfp);
-
       setLoading(false);
     }
 
@@ -91,13 +90,11 @@ export default function ListenerUserProfile() {
         <NavBar />
         <main className="p-6 space-y-10">
           <div className="flex gap-6 items-center">
-            {user_id !== null && (
-              <ChangeProfilePic
-                currentPfp={pfp || "/default-pfp.jpg"}
-                userId={user_id}
-                onUploadComplete={(url) => setPfp(url)}
-              />
-            )}
+        <ChangeProfilePic
+          currentPfp={pfp || "/default_pfp.jpg"}
+          userId={user_id? user_id : 1}
+          onUploadComplete={(url) => setPfp(url)}
+          />
             <div>
               <p className="text-sm uppercase text-gray-400 font-semibold">Profile</p>
               <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500">
