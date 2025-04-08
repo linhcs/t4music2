@@ -31,12 +31,13 @@ export default function FileUpload() {
       };
 
       const handleError = (error: Event) => {
+        console.error("❌ Error loading audio metadata:", error);
         URL.revokeObjectURL(objectUrl);
         audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
         audio.removeEventListener('error', handleError);
         reject(new Error('Failed to load audio file'));
       };
-
+      
       audio.addEventListener('loadedmetadata', handleLoadedMetadata);
       audio.addEventListener('error', handleError);
 
@@ -98,7 +99,8 @@ export default function FileUpload() {
         songName,
         artistName,
         genre,
-        duration
+        duration,
+        
       );
 
       if ("failure" in urlresult) {

@@ -1,10 +1,13 @@
 'use client';
+
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import { listeners } from "process";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 import { useEffect, useState } from 'react';
-import InactivityTimer from "@/app/reportadmin/component/page";
+import InactivityTimer from "@/app/reportadmin/component/inact";
+import Form from "@/app/reportadmin/component/form";
 
 interface listeners {
   user_id: number;
@@ -22,12 +25,20 @@ interface albums {
   title: string;
 }
 
-type PassedObj = listeners | artists | albums;
+interface songs {
+  song_id: number;
+  title: string;
+}
+
+type PassedObj = listeners | artists | albums | songs;
 
 // Type guard to check if the object is an album
 function isAlbum(obj: PassedObj): obj is albums {
-  return (obj as albums).title !== undefined;
-  
+  return (obj as albums).album_id !== undefined && (obj as albums).title !== undefined;
+}
+
+function isSong(obj: PassedObj): obj is songs {
+  return (obj as songs).song_id !== undefined && (obj as songs).title !== undefined;
 }
 
 function isUser(obj: PassedObj): obj is listeners | artists {
@@ -35,28 +46,29 @@ function isUser(obj: PassedObj): obj is listeners | artists {
 }
 
 const CheckboxTable: React.FC<{
-  selectArr: boolean[]; // Array of booleans for the checkboxes
-  handleCheckboxChange: (index: number) => void; // Function that takes a number (index) and returns void
+  selectArr: boolean[];
+  handleCheckboxChange: (index: number) => void; 
 }> = ({ selectArr, handleCheckboxChange }) => {
   return (
     <div>
-      <h2>Select what you want to see</h2>
+      <h2 className="text-2xl font-semibold mt-10 mb-8">User print out</h2>
+      <h2 className= "text-[16px] mb-8">leave blank for no users to be printed </h2>
       <table className="checkbox-table">
         <thead>
           <tr>
-            <th>Attribute</th>
-            <th>Select</th>
+            <th className="text-2xl">Attribute</th>
+            <th className="text-2xl px-12">Select</th>
           </tr>
         </thead>
         <tbody>
           {['User ID', 'Username', 'Email', 'Role', 'Created'].map((col, index) => (
             <tr key={index}>
-              <td>{col}</td>
-              <td className='px-8'>
+              <td className="text-xl">{col}</td>
+              <td className='px-20'>
                 <input
                   type="checkbox"
-                  checked={selectArr[index]} // Checked state based on selectArr
-                  onChange={() => handleCheckboxChange(index)} // Update selectArr on toggle
+                  checked={selectArr[index]}
+                  onChange={() => handleCheckboxChange(index)}
                 />
               </td>
             </tr>
@@ -67,18 +79,29 @@ const CheckboxTable: React.FC<{
   );
 };
 
-const DownloadPDFButton: React.FC<{ updatedArr : boolean[]; }> = ({ updatedArr }) => {
+const DownloadPDFButton: React.FC<{ updatedArr : boolean[]; stringArr: string[] }> = ({ updatedArr,  stringArr }) => {
   const [loading, setLoading] = useState(false);
 
   const handleDownload = async () => {
     setLoading(true);
+
+    if (stringArr[0] === '' && (stringArr[1] === '' || stringArr[2] === '' || stringArr[3] === '' || stringArr[4] === '')) {
+      alert('Please make sure to select all options');
+      setLoading(false);
+      return;
+    }
+    if (stringArr[0] === '' && (stringArr[1] === '' || stringArr[2] === '' || stringArr[3] === '' || stringArr[4] === '')) {
+      alert('Please make a selection');
+      setLoading(false);
+      return;
+    }
 
     const response = await fetch('/api/pdfs/admin', {
       method: 'POST',  // Assuming a POST request
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ updatedArr }), // Send updated selectArr in the request body
+      body: JSON.stringify({ updatedArr, stringArr }), // Send Arrays in the request body
     });
 
     if (response.ok) {
@@ -87,7 +110,7 @@ const DownloadPDFButton: React.FC<{ updatedArr : boolean[]; }> = ({ updatedArr }
       link.href = URL.createObjectURL(blob);
       link.download = 'generated.pdf';
       link.click();
-    }
+    } else {console.error("Failed to download PDF")};
     setLoading(false);
   };
 
@@ -113,12 +136,19 @@ const ReportAdminPage = () => {
       router.push("/login");
     }
   }, [role, router]);
+
+  const [arrayOfStrings, setArrayOfStrings] = useState<string[]>([]);
+  const handleArrayChange = (newArray: string[]) => {
+    setArrayOfStrings(newArray);
+  };
+
   // Initialize selectArr with 5 values (false by default)
   const [selectArr, setSelectArr] = useState([false, false, false, false, false]);
   const [listeners, setListeners] = useState<listeners[]>([]);
   const [artists, setartists] = useState<artists[]>([]);
   const [albums, setalbums] = useState<albums[]>([]);
-  const [selectedobj, setSelectedobj] = useState<listeners | artists | albums | null>(null);
+  const [songs, setsongs] = useState<songs[]>([]);
+  const [selectedobj, setSelectedobj] = useState<listeners | artists | albums | songs |null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -133,12 +163,15 @@ const ReportAdminPage = () => {
       const responseAlbums = await fetch('/api/adminpage/albums');
       const dataAlbums: albums[] = await responseAlbums.json();
       setalbums(dataAlbums); // Set the albums data
+
+      const responseSongs = await fetch('/api/adminpage/songs');
+      const dataSongs: songs[] = await responseSongs.json();
+      setsongs(dataSongs); // Set the songs data
     };
 
     fetchData(); // Fetch the data when the component mounts
   }, []);
 
-  // Handle checkbox change to update the selectArr array
   const handleCheckboxChange = (index: number) => {
     const updatedArr: boolean[] = [...selectArr];
     updatedArr[index] = !updatedArr[index]; // Toggle the value at the clicked index
@@ -146,11 +179,11 @@ const ReportAdminPage = () => {
   };
 
   // Handle selecting a user
-  const handleUserClick = (obj: listeners | artists | albums) => {
+  const handleUserClick = (obj: listeners | artists | albums | songs) => {
     if (selectedobj === obj) {
       setSelectedobj(null);
     } else {
-      setSelectedobj(obj);  // Set the clicked user as selected
+      setSelectedobj(obj); 
     }
   };
 
@@ -186,8 +219,7 @@ const ReportAdminPage = () => {
         } else {
           alert("Action canceled.");
         }
-      }
-     else if (isUser(selectedobj)) {
+      } else if (isUser(selectedobj)) {
       
         const confirmed = window.confirm(`Are you sure you want to Delete ${selectedobj.username}?`);
         
@@ -215,13 +247,41 @@ const ReportAdminPage = () => {
         } else {
           alert("Action canceled.");
         }
-     }
+      } else if (isSong(selectedobj)) {
+
+        const confirmed = window.confirm(`Are you sure you want to Delete ${selectedobj.title}?`);
+        
+        if (confirmed) {
+          // Send the delete request to the server
+          const response = await fetch('/api/adminpage/delete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ selectedobj }), // Send the selected object to delete
+          });
+
+          if (response.ok) {
+            alert(`${selectedobj.title} has been removed`);
+
+            // Clear the selected user
+            setSelectedobj(null);
+
+            // Fetch updated data after deletion
+            await fetchData();
+          } else {
+            alert("Action Failed.");
+          }
+        } else {
+          alert("Action canceled.");
+        }
+      }
     } else {
       alert("Please select something first.");
     }
   };
 
-  // Fetch the updated data for listeners, artists, and albums after deletion
+  // Fetch the updated data for listeners, artists, albums and songs after deletion
   const fetchData = async () => {
     const responseListeners = await fetch('/api/adminpage/listeners');
     const dataListeners: listeners[] = await responseListeners.json();
@@ -234,14 +294,28 @@ const ReportAdminPage = () => {
     const responseAlbums = await fetch('/api/adminpage/albums');
     const dataAlbums: albums[] = await responseAlbums.json();
     setalbums(dataAlbums);
+
+    const responseSongs = await fetch('/api/adminpage/songs');
+    const dataSongs: songs[] = await responseSongs.json();
+    setsongs(dataSongs);
   };
+
 
   return (
     <div className="min-h-screen flex flex-col bg-black">
       <InactivityTimer />
-      <div className="flex space-x-4 p-5 px-[320px] py-20">
-        {/* Window 1: Users */}
-        <div className="w-[250px] h-[350px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
+      <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1">
+        <motion.h1
+            initial={{ opacity: 0, y: -500 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.25 }}
+            className="text-[4rem] md:text-[4rem] leading-none font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-500 animate-gradient"
+            >
+            User and Albumn controls
+        </motion.h1>
+      </header>
+      <div className="flex space-x-10 justify-center py-20">
+        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
           <h3 className="text-center text-lg font-bold">Listeners</h3>
           <ul>
             {listeners.map((listener) => (
@@ -255,7 +329,7 @@ const ReportAdminPage = () => {
             ))}
           </ul>
         </div>
-        <div className="w-[250px] h-[350px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
+        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
           <h3 className="text-center text-lg font-bold">Artists</h3>
           <ul>
             {artists.map((artist) => (
@@ -269,8 +343,8 @@ const ReportAdminPage = () => {
             ))}
           </ul>
         </div>
-        <div className="w-[250px] h-[350px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
-          <h3 className="text-center text-lg font-bold">Other Data</h3>
+        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
+          <h3 className="text-center text-lg font-bold">Albums</h3>
           <ul>
             {albums.map((album) => (
               <li
@@ -278,27 +352,54 @@ const ReportAdminPage = () => {
                 className={`py-1 cursor-pointer ${album === selectedobj ? "border-2 border-red-500" : ""}`}
                 onClick={() => handleUserClick(album)}
               >
-                {`${album.album_id} - ${album.title}`}
+        
+                {`${album.album_id} - ${album.title.slice(0, 13)}`}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
+          <h3 className="text-center text-lg font-bold">Songs</h3>
+          <ul>
+            {songs.map((song) => (
+              <li
+                key={song.song_id}
+                className={`py-1 cursor-pointer ${song === selectedobj ? "border-2 border-red-500" : ""}`}
+                onClick={() => handleUserClick(song)}
+              >
+        
+                {`${song.song_id} - ${song.title.slice(0, 13)}`}
               </li>
             ))}
           </ul>
         </div>
       </div>
 
-      <div className="flex px-80 mb-8">
+      <div className="flex justify-center px-80 mb-8">
         <Button
           onClick={handleDeleteUser}
           size="lg"
           variant="outline"
           className="rounded-full text-[17px] text-white border border-white/10 transition-all duration-300 hover:scale-90 bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 animate-gradient"
         >
-          Delete User
+          Delete Selection
         </Button>
       </div>
+      <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1 mb-10">
+        <div className="text-[4rem] md:text-[4rem] leading-none font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-500 animate-gradient">
+          Reports
+        </div>
+      </header>
+      <div className="flex space-x-16 justify-center mb-4">
 
-      <div className="px-[310px] mb-12">
         <CheckboxTable selectArr={selectArr} handleCheckboxChange={handleCheckboxChange} />
-        <DownloadPDFButton updatedArr={selectArr} />
+        
+        <div className="text-2xl font-semibold mt-10 mb-5">
+        <Form onArrayChange={handleArrayChange}/>
+        </div>
+      </div>
+      <div className="flex justify-center mb-12">
+        <DownloadPDFButton updatedArr={selectArr} stringArr={arrayOfStrings}  />
       </div>
     </div>
   );

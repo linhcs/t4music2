@@ -1,38 +1,41 @@
 "use client";
-import Image from "next/image";
-import { useUserStore } from "@/app/store/userStore"; // Import Zustand store
+
+import { useUserStore } from "@/store/useUserStore";
+import ChangeProfilePic from "@/components/ui/changepfp";
+import { useEffect } from "react";
 
 export default function UserCard() {
-  const { username } = useUserStore(); // Retrieve username from store
+  const { username, pfp, followers, following, playlistCount, user_id, setPfp } = useUserStore();
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      const response = await fetch(`/api/user/${user_id}`);
+      const userData = await response.json();
+      setPfp(userData.pfp);
+    };
+    loadUserData();
+  }, [user_id, setPfp]);
 
   return (
-    <div className="relative w-full bg-black p-8">
-      <div className="flex items-center gap-6 mt-8">
-        {/* Avatar */}
-        <Image
-          src="/ed.jpeg"
-          alt="User Avatar"
-          width={120}
-          height={120}
-          className="rounded-full object-cover border-4 border-black shadow-md"
-          priority
-        />
+    <div className="relative w-full bg-black px-10 py-12 rounded-b-xl shadow-md border-b border-gray-800">
+      <div className="flex items-center gap-8">
+        {/* profile avatar */}
+        <ChangeProfilePic
+          currentPfp={pfp || "/default_pfp.jpg"}
+          userId={user_id? user_id : 1}
+          onUploadComplete={(url) => setPfp(url)}
+          />
 
-        {/* Text Info */}
-        <div className="flex flex-col">
-          {/* Small label above the username */}
-          <span className="text-white text-sm uppercase tracking-wide mb-1">
-            Profile
-          </span>
+        <div className="flex flex-col gap-2">
+          <span className="text-white text-sm uppercase tracking-wider">Profile</span>
 
-          {/* Username (same as ListenerHome approach) */}
-          <h2 className="text-5xl font-extrabold text-white leading-none">
-            {username ? username : "User"}
-          </h2>
+          <h1 className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-purple-500 to-blue-500 animate-gradient drop-shadow-md">
+            {username || "User"}
+          </h1>
 
-          {/* Additional stats row */}
-          <p className="text-white text-sm mt-2">
-            16 Public Playlists • 2 Followers • 2 Following
+          {/* stats */}
+          <p className="text-white mt-1 text-sm sm:text-base">
+            {playlistCount} Public Playlists • {followers} Followers • {following} Following
           </p>
         </div>
       </div>

@@ -16,13 +16,22 @@ interface listeners {
     album_id: number;
     title: string;
   }
+
+  interface songs {
+    song_id: number;
+    title: string;
+  }
   
   // Define a type that includes all possible structures for passedobj
-  type PassedObj = listeners | artists | albums;
+  type PassedObj = listeners | artists | albums | songs;
 
   // Type guard to check if the object is an album
 function isAlbum(obj: PassedObj): obj is albums {
-  return (obj as albums).album_id !== undefined;
+  return (obj as albums).album_id !== undefined && (obj as albums).title !== undefined;
+}
+
+function isSong(obj: PassedObj): obj is songs {
+  return (obj as songs).song_id !== undefined && (obj as songs).title !== undefined;
 }
 
   export async function POST(req: Request) {
@@ -33,13 +42,25 @@ function isAlbum(obj: PassedObj): obj is albums {
     console.log('Parsed passedobj:', selectedobj);
 
     const isAlbumObject = isAlbum(selectedobj);
+    const isSongObject = isSong(selectedobj);
+    let tablename: string;
+    let reference:string;
+    let id:number;
+    if(isAlbumObject){
+      tablename = 'album';
+      reference = 'album_id';
+      id = selectedobj.album_id;
+    } else if (isSongObject) {
+      tablename = 'songs';
+      reference = 'song_id';
+      id = selectedobj.song_id;
+    } else {
+      tablename = 'users';
+      reference = 'user_id';
+      id = selectedobj.user_id;
+    };
 
-    const tablename = isAlbumObject ? 'album' : 'users';
-    const reference = isAlbumObject ? 'album_id' : 'user_id';
-    const id = isAlbumObject ? selectedobj.album_id : selectedobj.user_id;
     const rawquery = `DELETE FROM ${tablename} WHERE ${reference} = ${id};`;
-
-    
     // Query the database for some data
     const result = await prisma.$queryRawUnsafe(rawquery);
 

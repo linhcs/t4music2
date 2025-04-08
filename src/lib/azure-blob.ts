@@ -1,7 +1,7 @@
 import { BlobServiceClient } from "@azure/storage-blob";
 
 const AZURE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
-const CONTAINER_NAME = "mp3";
+const CONTAINER_NAME = "images";
 
 export async function uploadToAzureBlobFromServer(fileBuffer: Buffer, fileName: string): Promise<string> {
   const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_CONNECTION_STRING!);

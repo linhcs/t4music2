@@ -104,12 +104,10 @@ model songs {
   uploaded_at       DateTime?           @default(now()) @db.DateTime(0)
   plays_count       Int?                @default(0)
   user_id           Int
-  URL               String?             @db.VarChar(255)
   album_id          Int?
   album_songs       album_songs[]
   likes             likes[]
   playlist_songs    playlist_songs[]
-  ratings           ratings[]
   users             users               @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "songs_ibfk_1")
   album             album?              @relation(fields: [album_id], references: [album_id], onUpdate: NoAction, map: "songs_ibfk_2")
   streaming_history streaming_history[]
@@ -149,7 +147,6 @@ model users {
   likes                                                  likes[]
   playlists_playlists_user_idTousers                     playlists[]         @relation("playlists_user_idTousers")
   playlists_playlists_created_idTousers                  playlists[]         @relation("playlists_created_idTousers")
-  ratings                                                ratings[]
   songs                                                  songs[]
   streaming_history_streaming_history_listener_idTousers streaming_history[] @relation("streaming_history_listener_idTousers")
   streaming_history_streaming_history_user_idTousers     streaming_history[] @relation("streaming_history_user_idTousers")
@@ -167,16 +164,3 @@ enum users_role {
   admin
 }
 
-model ratings {
-  rating_id Int      @id @default(autoincrement())
-  user_id   Int
-  song_id   Int
-  rating    Int
-  rated_at  DateTime @default(now()) @db.DateTime(0)
-
-  users users @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-  songs songs @relation(fields: [song_id], references: [song_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([user_id], map: "user_id")
-  @@index([song_id], map: "song_id")
-}

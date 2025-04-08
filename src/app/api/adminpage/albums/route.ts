@@ -11,7 +11,7 @@ export async function GET() {
   try {
     // Query the database for some data
     const albums: album[] = await prisma.$queryRaw`
-    SELECT * FROM album;`;
+    SELECT user_id, album_id, title FROM album;`;
 
     return NextResponse.json(albums)
   } catch (error: unknown) {
