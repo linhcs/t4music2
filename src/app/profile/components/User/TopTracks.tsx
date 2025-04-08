@@ -2,7 +2,7 @@
 import { useUserStore } from "@/store/useUserStore";
 import Image from "next/image";
 import { useAudioPlayer } from "@/context/AudioContext";
-import { Song } from "C:/Music/t4music/types";
+import { Song } from "@/types";
 
 export default function TopTracks() {
   const { topTracks } = useUserStore();
