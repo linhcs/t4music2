@@ -10,7 +10,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Song } from "../../../types";
 import { useAudioPlayer } from "@/context/AudioContext";
 import PlayBar from "@/components/ui/playBar";
-import Lottie from "lottie-react";
+import dynamic from "next/dynamic";
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import cuteAnimation from "@/assets/cute_animation.json"; // <--- your local JSON file
 
 const ListenerHome = () => {

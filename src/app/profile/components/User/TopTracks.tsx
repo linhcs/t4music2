@@ -7,7 +7,8 @@ import { Song } from "@/types";
 
 export default function TopTracks() {
   const { topTracks } = useUserStore();
-  const { currentSong, isPlaying, playSong, togglePlayPause } = useAudioPlayer();
+  // const { currentSong, isPlaying, playSong, togglePlayPause } = useAudioPlayer();
+  const { currentSong, isPlaying, playSong, togglePlayPause, audioRef } = useAudioPlayer();
 
   if (!topTracks || topTracks.length === 0) {
     return (

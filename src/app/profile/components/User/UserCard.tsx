@@ -11,28 +11,27 @@ export default function UserCard() {
     followers,
     following,
     playlistCount,
-    userId,
+    user_id,
     setPfp,
   } = useUserStore();
 
   useEffect(() => {
     const loadUserData = async () => {
-      if (userId === null) return;
-      const response = await fetch(`/api/user/${userId}`);
+      if (user_id === null) return;
+      const response = await fetch(`/api/user/${user_id}`);
       const userData = await response.json();
       setPfp(userData.pfp);
     };
     loadUserData();
-  }, [userId, setPfp]);
+  }, [user_id, setPfp]);
 
   return (
     <div className="relative w-full bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 px-10 py-12 rounded-b-xl shadow-md">
       <div className="flex items-center gap-8">
-        {/* ✅ Only render when userId is not null */}
-        {userId !== null && (
+        {user_id !== null && (
           <ChangeProfilePic
             currentPfp={pfp || "/default_pfp.jpg"}
-            userId={userId}
+            userId={user_id}
             onUploadComplete={(url) => setPfp(url)}
           />
         )}
