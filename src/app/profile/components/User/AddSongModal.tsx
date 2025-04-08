@@ -39,17 +39,29 @@ export default function AddSongModal({
   }, [search, songs]);
 
   const handleAdd = async (songId: number) => {
-    const res = await fetch(`/api/playlists/${playlistId}/add-song`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ song_id: songId }),
-    });
+    console.log("Adding song to playlist:", { songId, playlistId });
 
-    const result = await res.json();
-    if (!res.ok) return alert(result.error || "Failed to add song");
-    alert("🎵 Song added!");
-    onAdd(songId);
-    onClose();
+    try {
+      const res = await fetch(`/api/playlists/${playlistId}/add-song`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ song_id: songId }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        console.error("Add song error:", result);
+        return alert(result.error || "Failed to add song");
+      }
+
+      alert("🎵 Song added!");
+      onAdd(songId);
+      onClose();
+    } catch (err) {
+      console.error("Fetch failed:", err);
+      alert("Fetch error");
+    }
   };
 
   return (

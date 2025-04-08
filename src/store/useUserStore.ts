@@ -120,8 +120,14 @@ export const useUserStore = create<UserStore>()(
 
       logout: () => {
         usePlayerStore.getState().reset();
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("user-storage"); // ✅ Clear Zustand-persisted user state
+          localStorage.removeItem("user");
+          sessionStorage.removeItem("user");
+        }
+      
         set({
-          user_id: -1,
+          user_id: null,
           username: "",
           role: "",
           pfp: "",
@@ -137,6 +143,7 @@ export const useUserStore = create<UserStore>()(
           topTracks: [],
         });
       },
+      
       // Toggle like/unlike a song
       toggleLike: (song) => {
         const { likedSongs } = get();
