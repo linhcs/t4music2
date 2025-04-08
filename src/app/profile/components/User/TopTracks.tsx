@@ -1,7 +1,6 @@
 "use client";
 import { useUserStore } from "@/store/useUserStore";
 import Image from "next/image";
-import { Song } from "@/types";
 import { useAudioPlayer } from "@/context/AudioContext";
 import { Song } from "@/types";
 
