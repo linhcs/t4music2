@@ -7,15 +7,18 @@ import TopArtists from "@/app/profile/components/User/TopArtists";
 import UserPlaylists from "@/app/profile/components/User/UserPlaylists";
 import Sidebar from "@/components/ui/Sidebar";
 import NavBar from "@/components/ui/NavBar";
-import { useAudioPlayer } from "@/context/AudioContext"; // Global hook for audio player
-import PlayBar from "@/components/ui/playBar"; // Import the PlayBar component
-import ChangeProfilePic from "@/components/ui/changepfp"; //to change pfp
+import { useAudioPlayer } from "@/context/AudioContext";
+import PlayBar from "@/components/ui/playBar";
+import ChangeProfilePic from "@/components/ui/changepfp";
+import dynamic from "next/dynamic";
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+import cuteAnimation from "@/assets/cute_animation.json";
 
 export default function ListenerUserProfile() {
   const {
     username,
     pfp,
-    role,
+    // role,
     playlistCount,
     followers,
     following,
@@ -24,17 +27,20 @@ export default function ListenerUserProfile() {
     setLikedSongs,
     setPlaylists,
     setStreamingHistory,
-    setPlaylistCount,
     setTopTracks,
     setFollowers,
     setFollowing,
-    setPfp
+    setPfp,
+    setPlaylistCount,
   } = useUserStore();
-  console.log(role)// you can delete later
 
-  const { currentSong, isPlaying, progress, playSong } = useAudioPlayer(); // Access global audio player state
-
+  const { currentSong, isPlaying, progress, playSong } = useAudioPlayer();
   const [loading, setLoading] = useState(true);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -47,7 +53,7 @@ export default function ListenerUserProfile() {
       setPlaylists(data.playlists);
       setStreamingHistory(data.streamingHistory);
       setTopTracks(data.topTracks);
-      setFollowers(data.followers.length); // idk if it should be length or just followers..
+      setFollowers(data.followers.length);
       setFollowing(data.following.length);
       setPlaylistCount(data.playlists.length);
       setPfp(data.pfp);
@@ -62,13 +68,17 @@ export default function ListenerUserProfile() {
     setStreamingHistory,
     setTopTracks,
     setFollowers,
-    setFollowing, setPfp
+    setFollowing,
+    setPlaylistCount,
+    setPfp,
   ]);
 
-  if (loading) {
+  if (!hasMounted || loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
-        <div className="text-lg">Loading profile...</div>
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <div className="w-64 h-64">
+          <Lottie animationData={cuteAnimation} loop />
+        </div>
       </div>
     );
   }
@@ -86,9 +96,7 @@ export default function ListenerUserProfile() {
           onUploadComplete={(url) => setPfp(url)}
           />
             <div>
-              <p className="text-sm uppercase text-gray-400 font-semibold">
-                Profile
-              </p>
+              <p className="text-sm uppercase text-gray-400 font-semibold">Profile</p>
               <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500">
                 {username || "Loading..."}
               </h1>
@@ -116,7 +124,6 @@ export default function ListenerUserProfile() {
         </main>
       </div>
 
-      {/* Add the PlayBar component here */}
       <PlayBar
         currentSong={currentSong}
         isPlaying={isPlaying}
@@ -126,9 +133,9 @@ export default function ListenerUserProfile() {
           if (!currentSong) return;
           const bar = e.currentTarget;
           const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
-          const currentTime = percent * currentSong.duration; // Assuming `duration` exists in the song object
+          const currentTime = percent * currentSong.duration;
           console.log(currentTime)// can be deleted later
-          playSong(currentSong);
+           playSong(currentSong);
         }}
       />
     </div>

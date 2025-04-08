@@ -28,7 +28,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
     store.logout();
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
-    router.push("/login");
+    router.push("/");
   }
 
    useEffect(() => {
