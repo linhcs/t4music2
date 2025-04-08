@@ -10,6 +10,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Song } from "../../../types";
 import { useAudioPlayer } from "@/context/AudioContext";
 import PlayBar from "@/components/ui/playBar";
+import Lottie from "lottie-react";
+import cuteAnimation from "@/assets/cute_animation.json"; // <--- your local JSON file
 
 const ListenerHome = () => {
   const router = useRouter();
@@ -156,12 +158,14 @@ const ListenerHome = () => {
   );
 
   if (!hasMounted || loading) {
-    return (
-      <div className="flex min-h-screen bg-black text-white items-center justify-center">
-        <div className="text-xl">Loading songs...</div>
-      </div>
-    );
-  }
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-black">
+          <div className="w-64 h-64">
+            <Lottie animationData={cuteAnimation} loop={true} />
+          </div>
+        </div>
+      );
+    }
 
   return (
     <div className="flex min-h-screen bg-black text-white">

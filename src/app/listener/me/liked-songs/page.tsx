@@ -78,6 +78,7 @@ export default function LikedSongsPage() {
           const bar = e.currentTarget;
           const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
           const currentTime = percent * currentSong.duration;
+          console.log("Seek to:", currentTime);
           playSong(currentSong); // you might want to call a seek function if you build one
         }}
       />
