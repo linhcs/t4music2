@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback} from "react";
 import { useParams, useRouter } from "next/navigation";
 import AddSongModal from "@/app/profile/components/User/AddSongModal";
 import Image from "next/image";
@@ -30,34 +30,42 @@ export default function PlaylistPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { currentSong, isPlaying, playSong, togglePlayPause } = useAudioPlayer();
 
-  const fetchPlaylist = async () => {
+  const fetchPlaylist = useCallback(async () => {
     const res = await fetch(`/api/playlists/${id}`);
     const data = await res.json();
     setPlaylist(data);
-  };
+  }, [id]);
 
   useEffect(() => {
     if (id) fetchPlaylist();
   }, [id]);
 
-  const handleSkipNext = () => { 
-    const currentIndex = playlist?.playlist_songs.findIndex( //find current song index in playlist
-      (entry) => entry.songs.song_id === currentSong?.song_id
+  const handleSkipNext = () => {
+    if (!playlist?.playlist_songs || !currentSong) return;
+    
+    const currentIndex = playlist.playlist_songs.findIndex(
+      (entry) => entry.songs.song_id === currentSong.song_id
     );
-    const nextIndex = (currentIndex! + 1) % playlist?.playlist_songs.length!; //add by one % size of playlist, so restart playlist if at end
-    const nextSong = playlist?.playlist_songs[nextIndex]?.songs;
-    playSong(nextSong!); //start next song
+    
+    if (currentIndex === -1) return;
+    
+    const nextIndex = (currentIndex + 1) % playlist.playlist_songs.length;
+    const nextSong = playlist.playlist_songs[nextIndex]?.songs;
+    if (nextSong) playSong(nextSong);
   };
 
   const handleSkipPrevious = () => {
-    const currentIndex = playlist?.playlist_songs.findIndex( //find index
-      (entry) => entry.songs.song_id === currentSong?.song_id 
+    if (!playlist?.playlist_songs || !currentSong) return;
+    
+    const currentIndex = playlist.playlist_songs.findIndex(
+      (entry) => entry.songs.song_id === currentSong.song_id
     );
-    const prevIndex =
-      (currentIndex! - 1 + playlist?.playlist_songs.length!) % //subtract by one to go back
-      playlist?.playlist_songs.length!;
-    const prevSong = playlist?.playlist_songs[prevIndex]?.songs;
-    playSong(prevSong!); //play
+    
+    if (currentIndex === -1) return;
+    
+    const prevIndex = (currentIndex - 1 + playlist.playlist_songs.length) % playlist.playlist_songs.length;
+    const prevSong = playlist.playlist_songs[prevIndex]?.songs;
+    if (prevSong) playSong(prevSong);
   };
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
