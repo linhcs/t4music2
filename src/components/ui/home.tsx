@@ -13,8 +13,9 @@ import PlayBar from "@/components/ui/playBar";
 const ListenerHome = () => {
   const router = useRouter();
   const { username, toggleLike, likedSongs, playlists } = useUserStore();
-  const { setSong, currentSong, isPlaying } = usePlayerStore();
+  const { setSong } = usePlayerStore();
   const searchParams = useSearchParams();
+  console.log(setSong)// can delete later
 
   const [songs, setSongs] = useState<Song[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
