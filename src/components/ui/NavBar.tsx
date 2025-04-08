@@ -13,8 +13,10 @@ export default function NavBar() {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<{ username: string; user_id: number; pfp?: string }[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const username = useUserStore((state) => state.username); // not too sure if this is right cries
 
-  useEffect(() => {
+
+   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
       if (!searchTerm.trim()) {
         setResults([]);
@@ -129,6 +131,13 @@ export default function NavBar() {
             </Menu.Button>
             <Menu.Items className="absolute right-0 mt-2 w-56 bg-gray-800 rounded-md shadow-xl ring-1 ring-black ring-opacity-5">
               <div className="py-1">
+                <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-700">
+                  Logged in as{" "}
+                  <span className="text-white font-medium">
+                    {username || "User"}
+                  </span>
+                </div>
+
                 <Menu.Item>
                   <Link
                     href={role === "artist" ? "/profile/artist" : "/profile/user"}
@@ -137,6 +146,7 @@ export default function NavBar() {
                     Profile
                   </Link>
                 </Menu.Item>
+
                 <Menu.Item>
                   <Link
                     href="/settings"
