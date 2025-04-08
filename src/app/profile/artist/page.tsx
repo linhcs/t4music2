@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import NavBar from '@/components/ui/NavBar';
 import ArtistCard from '../components/Artist/ArtistCard';
 import ArtistAlbums from '../components/Artist/ArtistAlbums';
-import TopTracks from '../components/Artist/TopTracks';
+import TopTracks from '../components/Artist/ArtistTopTracks';
 import ArtistBio from '../components/Artist/ArtistBio';
 import ReportsButton from '../components/ReportsButton';
 import ProfileSettingsButton from '../components/ProfileSettingsButton';

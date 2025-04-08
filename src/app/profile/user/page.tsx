@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import TopTracks from "@/app/profile/components/User/TopTracks";
+import ArtistTopTracks from "../components/Artist/ArtistTopTracks";
 import TopArtists from "@/app/profile/components/User/TopArtists";
 import UserPlaylists from "@/app/profile/components/User/UserPlaylists";
 import Sidebar from "@/components/ui/Sidebar";
@@ -13,12 +14,13 @@ import ChangeProfilePic from "@/components/ui/changepfp";
 import dynamic from "next/dynamic";
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import cuteAnimation from "@/assets/cute_animation.json";
+import ArtistAlbums from "../components/Artist/ArtistAlbums";
 
 export default function ListenerUserProfile() {
   const {
     username,
     pfp,
-    // role,
+    role,
     playlistCount,
     followers,
     following,
@@ -114,12 +116,14 @@ export default function ListenerUserProfile() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">Top tracks this month</h2>
-            <TopTracks />
+            <h2 className="text-2xl font-bold mb-4">
+              {role === "artist" ? "Your Top Tracks" : "Top Tracks This Month"}
+            </h2>
+            {role === "artist" ? <ArtistTopTracks /> : <TopTracks />}
           </section>
 
           <section>
-            <UserPlaylists />
+            {role === "artist" ? <ArtistAlbums /> : <UserPlaylists />}
           </section>
         </main>
       </div>

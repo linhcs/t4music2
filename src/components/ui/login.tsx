@@ -15,7 +15,7 @@ export default function Login() {
   useEffect(() => {
     if (user_id) {
       if (role === "listener") router.push("/home");
-      else if (role === "artist") router.push("/profile/artist");
+      else if (role === "artist") router.push("/profile/user");
       else if (role === "admin") router.push("/reportadmin");
       else router.push("/home");
     }
