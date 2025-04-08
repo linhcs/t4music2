@@ -16,7 +16,7 @@ export default function ChangeProfilePic ({ currentPfp, userId, onUploadComplete
     useEffect(() => {
       setPreviewUrl(currentPfp);
     }, [currentPfp]);
-    
+
     const handleUpload = async (file: File) => {
         setIsUploading(true);
         try {
@@ -35,6 +35,7 @@ export default function ChangeProfilePic ({ currentPfp, userId, onUploadComplete
     
           const { url } = await response.json(); //get image url and update zustand
           onUploadComplete(url);
+          window.location.reload();
         } catch (error) {
           console.error("Upload error:", error);
           setPreviewUrl(currentPfp);

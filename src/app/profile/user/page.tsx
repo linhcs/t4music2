@@ -9,6 +9,7 @@ import Sidebar from "@/components/ui/Sidebar";
 import NavBar from "@/components/ui/NavBar";
 import { useAudioPlayer } from "@/context/AudioContext"; // Global hook for audio player
 import PlayBar from "@/components/ui/playBar"; // Import the PlayBar component
+import ChangeProfilePic from "@/components/ui/changepfp"; //to change pfp
 
 export default function ListenerUserProfile() {
   const {
@@ -18,6 +19,7 @@ export default function ListenerUserProfile() {
     playlistCount,
     followers,
     following,
+    user_id,
     setUser,
     setLikedSongs,
     setPlaylists,
@@ -26,6 +28,7 @@ export default function ListenerUserProfile() {
     setTopTracks,
     setFollowers,
     setFollowing,
+    setPfp
   } = useUserStore();
   console.log(role)// you can delete later
 
@@ -47,7 +50,7 @@ export default function ListenerUserProfile() {
       setFollowers(data.followers.length); // idk if it should be length or just followers..
       setFollowing(data.following.length);
       setPlaylistCount(data.playlists.length);
-
+      setPfp(data.pfp);
       setLoading(false);
     }
 
@@ -59,7 +62,7 @@ export default function ListenerUserProfile() {
     setStreamingHistory,
     setTopTracks,
     setFollowers,
-    setFollowing,
+    setFollowing, setPfp
   ]);
 
   if (loading) {
@@ -77,11 +80,11 @@ export default function ListenerUserProfile() {
         <NavBar />
         <main className="p-6 space-y-10">
           <div className="flex gap-6 items-center">
-            <img
-              src={pfp || "/default-pfp.jpg"}
-              alt="Profile"
-              className="w-28 h-28 rounded-full object-cover border-4 border-purple-500 shadow-xl"
-            />
+        <ChangeProfilePic
+          currentPfp={pfp || "/default_pfp.jpg"}
+          userId={user_id? user_id : 1}
+          onUploadComplete={(url) => setPfp(url)}
+          />
             <div>
               <p className="text-sm uppercase text-gray-400 font-semibold">
                 Profile
