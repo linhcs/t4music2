@@ -40,6 +40,26 @@ export default function PlaylistPage() {
     if (id) fetchPlaylist();
   }, [id]);
 
+  const handleSkipNext = () => { 
+    const currentIndex = playlist?.playlist_songs.findIndex( //find current song index in playlist
+      (entry) => entry.songs.song_id === currentSong?.song_id
+    );
+    const nextIndex = (currentIndex! + 1) % playlist?.playlist_songs.length!; //add by one % size of playlist, so restart playlist if at end
+    const nextSong = playlist?.playlist_songs[nextIndex]?.songs;
+    playSong(nextSong!); //start next song
+  };
+
+  const handleSkipPrevious = () => {
+    const currentIndex = playlist?.playlist_songs.findIndex( //find index
+      (entry) => entry.songs.song_id === currentSong?.song_id 
+    );
+    const prevIndex =
+      (currentIndex! - 1 + playlist?.playlist_songs.length!) % //subtract by one to go back
+      playlist?.playlist_songs.length!;
+    const prevSong = playlist?.playlist_songs[prevIndex]?.songs;
+    playSong(prevSong!); //play
+  };
+
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!audioRef.current || !currentSong) return;
     
@@ -204,6 +224,8 @@ export default function PlaylistPage() {
               }
             }}
             onSeek={handleSeek}
+            onSkipNext={handleSkipNext}
+            onSkipPrevious={handleSkipPrevious}
           />
         </>
       )}
