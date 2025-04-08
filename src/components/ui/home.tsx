@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
-import { FiPlayCircle, FiPauseCircle, FiSearch } from "react-icons/fi";
+import { FiPlayCircle, FiPauseCircle, FiSearch,  } from "react-icons/fi";
 import { FaTimes } from "react-icons/fa";
-import { useUserStore } from "@/store/useUserStore";
+import { useUserStore, usePlayerStore } from "@/store/useUserStore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Song } from "../../../types";
 import { useAudioPlayer } from "@/context/AudioContext";
@@ -14,7 +14,9 @@ import PlayBar from "@/components/ui/playBar";
 const ListenerHome = () => {
   const router = useRouter();
   const { username, toggleLike, likedSongs, playlists } = useUserStore();
+  const { setSong } = usePlayerStore();
   const searchParams = useSearchParams();
+  console.log(setSong)// can delete later
 
   const [songs, setSongs] = useState<Song[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,7 +64,6 @@ const ListenerHome = () => {
     const fetchData = async () => {
       try {
         const response = await fetch("/api/songs");
-        if (!response.ok) throw new Error("Failed to fetch songs");
         const data: Song[] = await response.json();
         setSongs(data);
       } catch (error) {
@@ -92,7 +93,6 @@ const ListenerHome = () => {
     setIsSearching(true);
     try {
       const response = await fetch(`/api/songs/search?q=${encodeURIComponent(query)}`);
-      if (!response.ok) throw new Error("Search failed");
       const data = await response.json();
       setSearchResults(data.songs);
     } catch (error) {
@@ -101,6 +101,16 @@ const ListenerHome = () => {
       setIsSearching(false);
     }
   };
+
+  useEffect(() => {
+    const search = searchParams.get("search");
+    if (search) {
+      setSearchQuery(search);
+      handleSearch(search);
+    }
+  }, [searchParams, handleSearch]);
+
+
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -167,7 +177,7 @@ const ListenerHome = () => {
     <div className="flex min-h-screen bg-black text-white">
       <Sidebar username={username} />
       <div className="flex flex-col flex-1 min-w-0">
-        <NavBar role="listener" />
+        <NavBar />
         <main className="p-6 overflow-auto">
           <div className="relative mb-8 group">
             <div className="relative flex items-center group">
@@ -229,7 +239,7 @@ const ListenerHome = () => {
                     body: JSON.stringify({ username, songId: song.song_id }),
                   });
                 } catch (err) {
-                  console.error("Failed to sync like to DB:", err);
+                  console.error("Failed to sync like:", err);
                 }
                 setContextMenu(null);
               }}

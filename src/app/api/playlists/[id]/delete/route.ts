@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@prisma/script";
+import { prisma } from "@/lib/prisma";
+import { extractParamFromUrl } from "@/lib/utils";
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  const playlistId = parseInt(params.id);
-
+export async function DELETE(req: Request) {
   try {
+    const idStr = extractParamFromUrl(req.url, "playlists");
+    const playlistId = idStr ? parseInt(idStr) : NaN;
+
+    if (isNaN(playlistId)) {
+      return NextResponse.json({ error: "Invalid playlist ID." }, { status: 400 });
+    }
+
     await prisma.playlists.delete({
       where: { playlist_id: playlistId },
     });

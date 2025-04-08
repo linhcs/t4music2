@@ -10,7 +10,9 @@ export async function createPlaylist(name: string, user_id: number, playlist_art
   const data = await res.json();
   console.log("API response:", data);
 
-  if (!res.ok) throw new Error("Failed to create playlist");
+  if (!res.ok) {
+    throw new Error("Failed to create playlist");
+  }
 
-  return data;
+  return res.json();
 }
