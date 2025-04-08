@@ -6,6 +6,8 @@ import AddSongModal from "@/app/profile/components/User/AddSongModal";
 import Image from "next/image";
 import PlayBar from "@/components/ui/playBar";
 import { Song } from "@/types";
+import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
+import { useAudioPlayer } from "@/context/AudioContext";
 
 interface Playlist {
   playlist_id: number;
@@ -24,10 +26,9 @@ export default function PlaylistPage() {
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  const [currentSong, setCurrentSong] = useState<Song | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { currentSong, isPlaying, playSong, togglePlayPause } = useAudioPlayer();
 
   const fetchPlaylist = async () => {
     const res = await fetch(`/api/playlists/${id}`);
@@ -39,32 +40,19 @@ export default function PlaylistPage() {
     if (id) fetchPlaylist();
   }, [id]);
 
-  const handlePlay = (song: Song) => {
-    setCurrentSong(song);
-    setIsPlaying(true);
-    setTimeout(() => {
-      audioRef.current?.play();
-    }, 100);
-  };
-
-  const handlePlayPause = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current) return;
-    const rect = (e.target as HTMLDivElement).getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    const newTime = (clickX / width) * audioRef.current.duration;
-    audioRef.current.currentTime = newTime;
+    if (!audioRef.current || !currentSong) return;
+    
+    const bar = e.currentTarget;
+    const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
+    
+    if (audioRef.current && !isNaN(audioRef.current.duration)) {
+      const newTime = percent * audioRef.current.duration;
+      if (isFinite(newTime)) {
+        audioRef.current.currentTime = newTime;
+        setProgress(percent * 100);
+      }
+    }
   };
 
   useEffect(() => {
@@ -155,11 +143,21 @@ export default function PlaylistPage() {
                   <p className="text-sm text-gray-500 group-hover:text-gray-400">{song.genre}</p>
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => handlePlay(song)}
+                <button
+                    onClick={() => {
+                      if (currentSong?.song_id === song.song_id) {
+                        togglePlayPause(); //play pause same song
+                      } else {
+                        playSong(song); //play new song
+                      }
+                    }}
                     className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full hover:scale-105 text-sm shadow"
                   >
-                    ▶️ Play
+                    {isPlaying && currentSong?.song_id === song.song_id ? (
+                      <FiPauseCircle />
+                    ) : (
+                      <FiPlayCircle />
+                    )}
                   </button>
                   <button
                     onClick={() => handleRemove(song.song_id)}
@@ -188,13 +186,23 @@ export default function PlaylistPage() {
             ref={audioRef}
             src={`/${currentSong.file_path}`}
             autoPlay
-            onEnded={() => setIsPlaying(false)}
+            onEnded={() => togglePlayPause()}
           />
           <PlayBar
             currentSong={currentSong}
             isPlaying={isPlaying}
             progress={progress}
-            onPlayPause={handlePlayPause}
+            onPlayPause={() => {
+              if (isPlaying) {
+                audioRef.current?.pause();
+                togglePlayPause(); //pause
+              } else {
+                audioRef.current?.play().catch((error) => {
+                  console.error("Error playing audio:", error);
+                });
+                togglePlayPause(); //play
+              }
+            }}
             onSeek={handleSeek}
           />
         </>
