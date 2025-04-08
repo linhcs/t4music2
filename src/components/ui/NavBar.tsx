@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { FaHome, FaSearch, FaBell, FaUserCircle } from "react-icons/fa";
+import { FaHome, FaSearch, FaBell, FaUserCircle, FaTimes } from "react-icons/fa";
 import { useUserStore } from "@/store/useUserStore";
 
 
@@ -86,13 +86,26 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
 
         {/* Center - Search */}
         <div className="relative max-w-xl mx-auto flex-1">
+          <div className="relative flex items-center group w-full max-w-md mx-auto"> {/*added flexbox to keep search within playbar*/}
           <input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search for artists..."
-            className="w-full py-2 px-4 rounded-full bg-gray-800 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-          <FaSearch className="absolute right-4 top-2.5 text-gray-400" />
+            className="w-full py-2 px-4 rounded-full bg-gray-800 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-white
+            focus:ring-opacity-80 transition-all duration-300 ease-in-out border border-gray-700 hover:border-gray-600 group-hover:shadow-lg group-hover:shadow-white/50 truncate" 
+          /> {/*added glow effect*/}
+          {/*search bar is responsive to screen resizing*/}
+          <FaSearch className="absolute right-4 text-gray-400" />
+          {searchTerm && (
+            <button
+             onClick={() => setSearchTerm('')}
+             className="absolute right-10 text-gray-400 hover:text-white transition-colors"
+             aria-label="Clear search" >
+              <FaTimes />
+            </button>
+           )}
+          </div>
+          
 
           {showDropdown && results.length > 0 && (
             <ul className="absolute z-50 w-full bg-gray-900 mt-2 rounded-xl shadow-lg max-h-60 overflow-y-auto border border-gray-700">
@@ -117,7 +130,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
         </div>
 
         {/* Right - Notifications & Menu */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 z-50"> {/*added z-50 to ensure drop down appears in front of other elements*/}
           <Menu as="div" className="relative">
             <MenuButton className="hover:text-gray-300">
               <FaBell size={20} />

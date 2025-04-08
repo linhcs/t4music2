@@ -25,7 +25,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const store = useUserStore();
 
   const updateProgress = () => {
-    if (audioRef.current && !isNaN(audioRef.current.duration)) {
+    if (audioRef.current && !isNaN(audioRef.current.duration) && isFinite(audioRef.current.duration)) { //added additional check to ensure duration is a defined value
       setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
     }
   };
@@ -87,11 +87,16 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!audioRef.current || !currentSong) return;
+    
     const bar = e.currentTarget;
     const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
-    if (audioRef.current) {
-      audioRef.current.currentTime = percent * audioRef.current.duration;
-      setProgress(percent * 100);
+    
+    if (audioRef.current && !isNaN(audioRef.current.duration)) {
+      const newTime = percent * audioRef.current.duration;
+      if (isFinite(newTime)) {
+        audioRef.current.currentTime = newTime;
+        setProgress(percent * 100);
+      }
     }
   };
 
