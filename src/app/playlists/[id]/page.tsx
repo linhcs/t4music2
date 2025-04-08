@@ -32,7 +32,7 @@ export default function PlaylistPage() {
 
   const fetchPlaylist = useCallback(async () => {
     const res = await fetch(`/api/playlists/${id}`);
-    const data: playlisttype = await res.json();
+    const data: Playlist = await res.json();
     setPlaylist(data);
   }, [id]);
 

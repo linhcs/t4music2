@@ -1,13 +1,7 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-
-interface Artist {
-  userId: number;
-  username: string;
-  pfp?: string; 
-}
-
+import { useUserStore } from "@/store/useUserStore";
 
 export type Artist = {
   user_id: number;
