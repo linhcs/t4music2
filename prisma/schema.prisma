@@ -163,3 +163,4 @@ enum users_role {
   artist
   admin
 }
+

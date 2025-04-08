@@ -11,7 +11,7 @@ import { useAudioPlayer } from "@/context/AudioContext";
 import PlayBar from "@/components/ui/playBar";
 import ChangeProfilePic from "@/components/ui/changepfp";
 import Lottie from "lottie-react";
-import cuteAnimation from "@/assets/cute_animation.json"; // <--- your local JSON file
+import cuteAnimation from "@/assets/cute_animation.json"; 
 
 export default function ListenerUserProfile() {
   const {
@@ -32,6 +32,7 @@ export default function ListenerUserProfile() {
     setPfp,
     setPlaylistCount,
   } = useUserStore();
+  console.log(role)// you can delete later
 
   const { currentSong, isPlaying, progress, playSong } = useAudioPlayer();
   const [loading, setLoading] = useState(true);
@@ -42,13 +43,13 @@ export default function ListenerUserProfile() {
       if (!res.ok) return;
 
       const data = await res.json();
-      setUser(data.username, data.role, data.pfp, data.user_id);
+      setUser(data.username, data.role, data.pfp, data.userId);
       setLikedSongs(data.likedSongs);
       setPlaylists(data.playlists);
       setStreamingHistory(data.streamingHistory);
       setTopTracks(data.topTracks);
-      setFollowers(data.followers.length);
-      setFollowing(data.following);
+      setFollowers(data.followers.length); // idk if it should be length or just followers..
+      setFollowing(data.following.length);
       setPlaylistCount(data.playlists.length);
       setPfp(data.pfp);
 
@@ -82,7 +83,7 @@ export default function ListenerUserProfile() {
     <div className="flex min-h-screen bg-black text-white">
       <Sidebar username={username} />
       <div className="flex flex-col flex-1 min-w-0">
-        <NavBar role={role as "listener" | "artist" | "admin"} />
+        <NavBar />
         <main className="p-6 space-y-10">
           <div className="flex gap-6 items-center">
             {userId !== null && (
@@ -130,7 +131,8 @@ export default function ListenerUserProfile() {
           if (!currentSong) return;
           const bar = e.currentTarget;
           const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
-          const currentTime = percent * currentSong.duration;
+          const currentTime = percent * currentSong.duration; // Assuming `duration` exists in the song object
+          console.log(currentTime)// can be deleted later
           playSong(currentSong);
         }}
       />

@@ -39,7 +39,9 @@ export async function POST(request: Request) {
     }, ${hashedPassword}, ${role})
     `;
 
-    const user : users[] = await prisma.$queryRawUnsafe(`SELECT user_id, username, role FROM users WHERE username = '${username}'`);
+    const user: users[] = await prisma.$queryRawUnsafe(`
+      SELECT user_id, username, role FROM users WHERE username = '${username}'
+    `);
 
     if (!user || !user[0]) {
       return NextResponse.json({ error: "Failed to fetch user after signup" }, { status: 500 });

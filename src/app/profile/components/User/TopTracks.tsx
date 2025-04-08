@@ -7,7 +7,7 @@ import { Song } from "@/types";
 
 export default function TopTracks() {
   const { topTracks } = useUserStore();
-  const { currentSong, isPlaying, playSong, togglePlayPause, audioRef } = useAudioPlayer();
+  const { currentSong, isPlaying, playSong, togglePlayPause } = useAudioPlayer();
 
   if (!topTracks || topTracks.length === 0) {
     return (
@@ -16,6 +16,7 @@ export default function TopTracks() {
       </p>
     );
   }
+
   const handlePlayClick = (track: Song) => {
     if (currentSong?.song_id === track.song_id && isPlaying) {
       togglePlayPause();
@@ -47,7 +48,7 @@ export default function TopTracks() {
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-md overflow-hidden bg-gray-700">
                 <Image
-                  src={track.album?.album_art || "/default-art.jpg"}
+                  src={track.album?.album_art || "/defaultAlbumArt.png"}
                   alt={track.title}
                   width={56}
                   height={56}
