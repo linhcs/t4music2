@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { Song as song2 } from "C:/Music/t4music/types";
 
 export type Song = {
   song_id: number;
@@ -18,6 +19,7 @@ export type Song = {
     album_art?: string;
   };
 };
+
 type PlayerState = {
   currentSong: Song | null;
   isPlaying: boolean;
@@ -54,7 +56,7 @@ type UserStore = {
   playlists: Playlist[];
   streamingHistory: Song[];
   followedArtists: FollowedArtist[];
-  topTracks: Song[];
+  topTracks: song2[];
 
   // Actions
   setUser: (username: string, role: string, pfp?: string, user_id?: number | null) => void;
@@ -68,7 +70,7 @@ type UserStore = {
   setPlaylistCount: (count: number) => void;
   setFollowedArtists: (artists: FollowedArtist[]) => void;
   setFollowingList: (ids: number[]) => void;
-  setTopTracks: (songs: Song[]) => void;
+  setTopTracks: (songs: song2[]) => void;
   logout: () => void;
   toggleLike: (song: Song) => void;
 };

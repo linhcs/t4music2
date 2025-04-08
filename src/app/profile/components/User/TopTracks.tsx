@@ -2,10 +2,11 @@
 import { useUserStore } from "@/store/useUserStore";
 import Image from "next/image";
 import { useAudioPlayer } from "@/context/AudioContext";
+import { Song } from "C:/Music/t4music/types";
 
 export default function TopTracks() {
   const { topTracks } = useUserStore();
-  const { currentSong, isPlaying, playSong, pauseSong } = useAudioPlayer();
+  const { currentSong, isPlaying, playSong, togglePlayPause } = useAudioPlayer();
 
   if (!topTracks || topTracks.length === 0) {
     return (
@@ -15,9 +16,9 @@ export default function TopTracks() {
     );
   }
 
-  const handlePlayClick = (track: any) => {
+  const handlePlayClick = (track: Song) => {
     if (currentSong?.song_id === track.song_id && isPlaying) {
-      pauseSong();
+      togglePlayPause();
     } else {
       playSong(track);
     }

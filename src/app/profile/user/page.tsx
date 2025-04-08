@@ -27,6 +27,7 @@ export default function ListenerUserProfile() {
     setFollowers,
     setFollowing,
   } = useUserStore();
+  console.log(role)// you can delete later
 
   const { currentSong, isPlaying, progress, playSong } = useAudioPlayer(); // Access global audio player state
 
@@ -123,6 +124,7 @@ export default function ListenerUserProfile() {
           const bar = e.currentTarget;
           const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
           const currentTime = percent * currentSong.duration; // Assuming `duration` exists in the song object
+          console.log(currentTime)// can be deleted later
           playSong(currentSong);
         }}
       />
