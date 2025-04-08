@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
 import { FiPlayCircle, FiPauseCircle, FiSearch } from "react-icons/fi";
+import { FaTimes } from "react-icons/fa";
 import { useUserStore } from "@/store/useUserStore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Song } from "../../../types";
@@ -168,16 +169,27 @@ const ListenerHome = () => {
       <div className="flex flex-col flex-1 min-w-0">
         <NavBar role="listener" />
         <main className="p-6 overflow-auto">
-          <div className="relative mb-8">
-            <div className="relative">
+          <div className="relative mb-8 group">
+            <div className="relative flex items-center group">
               <input
                 type="text"
                 placeholder="Search songs, artists, or genres..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg 
+                focus:outline-none focus:ring-4 focus:ring-white-500 border 
+                border-gray-700 hover:border-gray-600 transition-all 
+                duration-300 group-hover:shadow-lg group-hover:shadow-white/50 truncate"
               />
               <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              {searchQuery && (
+                <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-10 text-gray-400 hover:text-white transition-colors"
+                aria-label="Clear search" >
+                  <FaTimes />
+                </button>
+              )}
             </div>
           </div>
 
