@@ -14,17 +14,18 @@ type Album = {
 export default function ArtistAlbums() {
   const { user_id, isLoggedIn } = useUserStore();
   const [albums, setAlbums] = useState<Album[]>([]);
+  console.log(user_id)// feel free to delete later
   //const [showModal, setShowModal] = useState(false); // optional for "add album" modal
 
   useEffect(() => {
     async function fetchAlbums() {
-      const res = await fetch(`/api/albums/user/${userId}`);
+      const res = await fetch(`/api/albums/user/${user_id}`);
       const data = await res.json();
       setAlbums(data);
     }
 
     if (isLoggedIn) fetchAlbums();
-  }, [userId, isLoggedIn]);
+  }, [user_id, isLoggedIn]);
 
   const handleDelete = async (albumId: number) => {
     const confirm = window.confirm("Are you sure you want to delete this album?");

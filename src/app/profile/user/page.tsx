@@ -9,7 +9,6 @@ import Sidebar from "@/components/ui/Sidebar";
 import NavBar from "@/components/ui/NavBar";
 import { useAudioPlayer } from "@/context/AudioContext"; // Global hook for audio player
 import PlayBar from "@/components/ui/playBar"; // Import the PlayBar component
-import ChangeProfilePic from "@/components/ui/changepfp"; //to change pfp
 
 export default function ListenerUserProfile() {
   const {
@@ -19,7 +18,6 @@ export default function ListenerUserProfile() {
     playlistCount,
     followers,
     following,
-    user_id,
     setUser,
     setLikedSongs,
     setPlaylists,
@@ -28,7 +26,6 @@ export default function ListenerUserProfile() {
     setTopTracks,
     setFollowers,
     setFollowing,
-    setPfp
   } = useUserStore();
   console.log(role)// you can delete later
 
@@ -50,7 +47,7 @@ export default function ListenerUserProfile() {
       setFollowers(data.followers.length); // idk if it should be length or just followers..
       setFollowing(data.following.length);
       setPlaylistCount(data.playlists.length);
-      setPfp(data.pfp);
+
       setLoading(false);
     }
 
@@ -62,7 +59,7 @@ export default function ListenerUserProfile() {
     setStreamingHistory,
     setTopTracks,
     setFollowers,
-    setFollowing, setPfp
+    setFollowing,
   ]);
 
   if (loading) {
@@ -80,11 +77,11 @@ export default function ListenerUserProfile() {
         <NavBar />
         <main className="p-6 space-y-10">
           <div className="flex gap-6 items-center">
-        <ChangeProfilePic
-          currentPfp={pfp || "/default_pfp.jpg"}
-          userId={user_id? user_id : 1}
-          onUploadComplete={(url) => setPfp(url)}
-          />
+            <img
+              src={pfp || "/default-pfp.jpg"}
+              alt="Profile"
+              className="w-28 h-28 rounded-full object-cover border-4 border-purple-500 shadow-xl"
+            />
             <div>
               <p className="text-sm uppercase text-gray-400 font-semibold">
                 Profile
@@ -127,11 +124,7 @@ export default function ListenerUserProfile() {
           const bar = e.currentTarget;
           const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
           const currentTime = percent * currentSong.duration; // Assuming `duration` exists in the song object
-<<<<<<< HEAD
-          console.log(currentTime);// fixing error you can delete later
-=======
           console.log(currentTime)// can be deleted later
->>>>>>> 13bdd3376bd81576d72479f8259ba2eb9be422b0
           playSong(currentSong);
         }}
       />
