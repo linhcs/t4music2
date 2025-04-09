@@ -91,26 +91,26 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
         </Link>
 
     <div ref={searchRef} className="relative max-w-xl mx-auto flex-1">
-          <div className="relative flex items-center group w-full max-w-md mx-auto">
-            <input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search for songs, artists, albums, genres..."
-              className="w-full py-2 px-4 rounded-full bg-gray-800 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-white
-              focus:ring-opacity-80 transition-all duration-300 ease-in-out border border-gray-700 hover:border-gray-600 group-hover:shadow-lg group-hover:shadow-white/50 truncate"
-            />
-            <FaSearch className="absolute right-4 text-white" />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm("")}
-                className="absolute right-10 text-gray-400 hover:text-white transition-colors"
-                aria-label="Clear search"
-              >
-                <FaTimes />
-              </button>
-            )}
-          </div>
-
+    <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 p-[1px] rounded-xl w-full max-w-xl mx-auto">
+  <div className="relative flex items-center group bg-black rounded-xl">
+    <input
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      placeholder="Search for songs, artists, albums, genres..."
+      className="w-full py-2 px-4 bg-black text-white placeholder-white rounded-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-80 transition-all duration-300 ease-in-out truncate"
+    />
+    <FaSearch className="absolute right-4 text-white" />
+    {searchTerm && (
+      <button
+        onClick={() => setSearchTerm("")}
+        className="absolute right-10 text-gray-400 hover:text-white transition-colors"
+        aria-label="Clear search"
+      >
+        <FaTimes />
+      </button>
+    )}
+  </div>
+</div>
           {showDropdown && (
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-full max-w-md z-50">
               <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 p-[1px] rounded-xl shadow-xl">

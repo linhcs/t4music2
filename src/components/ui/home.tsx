@@ -13,6 +13,7 @@ import dynamic from "next/dynamic";
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import cuteAnimation from "@/assets/cute_animation.json";
 import YourLibrary from "@/components/ui/YourLibrary";
+import { useRef } from "react";
 
 const ListenerHome = () => {
   const router = useRouter();
@@ -23,7 +24,7 @@ const ListenerHome = () => {
   const [recommendedSongs, setRecommendedSongs] = useState<Song[]>([]);
   const [hasMounted, setHasMounted] = useState(false);
   const [loading, setLoading] = useState(true);
-
+  const contextMenuRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -42,8 +43,27 @@ const ListenerHome = () => {
   } = useAudioPlayer();
 
   useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        contextMenuRef.current &&
+        !contextMenuRef.current.contains(event.target as Node)
+      ) {
+        setContextMenu(null);
+      }
+    }
+  
+    if (contextMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+  
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [contextMenu]);
+  
+  useEffect(() => {
     async function fetchUserData() {
-      const res = await fetch("/api/user/profile", { cache: "no-store" });
+      const res = await fetch("/api/user/me", { cache: "no-store" });
       if (!res.ok) return;
       const data = await res.json();
       const store = useUserStore.getState();
@@ -168,11 +188,11 @@ const ListenerHome = () => {
       </div>
 
       {contextMenu && (
-        <div
-          className="fixed bg-gray-800 text-white rounded shadow-lg z-50"
-          style={{ top: contextMenu.y, left: contextMenu.x }}
-          onClick={() => setContextMenu(null)}
-        >
+     <div
+     ref={contextMenuRef}
+     className="fixed bg-gray-800 text-white rounded shadow-lg z-50"
+     style={{ top: contextMenu.y, left: contextMenu.x }}
+   >   
           <ul>
             <li
               className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
@@ -218,7 +238,7 @@ const ListenerHome = () => {
                 key={playlist.playlist_id}
                 className="text-white hover:bg-gray-700 p-2 rounded cursor-pointer"
                 onClick={() => {
-                  fetch("/api/playlist/add", {
+                  fetch(`/api/playlists/${playlist.playlist_id}/add-song`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
