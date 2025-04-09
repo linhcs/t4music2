@@ -85,7 +85,7 @@ export default function PlaylistPage() {
         <Image
           src={
             isLikedPlaylist
-              ? "/albumArt/liked-default.png"
+              ? "/likedsong/liked_songs.jpg"
               : playlist?.playlist_art || "/artist-banner.jpg"
           }
           alt="Cover"

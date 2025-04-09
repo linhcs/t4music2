@@ -1,15 +1,12 @@
 import { prisma } from "@prisma/script";
 import { NextRequest, NextResponse } from "next/server";
 
-// If you're using bcrypt to hash passwords (recommended)
-import bcrypt from "bcryptjs"; // Optional but encouraged
-
+import bcrypt from "bcryptjs"; 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { username, password } = body;
 
-    // Fetch user from DB
     const user = await prisma.users.findUnique({
       where: { username },
       select: {
@@ -17,7 +14,7 @@ export async function POST(req: NextRequest) {
         username: true,
         role: true,
         pfp: true,
-        password_hash: true, // this should be hashed
+        password_hash: true, 
       },
     });
 
@@ -25,7 +22,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    // ✅ If using bcrypt for password security:
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatch) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
