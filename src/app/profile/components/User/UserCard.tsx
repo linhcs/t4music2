@@ -28,7 +28,14 @@ export default function UserCard() {
   return (
     <div className="relative">
       <div className="flex items-center gap-8 ">
-      <div className="flex flex-col gap-2">
+        {user_id !== null && (
+          <ChangeProfilePic
+            currentPfp={pfp || "/default_pfp.jpg"}
+            userId={user_id}
+            onUploadComplete={(url) => setPfp(url)}
+          />
+        )}
+              <div className="flex flex-col gap-2">
             <div>
               <p className="text-sm uppercase text-gray-400 font-semibold">Profile</p>
               <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500">
@@ -41,13 +48,6 @@ export default function UserCard() {
               </div>
             </div>
         </div>
-        {user_id !== null && (
-          <ChangeProfilePic
-            currentPfp={pfp || "/default_pfp.jpg"}
-            userId={user_id}
-            onUploadComplete={(url) => setPfp(url)}
-          />
-        )}
       </div>
     </div>
   );

@@ -47,15 +47,17 @@ export default function ChangeProfilePic ({ currentPfp, userId, onUploadComplete
       return (
         <div className="relative w-40 h-40">
           {/*profile picture*/}
-          <div className="w-40 h-40 rounded-full bg-black border-4 border-white overflow-hidden shadow-xl">
-            <Image
-              src={previewUrl || "/default_pfp.jpg"}
-              alt="Profile"
-              width={160}
-              height={160}
-              className="object-cover w-full h-full"
-              key={previewUrl}
-            />
+          <div className="w-full h-full rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-blue-500 p-1 shadow-xl">
+            <div className="w-full h-full rounded-full overflow-hidden">
+              <Image
+                src={previewUrl || "/default_pfp.jpg"}
+                alt="Profile"
+                width={160}
+                height={160}
+                className="object-cover w-full h-full rounded-full"
+                key={previewUrl}
+              />
+            </div>
           </div>
 
           <button
