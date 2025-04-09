@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
+import { FaArrowLeft } from "react-icons/fa";
 
 export default function CreateAlbumPage() {
   const { user_id } = useUserStore();
@@ -44,6 +45,14 @@ export default function CreateAlbumPage() {
 
   return (
     <div className="min-h-screen bg-black text-white p-8 flex flex-col items-center">
+      {/* Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="self-start mb-4 text-sm text-gray-400 hover:text-white flex items-center gap-2"
+      >
+        <FaArrowLeft /> Back
+      </button>
+
       <h1 className="text-4xl font-bold mb-6">🎶 Create a New Album</h1>
 
       <form

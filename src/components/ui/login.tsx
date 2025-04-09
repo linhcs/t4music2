@@ -5,21 +5,42 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 
 export default function Login() {
-  const { user_id, role } = useUserStore();
+  const router = useRouter();
+  const store = useUserStore.getState();
+
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  
   useEffect(() => {
-    if (user_id) {
-      if (role === "listener") router.push("/home");
-      else if (role === "artist") router.push("/profile/artist");
-      else if (role === "admin") router.push("/reportadmin");
-      else router.push("/home");
-    }
-  }, [user_id, role, router]);
+    const verifyUser = async () => {
+      try {
+        const res = await fetch("/api/user/me", { credentials: "include" });
+        if (!res.ok) return; // if user not logged in, stay on login page
+
+        const user = await res.json();
+
+        store.setUser(user.username, user.role, user.pfp || "", user.user_id);
+        store.setLikedSongs(user.likedSongs || []);
+        store.setPlaylists(user.playlists || []);
+        store.setStreamingHistory(user.streamingHistory || []);
+        store.setTopTracks(user.topTracks || []);
+        store.setFollowedArtists(user.topArtists || []);
+        store.setFollowers(user.followers?.length || 0);
+        store.setFollowing(user.following?.length || 0);
+
+        // Redirect based on role
+        if (user.role === "listener") router.push("/home");
+        else if (user.role === "artist") router.push("/profile/artist");
+        else if (user.role === "admin") router.push("/reportadmin");
+        else router.push("/home");
+      } catch (err) {
+        console.log("User not logged in or error verifying:", err);
+      }
+    };
+
+    verifyUser();
+  }, [router, store]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,36 +50,38 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
-  
+
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
-  
+
       const loginData = await res.json();
       if (!res.ok) throw new Error(loginData.error || "Invalid credentials");
-  
-      const userRes = await fetch("/api/user/me");
+
+      const userRes = await fetch("/api/user/me", { credentials: "include" });
       const userData = await userRes.json();
       if (!userRes.ok) throw new Error("Failed to load user data");
-  
-      const store = useUserStore.getState();
-      store.setUser(userData.username, userData.role, userData.pfp || "", userData.user_id);
-      store.setLikedSongs(userData.likedSongs);
-      store.setPlaylists(userData.playlists);
-      store.setStreamingHistory(userData.streamingHistory);
-      store.setTopTracks(userData.topTracks);
 
-  
+      store.setUser(userData.username, userData.role, userData.pfp || "", userData.user_id);
+      store.setLikedSongs(userData.likedSongs || []);
+      store.setPlaylists(userData.playlists || []);
+      store.setStreamingHistory(userData.streamingHistory || []);
+      store.setTopTracks(userData.topTracks || []);
+      store.setFollowedArtists(userData.topArtists || []);
+      store.setFollowers(userData.followers?.length || 0);
+      store.setFollowing(userData.following?.length || 0);
+
       alert("Login successful! Welcome to Amplifi 🎧");
-  
+
       if (userData.role === "listener") router.push("/home");
       else if (userData.role === "artist") router.push("/profile/artist");
       else if (userData.role === "admin") router.push("/reportadmin");
       else router.push("/home");
-  
+
     } catch (error) {
       if (error instanceof Error) setError(error.message);
       else setError("Unknown error occurred");
@@ -66,7 +89,7 @@ export default function Login() {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
       <div className="neon-card relative flex flex-col items-center justify-center w-full max-w-md p-8 rounded-xl shadow-lg space-y-6 border border-gray-800 animate-gradient">
