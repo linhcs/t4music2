@@ -44,12 +44,8 @@ export default function Sidebar() {
           <FaHeart />
           {isOpen && <span>Liked Songs</span>}
         </Link>
-        {/* <Link href="/home" className="flex items-center gap-3 hover:text-purple-400 transition-all duration-100 ease-in-out"> */}
-          {/* <FaMusic /> */}
-          {/* {isOpen && <span>Browse Music</span>} */}
-        {/* </Link> */}
         {role === "artist" && (
-          <Link href="/upload" className="flex items-center gap-3 hover:text-green-400">
+          <Link href="/fileupload" className="flex items-center gap-3 hover:text-green-400 transition-all duration-100 ease-in-out">
             <FaUpload />
             {isOpen && <span>Upload Song</span>}
           </Link>
