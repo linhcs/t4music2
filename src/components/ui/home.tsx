@@ -20,7 +20,7 @@ const ListenerHome = () => {
   const { setSong } = usePlayerStore();
   const searchParams = useSearchParams();
   console.log(setSong)// can delete later
-
+  const [popularSongs, setPopularSongs] = useState<Song[]>([]);
   const [songs, setSongs] = useState<Song[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Song[]>([]);
@@ -75,9 +75,21 @@ const ListenerHome = () => {
         setLoading(false);
       }
     };
+  
+    const fetchPopularSongs = async () => {
+      try {
+        const response = await fetch("/api/songs/popular");
+        const data: Song[] = await response.json();
+        setPopularSongs(data);
+      } catch (error) {
+        console.error("Failed to fetch popular songs:", error);
+      }
+    };
+  
     fetchData();
+    fetchPopularSongs();
   }, []);
-
+  
   useEffect(() => {
     const search = searchParams.get("search");
     if (search) {
@@ -217,7 +229,7 @@ const ListenerHome = () => {
           ) : (
             <>
               <SongGallerySection title="Recently Added" items={songs.slice(0, 5)} />
-              <SongGallerySection title="Popular Songs" items={songs.slice(0, 5)} />
+              <SongGallerySection title="Popular Songs" items={popularSongs.slice(0, 5)} />
               <SongGallerySection title="Your Library" items={songs.slice(0, 5)} />
               <SongGallerySection title="Recommended For You" items={songs.slice(0, 5)} />
             </>

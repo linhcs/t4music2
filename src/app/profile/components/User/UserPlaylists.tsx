@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import { createPlaylist } from "@/app/actions/createPlaylist";
@@ -6,37 +7,58 @@ import Link from "next/link";
 import Image from "next/image";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import CreatePlaylistModal from "./CreatePlaylistModal";
+import PlayBar from "@/components/ui/playBar";
+import { useAudioPlayer } from "@/context/AudioContext";
 
 type Playlist = {
-  playlist_id: number;
+  playlist_id: number | string;
   name: string;
   playlist_art?: string;
+  isLiked?: boolean;
 };
 
 export default function UserPlaylists() {
-  const { username, isLoggedIn, user_id } = useUserStore();
+  const { username, isLoggedIn, user_id, likedSongs } = useUserStore();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [showModal, setShowModal] = useState(false);
+
+  const {
+    currentSong,
+    isPlaying,
+    progress,
+    // playSong,
+    togglePlayPause,
+    handleSeek
+  } = useAudioPlayer();
 
   useEffect(() => {
     async function fetchPlaylists() {
       const res = await fetch(`/api/playlists/user/${username}`);
       const data = await res.json();
-      setPlaylists(data);
+
+      const likedPlaylist = {
+        playlist_id: "liked",
+        name: "💗 Liked Songs",
+        playlist_art: "/albumArt/liked-default.png",
+        isLiked: true,
+      };
+
+      setPlaylists([likedPlaylist, ...data]);
     }
 
     if (isLoggedIn) fetchPlaylists();
   }, [username, isLoggedIn]);
 
   const handleCreatePlaylist = async (name: string, playlist_art: string) => {
-    if(user_id !== null)
-    {
+    if (user_id !== null) {
       const newPlaylist = await createPlaylist(name, user_id, playlist_art);
       setPlaylists([...playlists, newPlaylist]);
     }
   };
 
-  const handleDelete = async (playlistId: number) => {
+  const handleDelete = async (playlistId: number | string) => {
+    if (playlistId === "liked") return;
+
     const confirm = window.confirm("Are you sure you want to delete this playlist?");
     if (!confirm) return;
 
@@ -61,17 +83,24 @@ export default function UserPlaylists() {
             key={playlist.playlist_id}
             className="relative group min-w-[180px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 flex flex-col items-center justify-center py-4"
           >
-            {/* 🗑️ Delete Button (top right) */}
-            <button
-              onClick={() => handleDelete(playlist.playlist_id)}
-              className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
-              title="Delete playlist"
-            >
-              <FaTrashAlt size={14} />
-            </button>
+            {playlist.playlist_id !== "liked" && (
+              <button
+                onClick={() => handleDelete(playlist.playlist_id)}
+                className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+                title="Delete playlist"
+              >
+                <FaTrashAlt size={14} />
+              </button>
+            )}
 
-            {/* Playlist card with link */}
-            <Link href={`/playlists/${playlist.playlist_id}`} className="flex flex-col items-center">
+            <Link
+              href={
+                playlist.playlist_id === "liked"
+                  ? "/playlists/liked"
+                  : `/playlists/${playlist.playlist_id}`
+              }
+              className="flex flex-col items-center"
+            >
               <div className="h-36 w-36 bg-gray-800 rounded-xl overflow-hidden">
                 <Image
                   src={playlist.playlist_art || "/albumArt/defaultAlbumArt.png"}
@@ -82,11 +111,13 @@ export default function UserPlaylists() {
                 />
               </div>
               <p className="text-center py-3 font-semibold">{playlist.name}</p>
+              {playlist.playlist_id === "liked" && (
+                <p className="text-sm text-white/60">{likedSongs.length} songs</p>
+              )}
             </Link>
           </div>
         ))}
 
-        {/* ➕ Add Button */}
         <button onClick={() => setShowModal(true)}>
           <div className="min-w-[180px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center py-4">
             <div className="h-36 w-36 bg-gradient-to-b from-purple-500 via-pink-500 to-blue-400 animate-gradient rounded-xl flex items-center justify-center">
@@ -103,6 +134,14 @@ export default function UserPlaylists() {
           onCreate={handleCreatePlaylist}
         />
       )}
+
+      <PlayBar
+        currentSong={currentSong}
+        isPlaying={isPlaying}
+        progress={progress}
+        onPlayPause={() => currentSong && togglePlayPause()}
+        onSeek={handleSeek}
+      />
     </div>
   );
 }
