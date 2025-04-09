@@ -15,6 +15,7 @@ import dynamic from "next/dynamic";
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import cuteAnimation from "@/assets/cute_animation.json";
 import ArtistAlbums from "../components/Artist/ArtistAlbums";
+import UserCard from "../components/User/UserCard";
 
 console.log(ChangeProfilePic)
 export default function ListenerUserProfile() {
@@ -92,22 +93,7 @@ export default function ListenerUserProfile() {
         <NavBar />
         <main className="p-6 space-y-10">
           <div className="flex gap-6 items-center">
-            <img
-              src={pfp || "/default-pfp.jpg"}
-              alt="Profile"
-              className="w-28 h-28 rounded-full object-cover border-4 border-purple-500 shadow-xl"
-            />
-            <div>
-              <p className="text-sm uppercase text-gray-400 font-semibold">Profile</p>
-              <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500">
-                {username || "Loading..."}
-              </h1>
-              <div className="flex gap-4 mt-2 text-gray-400">
-                <p>{followers} followers</p>
-                <p>{following} following</p>
-                <p>{playlistCount || 0} playlists</p>
-              </div>
-            </div>
+            <UserCard></UserCard>
           </div>
 
           <section>
