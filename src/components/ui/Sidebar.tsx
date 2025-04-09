@@ -13,7 +13,6 @@ import {
 } from "react-icons/fa";
 
 export default function Sidebar() {
-  // ✅ Zustand values
   const username = useUserStore((state) => state.username);
   const role = useUserStore((state) => state.role);
   const [isOpen, setIsOpen] = useState(true);
