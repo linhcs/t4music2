@@ -3,31 +3,24 @@
 import { useState, useEffect } from "react";
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
-import { FiPlayCircle, FiPauseCircle, FiSearch,  } from "react-icons/fi";
-import { FaTimes } from "react-icons/fa";
-import { useUserStore, usePlayerStore } from "@/store/useUserStore";
-import { useRouter, useSearchParams } from "next/navigation";
+import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
+import { useUserStore } from "@/store/useUserStore";
+import { useRouter } from "next/navigation";
 import { Song } from "../../../types";
 import { useAudioPlayer } from "@/context/AudioContext";
 import PlayBar from "@/components/ui/playBar";
 import dynamic from "next/dynamic";
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
-import cuteAnimation from "@/assets/cute_animation.json"; // <--- your local JSON file
+import cuteAnimation from "@/assets/cute_animation.json";
 import YourLibrary from "@/components/ui/YourLibrary";
-// import recommendedSongs from "@/components/ui/YourLibrary";
 
 const ListenerHome = () => {
   const router = useRouter();
   const { username, toggleLike, likedSongs, playlists } = useUserStore();
-  const { setSong } = usePlayerStore();
-  const searchParams = useSearchParams();
-  console.log(setSong)// can delete later
+  // const { setSong } = usePlayerStore();
   const [popularSongs, setPopularSongs] = useState<Song[]>([]);
   const [songs, setSongs] = useState<Song[]>([]);
   const [recommendedSongs, setRecommendedSongs] = useState<Song[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Song[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -64,9 +57,10 @@ const ListenerHome = () => {
     }
     fetchUserData();
   }, []);
+
   useEffect(() => {
     setHasMounted(true);
-  
+
     const fetchData = async () => {
       try {
         const response = await fetch("/api/songs");
@@ -78,7 +72,7 @@ const ListenerHome = () => {
         setLoading(false);
       }
     };
-  
+
     const fetchPopularSongs = async () => {
       try {
         const response = await fetch("/api/songs/popular");
@@ -88,7 +82,7 @@ const ListenerHome = () => {
         console.error("Failed to fetch popular songs:", error);
       }
     };
-  
+
     const fetchRecommendedSongs = async () => {
       try {
         const response = await fetch("/api/songs/recommended");
@@ -98,55 +92,11 @@ const ListenerHome = () => {
         console.error("Failed to fetch recommended songs:", error);
       }
     };
-  
+
     fetchData();
     fetchPopularSongs();
     fetchRecommendedSongs();
   }, []);
-  
-  useEffect(() => {
-    const search = searchParams.get("search");
-    if (search) {
-      setSearchQuery(search);
-      handleSearch(search);
-    }
-  }, [searchParams]);
-
-  const handleSearch = async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
-    }
-
-    setIsSearching(true);
-    try {
-      const response = await fetch(`/api/songs/search?q=${encodeURIComponent(query)}`);
-      const data = await response.json();
-      setSearchResults(data.songs);
-    } catch (error) {
-      console.error("Search error:", error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  useEffect(() => {
-    const search = searchParams.get("search");
-    if (search) {
-      setSearchQuery(search);
-      handleSearch(search);
-    }
-  }, [searchParams, handleSearch]);
-
-
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      handleSearch(searchQuery);
-    }, 300);
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
 
   const SongGallerySection = ({ title, items }: { title: string; items: Song[] }) => (
     <section className="w-full max-w-7xl">
@@ -195,59 +145,25 @@ const ListenerHome = () => {
   );
 
   if (!hasMounted || loading) {
-      return (
-        <div className="flex min-h-screen items-center justify-center bg-black">
-          <div className="w-64 h-64">
-            <Lottie animationData={cuteAnimation} loop={true} />
-          </div>
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <div className="w-64 h-64">
+          <Lottie animationData={cuteAnimation} loop={true} />
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-black text-white">
-      <Sidebar/>
+      <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         <NavBar />
         <main className="p-6 overflow-auto">
-          <div className="relative mb-8 group">
-            <div className="relative flex items-center group">
-              <input
-                type="text"
-                placeholder="Search songs, artists, or genres..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg 
-                focus:outline-none focus:ring-4 focus:ring-white-500 border 
-                border-gray-700 hover:border-gray-600 transition-all 
-                duration-300 group-hover:shadow-lg group-hover:shadow-white/50 truncate"
-              />
-              <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              {searchQuery && (
-                <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-10 text-gray-400 hover:text-white transition-colors"
-                aria-label="Clear search" >
-                  <FaTimes />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {isSearching ? (
-            <div className="text-center py-8">Searching...</div>
-          ) : searchQuery && searchResults.length > 0 ? (
-            <SongGallerySection title="Search Results" items={searchResults} />
-          ) : searchQuery && !isSearching ? (
-            <div className="text-center py-8">No results found</div>
-          ) : (
-            <>
-              <SongGallerySection title="Recently Added" items={songs.slice(0, 5)} />
-              <SongGallerySection title="Popular Songs" items={popularSongs.slice(0, 5)} />
-              <YourLibrary />
-              <SongGallerySection title="Recommended For You" items={recommendedSongs.slice(0, 5)} />
-            </>
-          )}
+          <SongGallerySection title="Recently Added" items={songs.slice(0, 5)} />
+          <SongGallerySection title="Popular Songs" items={popularSongs.slice(0, 5)} />
+          <YourLibrary />
+          <SongGallerySection title="Recommended For You" items={recommendedSongs.slice(0, 5)} />
         </main>
       </div>
 
@@ -325,7 +241,6 @@ const ListenerHome = () => {
         </div>
       )}
 
-      {/* PlayBar (global player) */}
       <PlayBar
         currentSong={currentSong}
         isPlaying={isPlaying}
