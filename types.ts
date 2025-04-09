@@ -43,13 +43,14 @@ export interface Song {
 }
 
 export interface Playlist {
-  playlist_id: number;
-  playlist_art?: string;
+  playlist_id: number | "liked"; 
   name: string;
-  created_id: number;
-  updated_at?: Date;
-  user_id: number;
+  playlist_art?: string;
+  user_id?: number; 
+  isLiked?: boolean;
+  songs?: Song[]; 
 }
+
 
 export interface LibraryItem {
   library_id: number;

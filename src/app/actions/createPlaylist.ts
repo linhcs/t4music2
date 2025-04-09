@@ -7,12 +7,12 @@ export async function createPlaylist(name: string, user_id: number, playlist_art
     body: JSON.stringify({ name, user_id, playlist_art }),
   });
 
-  const data = await res.json();
+  const data = await res.json(); // reads body here
   console.log("API response:", data);
 
   if (!res.ok) {
     throw new Error("Failed to create playlist");
   }
 
-  return res.json();
+  return data; // previously was trying to re-read the body which messes up compilation time
 }

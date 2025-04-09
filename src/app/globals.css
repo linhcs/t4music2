@@ -314,3 +314,12 @@ h1{
   background-color: rgba(255, 154, 247, 0.8);
 }
 
+/* Hide scrollbar for Webkit */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -30,8 +30,8 @@ type PlayerState = {
   reset: () => void;
 };
 
-type Playlist = {
-  playlist_id: number;
+export type Playlist = {
+  playlist_id: number | "liked";
   name: string;
   playlist_art?: string;
 };
@@ -57,6 +57,10 @@ type UserStore = {
   streamingHistory: Song[];
   followedArtists: FollowedArtist[];
   topTracks: song2[];
+
+  // Playlist modal support
+  showPlaylistModal: boolean;
+  setShowPlaylistModal: (show: boolean) => void;
 
   // Actions
   setUser: (username: string, role: string, pfp?: string, user_id?: number | null) => void;
@@ -102,8 +106,9 @@ export const useUserStore = create<UserStore>()(
       streamingHistory: [],
       followedArtists: [],
       topTracks: [],
+      showPlaylistModal: false,
+      setShowPlaylistModal: (show) => set({ showPlaylistModal: show }),
 
-      // Setters
       setUser: (username, role, pfp = "", user_id = null) =>
         set({ username, role, pfp, user_id, isLoggedIn: true }),
       setuser_id: (id) => set({ user_id: id }),
@@ -121,11 +126,11 @@ export const useUserStore = create<UserStore>()(
       logout: () => {
         usePlayerStore.getState().reset();
         if (typeof window !== "undefined") {
-          localStorage.removeItem("user-storage"); // ✅ Clear Zustand-persisted user state
+          localStorage.removeItem("user-storage");
           localStorage.removeItem("user");
           sessionStorage.removeItem("user");
         }
-      
+
         set({
           user_id: null,
           username: "",
@@ -141,10 +146,10 @@ export const useUserStore = create<UserStore>()(
           streamingHistory: [],
           followedArtists: [],
           topTracks: [],
+          showPlaylistModal: false,
         });
       },
-      
-      // Toggle like/unlike a song
+
       toggleLike: (song) => {
         const { likedSongs } = get();
         const isLiked = likedSongs.some((s) => s.song_id === song.song_id);

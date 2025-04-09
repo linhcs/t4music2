@@ -13,6 +13,8 @@ import PlayBar from "@/components/ui/playBar";
 import dynamic from "next/dynamic";
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import cuteAnimation from "@/assets/cute_animation.json"; // <--- your local JSON file
+import YourLibrary from "@/components/ui/YourLibrary";
+// import recommendedSongs from "@/components/ui/YourLibrary";
 
 const ListenerHome = () => {
   const router = useRouter();
@@ -22,6 +24,7 @@ const ListenerHome = () => {
   console.log(setSong)// can delete later
   const [popularSongs, setPopularSongs] = useState<Song[]>([]);
   const [songs, setSongs] = useState<Song[]>([]);
+  const [recommendedSongs, setRecommendedSongs] = useState<Song[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -61,9 +64,9 @@ const ListenerHome = () => {
     }
     fetchUserData();
   }, []);
-
   useEffect(() => {
     setHasMounted(true);
+  
     const fetchData = async () => {
       try {
         const response = await fetch("/api/songs");
@@ -86,8 +89,19 @@ const ListenerHome = () => {
       }
     };
   
+    const fetchRecommendedSongs = async () => {
+      try {
+        const response = await fetch("/api/songs/recommended");
+        const data = await response.json();
+        setRecommendedSongs(data.songs);
+      } catch (error) {
+        console.error("Failed to fetch recommended songs:", error);
+      }
+    };
+  
     fetchData();
     fetchPopularSongs();
+    fetchRecommendedSongs();
   }, []);
   
   useEffect(() => {
@@ -230,8 +244,8 @@ const ListenerHome = () => {
             <>
               <SongGallerySection title="Recently Added" items={songs.slice(0, 5)} />
               <SongGallerySection title="Popular Songs" items={popularSongs.slice(0, 5)} />
-              <SongGallerySection title="Your Library" items={songs.slice(0, 5)} />
-              <SongGallerySection title="Recommended For You" items={songs.slice(0, 5)} />
+              <YourLibrary />
+              <SongGallerySection title="Recommended For You" items={recommendedSongs.slice(0, 5)} />
             </>
           )}
         </main>
