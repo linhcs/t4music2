@@ -16,6 +16,7 @@ const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import cuteAnimation from "@/assets/cute_animation.json";
 import ArtistAlbums from "../components/Artist/ArtistAlbums";
 
+console.log(ChangeProfilePic)
 export default function ListenerUserProfile() {
   const {
     username,
