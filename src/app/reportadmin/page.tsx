@@ -121,6 +121,10 @@ const ReportAdminPage = () => {
   const { role } = useUserStore();
   useEffect(() => {
     if (role !== 'admin') {
+      const store = useUserStore.getState();
+      store.logout();
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
       router.push("/login");
     }
   }, [role, router]);

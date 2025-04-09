@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation"; // Use `next/navigation` for the app directory
+import { useUserStore } from "@/store/useUserStore";
 
 const InactivityTimer = () => {
   const [isClient, setIsClient] = useState(false); // Track if the component is rendered on the client
@@ -23,6 +24,11 @@ const InactivityTimer = () => {
 
       // Handle inactivity: redirect to login page
       const handleInactivity = () => {
+        const store = useUserStore.getState();
+        store.logout();
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
+
         console.log("User is inactive. Redirecting to login...");
         router.push("/login"); // Redirect to login page (change the path if necessary)
       };

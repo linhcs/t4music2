@@ -18,6 +18,7 @@ interface genrelist{genre: string; count: bigint};
 //interface treresult {v1: bigint; v2: bigint; v3: bigint; v4: bigint; v5: bigint; v6: bigint; };
 interface artresult {id: number; name: string; f: bigint; l: bigint; sh: bigint};
 
+
 function getCurrentDateFormatted(): string {
   const date = new Date();
   const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Get month (1-12), and pad to ensure 2 digits
