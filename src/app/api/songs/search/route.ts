@@ -8,10 +8,11 @@ export async function GET(request: Request) {
   const query = searchParams.get("q");
 
   if (!query) {
-    return NextResponse.json({ songs: [] });
+    return NextResponse.json({ songs: [], artists: [] });
   }
 
   try {
+    // Raw query for songs (same as yours)
     const songs = await prisma.$queryRaw`
       SELECT 
         s.song_id,
@@ -39,11 +40,25 @@ export async function GET(request: Request) {
       ORDER BY s.uploaded_at DESC
     `;
 
-    return NextResponse.json({ songs });
+    // artist search (separate from songs)
+    const artists = await prisma.users.findMany({
+      where: {
+        role: "artist",
+        username: { contains: query},
+      },
+      select: {
+        user_id: true,
+        username: true,
+        pfp: true,
+      },
+      take: 10,
+    });
+
+    return NextResponse.json({ songs, artists });
   } catch (error) {
     console.error("Search error:", error);
     return NextResponse.json(
-      { error: "Failed to search songs" },
+      { error: "Failed to search songs and artists" },
       { status: 500 }
     );
   }
