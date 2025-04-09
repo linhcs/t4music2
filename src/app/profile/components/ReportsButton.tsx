@@ -5,20 +5,20 @@ import { useUserStore } from "@/store/useUserStore";
 
 const DownloadPDFButton: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const {username} = useUserStore();
+  const {username, user_id } = useUserStore();
+  
+
 
   const handleDownload = async () => {
     setLoading(true);
     
-
-    const response = await fetch('/api/pdfs/listner', {
+    const response = await fetch('/api/pdfs/listener', {
       method: 'POST',  // Assuming a POST request
       headers: {
         'Content-Type': 'application/json',
-    },
-        body: JSON.stringify({ username }),
+      },
+      body: JSON.stringify({ username, user_id }),
     });
-
     if (response.ok) {
       const blob = await response.blob();
       const link = document.createElement('a');

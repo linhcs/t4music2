@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from "../../../../../prisma/script";
+import { console } from 'inspector';
 
   interface artist {
     user_id: number;

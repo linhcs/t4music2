@@ -13,7 +13,7 @@ interface Song {
 }
 
 interface Album {
-  album_id: number;
+  album_id: string;
   title: string;
   album_art?: string;
   user_id: number;

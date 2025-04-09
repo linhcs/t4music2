@@ -16,6 +16,7 @@ const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import cuteAnimation from "@/assets/cute_animation.json";
 import ArtistAlbums from "../components/Artist/ArtistAlbums";
 
+console.log(ChangeProfilePic)
 export default function ListenerUserProfile() {
   const {
     username,
@@ -24,7 +25,6 @@ export default function ListenerUserProfile() {
     playlistCount,
     followers,
     following,
-    user_id,
     setUser,
     setLikedSongs,
     setPlaylists,
@@ -58,7 +58,7 @@ export default function ListenerUserProfile() {
       setFollowers(data.followers.length);
       setFollowing(data.following.length);
       setPlaylistCount(data.playlists.length);
-      setPfp(data.pfp);
+
       setLoading(false);
     }
 
@@ -92,11 +92,11 @@ export default function ListenerUserProfile() {
         <NavBar />
         <main className="p-6 space-y-10">
           <div className="flex gap-6 items-center">
-        <ChangeProfilePic
-          currentPfp={pfp || "/default_pfp.jpg"}
-          userId={user_id? user_id : 1}
-          onUploadComplete={(url) => setPfp(url)}
-          />
+            <img
+              src={pfp || "/default-pfp.jpg"}
+              alt="Profile"
+              className="w-28 h-28 rounded-full object-cover border-4 border-purple-500 shadow-xl"
+            />
             <div>
               <p className="text-sm uppercase text-gray-400 font-semibold">Profile</p>
               <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500">

@@ -2,34 +2,19 @@
 
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { listeners } from "process";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 import { useEffect, useState } from 'react';
 import InactivityTimer from "@/app/reportadmin/component/inact";
 import Form from "@/app/reportadmin/component/form";
+import HeaderSelection from '@/app/reportadmin/component/tableheader1';
+import TableSection from '@/app/reportadmin/component/table1';
+import ArtTableSection from '@/app/reportadmin/component/artistTable';
 
-interface listeners {
-  user_id: number;
-  username: string;
-}
-
-interface artists {
-  user_id: number;
-  username: string;
-}
-
-interface albums {
-  user_id: number;
-  album_id: number;
-  title: string;
-}
-
-interface songs {
-  song_id: number;
-  title: string;
-}
-
+interface listeners {user_id: number; username: string;}
+interface artists {user_id: number; username: string;}
+interface albums {user_id: number; album_id: number; title: string; }
+interface songs {song_id: number; title: string;}
 type PassedObj = listeners | artists | albums | songs;
 
 // Type guard to check if the object is an album
@@ -44,6 +29,9 @@ function isSong(obj: PassedObj): obj is songs {
 function isUser(obj: PassedObj): obj is listeners | artists {
   return (obj as listeners | artists).username !== undefined;
 }
+
+interface ReportData {q1: number; q2: number; q3: number; q4: number; q1_2: number; q2_2: number; total: number;}
+interface CategoryData {listeners: ReportData[]; artists: ReportData[]; likes: ReportData[]; follows: ReportData[]; streaminghours: ReportData[]; uploads: ReportData[];}
 
 const CheckboxTable: React.FC<{
   selectArr: boolean[];
@@ -141,6 +129,27 @@ const ReportAdminPage = () => {
   const handleArrayChange = (newArray: string[]) => {
     setArrayOfStrings(newArray);
   };
+
+  const [selectedCategory, setSelectedCategory] = useState<keyof CategoryData>('listeners');
+  const [data, setData] = useState<CategoryData>({
+    listeners: [],
+    artists: [],
+    likes: [],
+    follows: [],
+    streaminghours: [],
+    uploads: [],
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('/api/adminpage/all-data');
+      const result: CategoryData = await response.json();
+      setData(result);
+    };
+
+    fetchData();
+  }, []);
+
 
   // Initialize selectArr with 5 values (false by default)
   const [selectArr, setSelectArr] = useState([false, false, false, false, false]);
@@ -299,6 +308,7 @@ const ReportAdminPage = () => {
     const dataSongs: songs[] = await responseSongs.json();
     setsongs(dataSongs);
   };
+  
 
 
   return (
@@ -315,8 +325,8 @@ const ReportAdminPage = () => {
         </motion.h1>
       </header>
       <div className="flex space-x-10 justify-center py-20">
-        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
-          <h3 className="text-center text-lg font-bold">Listeners</h3>
+        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px] glow-outline custom-scrollbar">
+          <h3 className="text-center text-lg bg-black sticky top-0 font-bold z-10 py-2 mb-4 border glow-headers">Listeners</h3>
           <ul>
             {listeners.map((listener) => (
               <li
@@ -329,8 +339,8 @@ const ReportAdminPage = () => {
             ))}
           </ul>
         </div>
-        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
-          <h3 className="text-center text-lg font-bold">Artists</h3>
+        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px] glow-outline custom-scrollbar">
+          <h3 className="text-center text-lg bg-black sticky top-0 font-bold z-10 py-2 mb-4 border glow-headers">Artists</h3>
           <ul>
             {artists.map((artist) => (
               <li
@@ -343,8 +353,8 @@ const ReportAdminPage = () => {
             ))}
           </ul>
         </div>
-        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
-          <h3 className="text-center text-lg font-bold">Albums</h3>
+        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px] glow-outline custom-scrollbar">
+          <h3 className="text-center text-lg bg-black sticky top-0 font-bold z-10 py-2 mb-4 border glow-headers">Albums</h3>
           <ul>
             {albums.map((album) => (
               <li
@@ -358,8 +368,8 @@ const ReportAdminPage = () => {
             ))}
           </ul>
         </div>
-        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px]">
-          <h3 className="text-center text-lg font-bold">Songs</h3>
+        <div className="w-[300px] h-[400px] overflow-y-auto border border-gray-300 p-2 px-[22px] glow-outline custom-scrollbar">
+          <h3 className="text-center text-lg bg-black sticky top-0 font-bold z-10 py-2 mb-4 border glow-headers">Songs</h3>
           <ul>
             {songs.map((song) => (
               <li
@@ -389,6 +399,35 @@ const ReportAdminPage = () => {
         <div className="text-[4rem] md:text-[4rem] leading-none font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-500 animate-gradient">
           Reports
         </div>
+        <div className="min-h-screen flex flex-col bg-black text-white mt-20">
+          <div className="flex flex-row justify-start space-x-10">
+            <div className="custom-gradient-container">
+              <HeaderSelection setSelectedCategory={setSelectedCategory} />
+            </div>
+            <div className="custom-gradient-container2">
+              <TableSection selectedCategory={selectedCategory} data={data} />
+            </div>
+          </div>
+          <div className="flex flex-row justify-center space-x-10 mt-20">
+            <div className="custom-gradient-container2">
+              <ArtTableSection />
+            </div>
+          </div>
+        </div>
+        
+          
+        
+
+
+
+
+
+
+
+
+
+
+
       </header>
       <div className="flex space-x-16 justify-center mb-4">
 
