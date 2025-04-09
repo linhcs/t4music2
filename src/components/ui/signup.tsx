@@ -1,7 +1,7 @@
 "use client";
 import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 
 export default function Signup() {
@@ -14,7 +14,7 @@ export default function Signup() {
   });
 
   const [error, setError] = useState("");
-  const router = useRouter();
+  // const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -36,6 +36,7 @@ export default function Signup() {
     setError("");
 
     try {
+      // 1. Signup the user
       const signupRes = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -50,30 +51,47 @@ export default function Signup() {
       const userData = await signupRes.json();
       if (!signupRes.ok) throw new Error(userData.error || "Signup failed");
 
-      // ✅ Set Zustand user info from signup response
       const store = useUserStore.getState();
-      store.setUser(userData.user_id, userData.username, userData.role);
 
-      // ✅ Optional: load extra user data (liked songs, playlists, history)
-      const extraRes = await fetch("/api/user/data", {
+      // 2. Clear any old state
+      store.logout();
+      localStorage.removeItem("user-storage");
+
+      // 3. Log in the new user
+      const loginRes = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: userData.username }),
+        credentials: "include",
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
+
+      if (!loginRes.ok) throw new Error("Auto-login failed");
+
+      // 4. Fetch user data after login
+      const extraRes = await fetch("/api/user/me", {
+        method: "GET",
+        credentials: "include",
       });
 
       const extra = await extraRes.json();
       if (extraRes.ok) {
+        store.setUser(extra.username, extra.role, extra.pfp, extra.user_id);
         store.setLikedSongs(extra.likedSongs || []);
         store.setPlaylists(extra.playlists || []);
         store.setStreamingHistory(extra.streamingHistory || []);
+        store.setTopTracks(extra.topTracks || []);
+        store.setFollowedArtists(extra.topArtists || []);
+        store.setFollowers(extra.followers?.length || 0);
+        store.setFollowing(extra.following?.length || 0);
       }
 
       alert("Signup successful! Welcome to Amplifi 🎧");
 
-      if (userData.role === "artist") router.push("/artistprofile");
-      else if (userData.role === "listener") router.push("/home");
-
-      else router.push("/home");
+      // 5. Redirect based on role
+      window.location.href = extra.role === "artist" ? "/artistprofile" : "/home";
     } catch (err) {
       if (err instanceof Error) setError(err.message);
       else setError("An unknown error occurred.");
