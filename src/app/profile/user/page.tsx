@@ -20,12 +20,7 @@ import UserCard from "../components/User/UserCard";
 console.log(ChangeProfilePic)
 export default function ListenerUserProfile() {
   const {
-    username,
-    pfp,
     role,
-    playlistCount,
-    followers,
-    following,
     setUser,
     setLikedSongs,
     setPlaylists,
