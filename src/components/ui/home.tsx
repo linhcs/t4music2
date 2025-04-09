@@ -180,7 +180,7 @@ const ListenerHome = () => {
 
   return (
     <div className="flex min-h-screen bg-black text-white">
-      <Sidebar username={username} />
+      <Sidebar/>
       <div className="flex flex-col flex-1 min-w-0">
         <NavBar />
         <main className="p-6 overflow-auto">
