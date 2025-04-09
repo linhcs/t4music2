@@ -23,6 +23,7 @@ interface genrelist{genre: string; count: bigint};
 const prisma = new PrismaClient();
 interface pfpresult {v: string;};
 interface pfpresult {v: string;};
+interface result {v: bigint;};
 
 function getCurrentDateFormatted(): string {
   const date = new Date();
@@ -32,10 +33,18 @@ function getCurrentDateFormatted(): string {
   return `${month}-${year}`;
 }
 
+function getCurrentQuarter(): string {
+  const qconvert : string[] = ['Q1', 'Q2', 'Q3', 'Q4']
+  const month = new Date().getMonth();
+  const pos = (month < 3? 0 : (month < 6? 1 : (month < 9? 2 : 3)))
+  return `${qconvert[pos]}`;
+}
+
 export async function POST(req: Request) {
   try {
 
-    const currentDate = getCurrentDateFormatted();
+    const currentDate = getCurrentDateFormatted()
+    const currentQuarter = getCurrentQuarter();
     const { username, user_id } = await req.json();
     console.log('username: ', username);
     console.log('user_id: ', user_id);
@@ -136,7 +145,44 @@ export async function POST(req: Request) {
     page.drawText('What you need to work on:', { x:240, y:620, font, size: 20, });
     page.drawText(response[resconvert], { x:250, y:600, font, size: 12, });
 
+    page.drawLine({ start: { x: 50, y: 435 }, end: { x: 562, y: 435 }, thickness: 3,});
+    page.drawLine({ start: { x: 306, y: 560 }, end: { x: 306, y: 310 }, thickness: 3,});
+    
+    const totFollows: result[] = await prisma.$queryRaw`SELECT count(*) FROM follows WHERE user_id_b = ${user_id}`;
+    const totLikes: result[] = await prisma.$queryRaw`select count(*) from likes as L
+      join songs as S on L.song_id = S.song_id
+      where user_id = ${user_id};`;
+    const totPlaylists: result[] = await prisma.$queryRaw`select count(distinct playlist_id) from playlist_songs as L
+      join songs as S on L.song_id = S.song_id
+      where user_id = 1;`;
+    const totSH: result[] = await prisma.$queryRaw`select floor(sum(duration)/3600) from hours where user_id = 1;`;
+    console.log(totFollows,totLikes,totPlaylists,totSH) // will get to this later
 
+
+
+
+
+
+
+    page.drawText('Follows', { x:130, y:555, font, size: 20, });
+    page.drawText('Total - ', { x:102, y: 525, font, size: 14, });
+    page.drawText('New users in ' + currentQuarter + '- ', { x:88, y: 495, font, size: 14, });
+    page.drawText('Growth %', { x:112, y: 465, font, size: 14, });
+
+    page.drawText('Likes', { x:400, y:555, font, size: 20, });
+    page.drawText('Total - ', { x:402, y: 525, font, size: 14, });
+    page.drawText('New users in ' + currentQuarter + '- ', { x:408, y: 495, font, size: 14, });
+    page.drawText('Growth %', { x:412, y: 465, font, size: 14, });
+
+    page.drawText('Playlist', { x:130, y:405, font, size: 20, });
+    page.drawText('Total - ', { x:102, y: 535, font, size: 14, });
+    page.drawText('New users in ' + currentQuarter + '- ', { x:388, y: 505, font, size: 14, });
+    page.drawText('Growth %', { x:112, y: 475, font, size: 14, });
+
+    page.drawText('Streaming Hours', { x:360, y:405, font, size: 20, });
+    page.drawText('Total - ', { x:102, y: 535, font, size: 14, });
+    page.drawText('New users in ' + currentQuarter + '- ', { x:88, y: 505, font, size: 14, });
+    page.drawText('Growth %', { x:112, y: 475, font, size: 14, });
 
 
 
