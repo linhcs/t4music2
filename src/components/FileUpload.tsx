@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { getSignedURL } from "@/app/api/misc/actions";
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
@@ -9,6 +9,8 @@ import { useUserStore } from "@/store/useUserStore";
 export default function FileUpload() {
   const { user_id } = useUserStore();
   const [file, setFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [fileURL, setFileURL] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string>('');
@@ -19,6 +21,9 @@ export default function FileUpload() {
     duration: 0,
     artistName: ''
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -75,6 +80,20 @@ export default function FileUpload() {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    setImageFile(selectedFile || null);
+
+    if (imagePreview) URL.revokeObjectURL(imagePreview); //show artist preview of image before sending to db
+
+    if (selectedFile) {
+      const url = URL.createObjectURL(selectedFile);
+      setImagePreview(url);
+    } else {
+      setImagePreview(null);
+    }
+  };
+
   const computeSHA256 = async (file: File): Promise<string> => {
     const arrayBuffer = await file.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
@@ -83,6 +102,24 @@ export default function FileUpload() {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
     return hashHex;
+  };
+
+  const uploadImageToAzure = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", "album-art");
+
+    const response = await fetch("/api/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to upload image");
+    }
+
+    const data = await response.json();
+    return data.url;
   };
 
   const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -103,8 +140,18 @@ export default function FileUpload() {
     setUploadStatus('Uploading...');
 
     try {
+
+      let imageUrl: string | null = null;
+      
+      if (imageFile) {
+        setUploadStatus('Uploading album art...'); //upload image then song
+        imageUrl = await uploadImageToAzure(imageFile);
+      }
+      setUploadStatus('Preparing song upload...');
       const checksum = await computeSHA256(file);
+      
       console.log('Creating song with user_id:', user_id);
+
       const urlresult = await getSignedURL(
         file.type,
         file.size,
@@ -113,15 +160,15 @@ export default function FileUpload() {
         user_id!,
         songInfo.genre,
         songInfo.duration,
-        songInfo.albumName
+        songInfo.albumName,
+        imageUrl || undefined
       );
 
       if ("failure" in urlresult) {
         throw new Error(urlresult.failure);
       }
-
+      setUploadStatus('Uploading song file...');
       const url = urlresult.success.url;
-
       const uploadResponse = await fetch(url, {
         method: "PUT",
         body: file,
@@ -143,8 +190,13 @@ export default function FileUpload() {
         artistName: ''
       });
       setFile(null);
+      setImageFile(null);
       if (fileURL) URL.revokeObjectURL(fileURL);
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
       setFileURL(null);
+      setImagePreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (imageInputRef.current) imageInputRef.current.value = '';
     } catch (error) {
       setUploadStatus(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
@@ -247,6 +299,34 @@ export default function FileUpload() {
                       <p>Duration: {Math.floor(songInfo.duration / 60)}:
                       {(songInfo.duration % 60).toString().padStart(2, '0')}</p>
                     )}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300">
+                  Album Cover (optional)
+                </label>
+                <input
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  ref={imageInputRef}
+                  className="block w-full text-sm text-gray-400
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-500 file:text-white
+                    hover:file:bg-blue-600 transition-colors"
+                />
+                {imagePreview && (
+                  <div className="mt-2">
+                    <img 
+                      src={imagePreview} 
+                      alt="Album cover preview" 
+                      className="h-24 w-24 object-cover rounded-md"
+                    />
                   </div>
                 )}
               </div>
