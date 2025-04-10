@@ -262,10 +262,7 @@ h1{
   border-color: rgba(0, 180, 255, 0.8);  
   background-color: rgba(10, 0, 34, 0.8);  
 }
-.total-column {
-  border-width: 4px;
-  border-color: rgb(255, 255, 255);
-}
+
 
 .glow-outline {
   box-shadow: 0 0 10px rgba(255, 0, 150, 0.67), 0 0 20px rgba(0, 180, 255, 0.8), 0 0 30px rgba(167, 39, 236, 0.6);
@@ -286,7 +283,18 @@ h1{
 }
 .custom-gradient-container2 {
   width: 1000px;
-  height: 420px;
+  height: 430px;
+  padding: 12px 12px;
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.4), rgba(168, 85, 247, 0.4), rgba(244, 114, 182, 0.4));
+  border-radius: 14px; 
+  border: 3px solid rgb(0, 0, 0);  
+  box-shadow: 0 0 10px rgba(255, 0, 150, 0.67), 0 0 20px rgba(0, 180, 255, 0.8), 0 0 30px rgba(167, 39, 236, 0.6);
+  position: relative;
+}
+
+.custom-gradient-container3 {
+  width: 1000px;
+  height: 750px;
   padding: 12px 12px;
   background: linear-gradient(to right, rgba(59, 130, 246, 0.4), rgba(168, 85, 247, 0.4), rgba(244, 114, 182, 0.4));
   border-radius: 14px; 

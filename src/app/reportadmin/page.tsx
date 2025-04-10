@@ -414,26 +414,12 @@ const ReportAdminPage = () => {
               <TableSection selectedCategory={selectedCategory} data={data} />
             </div>
           </div>
-          <div className="flex flex-row justify-center space-x-10 mt-20">
-            <div className="custom-gradient-container2">
+          <div className="flex flex-row justify-center space-x-10 mt-20 h-[750px]">
+            <div className="custom-gradient-container3">
               <ArtTableSection />
             </div>
           </div>
         </div>
-        
-          
-        
-
-
-
-
-
-
-
-
-
-
-
       </header>
       <div className="flex space-x-16 justify-center mb-4">
 

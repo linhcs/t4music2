@@ -32,7 +32,7 @@ const TableSection: React.FC<TableSectionProps> = ({ selectedCategory, data }) =
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col items-center w-full"
+      className="flex flex-col items-center w-[950px] h-[200px]"
     >
         
     <header className="p-2 text-[40px]"> {selectedCategory !== 'streaminghours' ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1,9) + ' ' + selectedCategory.slice(9) } </header>
@@ -59,41 +59,41 @@ const TableSection: React.FC<TableSectionProps> = ({ selectedCategory, data }) =
         <tbody>
           {tableData.map((item, index) => (
             <tr key={index}>
-              <td className="p-2 border-4 border-black text-[20px]">{selectedCategory !== 'streaminghours' ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1,9) + ' ' + selectedCategory.slice(9) }</td>
+              <td className="p-2 border-4 border-black text-[18px]">{selectedCategory !== 'streaminghours' ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1,9) + ' ' + selectedCategory.slice(9) }</td>
               <td className="p-2 border-4 border-black ">{ item.q1 }</td>
               <td className="p-2 border-4 border-black ">{ item.q2 }</td>
               <td className="p-2 border-4 border-black ">{ item.q3 }</td>
               <td className="p-2 border-4 border-black ">{ item.q4 }</td>
               <td className="p-2 border-4 border-black ">{ item.q1_2 }</td>
               <td className="p-2 border-4 border-black ">{ item.q2_2 }</td>
-              <td className="p-2 border-4 border-black total-column">{ item.total }</td>
-              <td className="p-2 border-4 total-column text-[18px]"> Current Total </td>
+              <td className="p-2 border-4 border-white ">{ item.total }</td>
+              <td className="border-4 border-white w-2 text-lg">Current Total</td>
             </tr>
           ))}
           {tableData.map((item, index) => (
             <tr key={index}>
-              <td className="p-2 border-4 border-black text-[16px]"> {selectedCategory !== 'streaminghours' ? 'New ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'New ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1,9) + ' ' + selectedCategory.slice(9) } </td>
+              <td className="p-2 border-4 border-black text-[14px]"> {selectedCategory !== 'streaminghours' ? 'New ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'New ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1,9) + ' ' + selectedCategory.slice(9) } </td>
               <td className="p-2 border-4 border-black "> - </td>
               <td className="p-2 border-4 border-black ">{item.q2 - item.q1}</td>
               <td className="p-2 border-4 border-black ">{ item.q3 - item.q2}</td>
               <td className="p-2 border-4 border-black ">{item.q4 - item.q3}</td>
               <td className="p-2 border-4 border-black ">{item.q1_2 - item.q4}</td>
               <td className="p-2 border-4 border-black ">{item.q2_2 - item.q1_2}</td>
-              <td className="p-2 border-4 border-black total-column">{((item.q2_2 - item.q1)/5).toFixed(0)}</td>
-              <td className="p-2 border-4 total-column text-[16px]"> Avg {selectedCategory !== 'streaminghours' ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1,9) + ' ' + selectedCategory.slice(9) } Increase </td>
+              <td className="p-2 border-4 border-white ">{((item.q2_2 - item.q1)/5).toFixed(0)}</td>
+              <td className="border-4 border-white w-2 text-lg"> Avg Increase </td>
           </tr>
           ))}
           {tableData.map((item, index) => (
             <tr key={index}>
-              <td className="p-2 border-4 border-black ="> % Growth </td>
+              <td className="p-2 border-4 border-black text-[20px]"> % Growth </td>
               <td className="p-2 border-4 border-black "> - </td>
               <td className="p-2 border-4 border-black ">{((item.q2 - item.q1)/item.q1 * 100).toFixed(2)}</td>
               <td className="p-2 border-4 border-black ">{((item.q3 - item.q2)/item.q2 * 100).toFixed(2)}</td>
               <td className="p-2 border-4 border-black ">{((item.q4 - item.q3)/item.q3 * 100).toFixed(2)}</td>
               <td className="p-2 border-4 border-black ">{((item.q1_2 - item.q4)/item.q4 * 100).toFixed(2)}</td>
               <td className="p-2 border-4 border-black ">{((item.q2_2 - item.q1_2)/item.q1_2 * 100).toFixed(2)}</td>
-              <td className="p-2 border-4  total-column">{((((item.q2 - item.q1)/item.q1 * 100) + ((item.q3 - item.q2)/item.q2 * 100) + ((item.q4 - item.q3)/item.q3 * 100) + ((item.q1_2 - item.q4)/item.q4 * 100) + ((item.q2_2 - item.q1_2)/item.q1_2 * 100))/5).toFixed(2) }</td>
-              <td className="p-2 border-4 total-column text-[16px]"> Avg %Growth Increase </td>
+              <td className="p-2 border-4 border-white">{((((item.q2 - item.q1)/item.q1 * 100) + ((item.q3 - item.q2)/item.q2 * 100) + ((item.q4 - item.q3)/item.q3 * 100) + ((item.q1_2 - item.q4)/item.q4 * 100) + ((item.q2_2 - item.q1_2)/item.q1_2 * 100))/5).toFixed(2) }</td>
+              <td className="border-4 border-white w-2 text-lg"> Avg %Growth Increase </td>
             </tr>
           ))}
         </tbody>
