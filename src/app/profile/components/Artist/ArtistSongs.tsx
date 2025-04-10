@@ -1,13 +1,12 @@
 "use client";
-
+import React, { useEffect, useState } from "react";
 import { useUserStore } from "@/store/useUserStore";
-import { useEffect, useState } from "react";
 import { Song } from "@/types";
 import { useAudioPlayer } from "@/context/AudioContext";
 import { Play, Pause } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaTrashAlt } from "react-icons/fa";
 
 export default function ArtistSongs() {
   const { user_id } = useUserStore();
@@ -28,6 +27,17 @@ export default function ArtistSongs() {
     if (user_id) fetchSongs();
   }, [user_id]);
 
+  const handleDelete = async (song_id: number) => {
+    const confirmDelete = confirm("Delete this song?");
+    if (!confirmDelete) return;
+
+    const res = await fetch(`/api/songs/${song_id}`, { method: "DELETE" });
+    const result = await res.json();
+
+    if (!res.ok) return alert(result.error);
+    setSongs((prev) => prev.filter((s) => s.song_id !== song_id));
+  };
+
   return (
     <div className="flex gap-6 overflow-x-auto scrollbar-hide">
       {songs.map((song) => {
@@ -37,8 +47,17 @@ export default function ArtistSongs() {
         return (
           <div
             key={song.song_id}
-            className="min-w-[180px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 flex flex-col items-center justify-center py-4"
+            className="relative group min-w-[180px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 flex flex-col items-center justify-center py-4"
           >
+            {/* Delete on hover */}
+            <button
+              onClick={() => handleDelete(song.song_id)}
+              className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+              title="Delete song"
+            >
+              <FaTrashAlt size={14} />
+            </button>
+
             <div className="relative h-36 w-36 rounded-xl overflow-hidden mb-4">
               <Image
                 src={albumArt}

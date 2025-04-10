@@ -49,7 +49,6 @@ export default function ArtistAlbums() {
             key={album.album_id}
             className="relative group min-w-[180px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 flex flex-col items-center justify-center py-4"
           >
-            {/* Delete button (top right corner) */}
             <button
               onClick={() => handleDelete(album.album_id)}
               className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
@@ -58,7 +57,6 @@ export default function ArtistAlbums() {
               <FaTrashAlt size={14} />
             </button>
 
-            {/* Album preview with link */}
             <Link href={`/albums/${album.album_id}`} className="flex flex-col items-center">
               <div className="h-36 w-36 bg-gray-800 rounded-xl overflow-hidden">
                 <Image
@@ -74,7 +72,6 @@ export default function ArtistAlbums() {
           </div>
         ))}
 
-        {/* ➕ Add Album Button */}
         <Link href="/albums/create">
           <div className="min-w-[180px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center py-4">
             <div className="h-36 w-36 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-xl flex items-center justify-center">

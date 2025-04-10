@@ -8,6 +8,7 @@ import { Song } from "@/types";
 import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
 import { useAudioPlayer } from "@/context/AudioContext";
 import { useUserStore } from "@/store/useUserStore";
+import PlayBar from "@/components/ui/playBar";
 
 interface Playlist {
   playlist_id: number;
@@ -25,22 +26,51 @@ export default function PlaylistPage() {
 
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [currentSongIndex, setCurrentSongIndex] = useState<number | null>(null);
+  const [songsToRender, setSongsToRender] = useState<Song[]>([]);
 
-  const { currentSong, isPlaying, playSong, togglePlayPause } = useAudioPlayer();
+  const { currentSong, isPlaying, playSong, togglePlayPause, progress } = useAudioPlayer();
   const { likedSongs, username } = useUserStore();
   const isLikedPlaylist = id === "liked";
+  const { handleSeek } = useAudioPlayer();
 
   const fetchPlaylist = useCallback(async () => {
     const res = await fetch(`/api/playlists/${id}`);
     const data: Playlist = await res.json();
     setPlaylist(data);
+    setSongsToRender(data.playlist_songs.map(entry => entry.songs));
   }, [id]);
 
   useEffect(() => {
     if (id && !isLikedPlaylist) {
       fetchPlaylist();
+    } else if (isLikedPlaylist) {
+      setSongsToRender(likedSongs as Song[]);
     }
-  }, [id, isLikedPlaylist]);
+  }, [id, isLikedPlaylist, fetchPlaylist, likedSongs]);
+
+    useEffect(() => {
+    if (currentSong) {
+      const index = songsToRender.findIndex(s => s.song_id === currentSong.song_id);
+      setCurrentSongIndex(index >= 0 ? index : null);
+    } else {
+      setCurrentSongIndex(null);
+    }
+  }, [currentSong, songsToRender]);
+
+  const playNextSong = useCallback(() => {
+    if (currentSongIndex === null || songsToRender.length === 0) return;
+    
+    const nextIndex = (currentSongIndex + 1) % songsToRender.length;
+    playSong(songsToRender[nextIndex]);
+  }, [currentSongIndex, songsToRender, playSong]);
+
+  const playPreviousSong = useCallback(() => {
+    if (currentSongIndex === null || songsToRender.length === 0) return;
+    
+    const prevIndex = (currentSongIndex - 1 + songsToRender.length) % songsToRender.length;
+    playSong(songsToRender[prevIndex]);
+  }, [currentSongIndex, songsToRender, playSong]);
 
   const handleRemove = async (songId: number) => {
     const res = await fetch(`/api/playlists/${id}/remove-song`, {
@@ -58,10 +88,6 @@ export default function PlaylistPage() {
   if (!isLikedPlaylist && !playlist) {
     return <div className="text-white p-10">Loading...</div>;
   }
-
-  const songsToRender = isLikedPlaylist
-    ? likedSongs
-    : playlist?.playlist_songs.map((entry) => entry.songs) || [];
 
   return (
     <div className="min-h-screen bg-black text-white p-6 pb-24">
@@ -158,6 +184,19 @@ export default function PlaylistPage() {
           ))
         )}
       </div>
+
+      {currentSong && (
+        <PlayBar 
+        currentSong={currentSong}
+        isPlaying={isPlaying}
+        progress={progress}
+        onPlayPause={togglePlayPause}
+        onSeek={handleSeek}
+        onSkipNext={playNextSong}
+        onSkipPrevious={playPreviousSong}
+        isPlaylist={true}
+      />
+      )}
 
       {showModal && playlist && (
         <AddSongModal
