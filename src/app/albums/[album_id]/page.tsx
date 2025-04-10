@@ -98,7 +98,7 @@ export default function AlbumPage() {
     <div className="min-h-screen bg-black text-white pb-32 p-6">
       {/* ⬅️ Back Button */}
       <button
-        onClick={() => router.back()}
+        onClick={() => router.push("/profile/user")}
         className="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition"
       >
         <svg
