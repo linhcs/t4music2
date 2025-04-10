@@ -31,7 +31,7 @@ export default function Login() {
 
         // Redirect based on role
         if (user.role === "listener") router.push("/home");
-        else if (user.role === "artist") router.push("/profile/artist");
+        else if (user.role === "artist") router.push("/profile/user");
         else if (user.role === "admin") router.push("/reportadmin");
         else router.push("/home");
       } catch (err) {
@@ -78,7 +78,7 @@ export default function Login() {
       alert("Login successful! Welcome to Amplifi 🎧");
 
       if (userData.role === "listener") router.push("/home");
-      else if (userData.role === "artist") router.push("/profile/artist");
+      else if (userData.role === "artist") router.push("/profile/user");
       else if (userData.role === "admin") router.push("/reportadmin");
       else router.push("/home");
 

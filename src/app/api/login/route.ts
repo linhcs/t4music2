@@ -1,6 +1,6 @@
 import { prisma } from "@prisma/script";
 import { NextRequest, NextResponse } from "next/server";
-
+//come back to fix stupid cookie issue 
 import bcrypt from "bcryptjs"; 
 export async function POST(req: NextRequest) {
   try {
@@ -32,7 +32,6 @@ export async function POST(req: NextRequest) {
     //   return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     // }
 
-    // ✅ Set cookie with user_id
     const res = new NextResponse(JSON.stringify({
       message: "Login successful",
       user_id: user.user_id,

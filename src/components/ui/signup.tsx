@@ -36,7 +36,7 @@ export default function Signup() {
     setError("");
 
     try {
-      // 1. Signup the user
+      // signupness
       const signupRes = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,11 +53,11 @@ export default function Signup() {
 
       const store = useUserStore.getState();
 
-      // 2. Clear any old state
+      // clearing any old state
       store.logout();
       localStorage.removeItem("user-storage");
 
-      // 3. Log in the new user
+      // logs in new user
       const loginRes = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -90,8 +90,8 @@ export default function Signup() {
 
       alert("Signup successful! Welcome to Amplifi 🎧");
 
-      // 5. Redirect based on role
-      window.location.href = extra.role === "artist" ? "/artistprofile" : "/home";
+      // redirecting based on role 
+      window.location.href = "/profile/user";
     } catch (err) {
       if (err instanceof Error) setError(err.message);
       else setError("An unknown error occurred.");
