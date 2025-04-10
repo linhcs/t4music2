@@ -43,7 +43,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (currentSong?.song_id === song.song_id) {
-      togglePlayPause(); // If the same song is clicked, toggle play/pause
+      togglePlayPause(); 
       return;
     }
 

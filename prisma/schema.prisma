@@ -180,6 +180,30 @@ model users {
   streaming_history_streaming_history_user_idTousers     streaming_history[] @relation("streaming_history_user_idTousers")
 }
 
+model notifications {
+  notification_id Int      @id @default(autoincrement())
+  user_id         Int
+  message         String   @db.Text
+  created_at      DateTime @default(now()) @db.DateTime(0)
+  is_read         Boolean  @default(false)
+  users           users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "user_id")
+}
+
+model song_plays {
+  id        BigInt   @id @default(autoincrement())
+  user_id   Int
+  song_id   Int
+  played_at DateTime @default(now()) @db.DateTime(0)
+  users     users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "song_plays_ibfk_1")
+  songs     songs    @relation(fields: [song_id], references: [song_id], onDelete: Cascade, onUpdate: NoAction, map: "song_plays_ibfk_2")
+
+  @@index([played_at], map: "idx_song_plays_played_at")
+  @@index([user_id, song_id], map: "idx_song_plays_user_song")
+  @@index([song_id], map: "song_id")
+}
+
 enum library_item_type {
   song
   album

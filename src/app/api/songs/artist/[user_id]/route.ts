@@ -13,14 +13,24 @@ export async function GET(req: Request) {
 
     const songs = await prisma.songs.findMany({
       where: { user_id },
-      include: {
+      select: {
+        song_id: true,
+        title: true,
+        file_path: true,
+        file_format: true,
+        duration: true,
+        plays_count: true,
+        user_id: true,     
         album: {
-          select: { album_art: true },
+          select: {
+            album_art: true,
+            title: true,
+          },
         },
       },
       orderBy: { plays_count: "desc" },
     });
-
+    
     return NextResponse.json(songs);
   } catch (error) {
     console.error("❌ Failed to fetch songs:", error);
