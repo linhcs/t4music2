@@ -17,10 +17,10 @@ export async function GET(req: Request) {
         song_id: true,
         title: true,
         file_path: true,
-        file_format: true,
+        file_format: true,  
         duration: true,
         plays_count: true,
-        user_id: true,     
+        user_id: true,      
         album: {
           select: {
             album_art: true,
