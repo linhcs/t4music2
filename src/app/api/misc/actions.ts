@@ -32,7 +32,9 @@ export async function getSignedURL(
   songName: string,
   artistName: string,
   genre: string = "Pop",
-  duration: number = 180
+  duration: number = 180,
+  albumName?: string,
+  userId?: number
 ) {
   if (!acceptedTypes.includes(type) || size > maxFileSize) {
     return { failure: "Invalid file or file size!" };
@@ -58,12 +60,61 @@ export async function getSignedURL(
         duration: duration,
         file_path: fileKey,
         file_format: type.split("/")[1],
-        user_id: 1,
+        user_id: userId || 1,
         plays_count: 0,
       },
     });
 
-    return { success: { url: signedURL, song } };
+    //if album name is provided
+    if (albumName && userId) {
+      //find existing album with the same name
+      const existingAlbum = await prisma.album.findFirst({
+        where: {
+          title: albumName,
+          user_id: userId,
+        },
+      });
+
+      let albumId: number;
+      
+      if (existingAlbum) {
+        albumId = existingAlbum.album_id;
+      } else {
+        //if there's no existing albums then create a new one
+        const newAlbum = await prisma.album.create({
+          data: {
+            title: albumName,
+            user_id: userId,
+          },
+        });
+        albumId = newAlbum.album_id;
+      }
+
+      //connect songs and albums using album_songs entity
+      await prisma.album_songs.create({
+        data: {
+          album_id: albumId,
+          song_id: song.song_id,
+        },
+      });
+
+      //update album id for song
+      await prisma.songs.update({
+        where: { song_id: song.song_id },
+        data: { album_id: albumId },
+      });
+    }
+
+    return { 
+      success: { 
+        url: signedURL, 
+        song: {
+          ...song,
+          artistName: artistName //add artist name
+        } 
+      } 
+    };
+
   } catch (error) {
     console.error("Database error:", error);
     return {
