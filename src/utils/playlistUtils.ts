@@ -10,7 +10,5 @@ export const getLikedSongsPlaylist = (likedSongs: Song[]): Playlist => ({
     duration: song.duration ?? 0,
     file_format: song.file_format ?? "mp3",
     user_id: song.user_id ?? 0,
-    users: song.users ?? [{ username: "Unknown Artist" }], 
   })),
 });
-
