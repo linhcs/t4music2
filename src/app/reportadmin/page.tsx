@@ -1,5 +1,7 @@
 'use client';
+import UploadButton from "@/app/reportadmin/component/temp";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -391,15 +393,25 @@ const ReportAdminPage = () => {
         </div>
       </div>
 
-      <div className="flex justify-center px-80 mb-8">
+      <div className="flex justify-center space-x-80 px-80 mb-8">
         <Button
           onClick={handleDeleteUser}
           size="lg"
           variant="outline"
-          className="rounded-full text-[17px] text-white border border-white/10 transition-all duration-300 hover:scale-90 bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 animate-gradient"
+          className="rounded-full text-[17px] text-2xl text-white border border-white/10 transition-all duration-300 hover:scale-90 bg-gradient-to-r from-red-500 via-red-800 to-red-800 animate-gradient"
         >
           Delete Selection
         </Button>
+        <Link href="/fileupload">
+          <Button
+            size="lg"
+            variant="outline"
+            className="rounded-full text-2xl px-8 text-white border border-white/20 min-w-[160px] transition-all duration-300 hover:scale-105 
+            bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 animate-gradient"
+            >
+            Upload
+          </Button>
+        </Link>
       </div>
       <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1 mb-10">
         <div className="text-[4rem] md:text-[4rem] leading-none font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-500 animate-gradient">
