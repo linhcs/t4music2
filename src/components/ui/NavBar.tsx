@@ -31,12 +31,19 @@ type ArtistResult = {
   pfp?: string;
 };
 
+type notiftype = {
+  notification_id: number;
+  message: string;
+  created_at: string;
+  is_read: boolean;
+};
+
 export default function NavBar({ role = "listener" }: NavBarProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<{ songs: SongResult[]; artists: ArtistResult[] }>({ songs: [], artists: [] });
   const [showDropdown, setShowDropdown] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<notiftype[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const username = useUserStore((state) => state.username);
