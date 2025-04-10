@@ -37,6 +37,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
   const [results, setResults] = useState<{ songs: SongResult[]; artists: ArtistResult[] }>({ songs: [], artists: [] });
   const [showDropdown, setShowDropdown] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const username = useUserStore((state) => state.username);
   const user_id = useUserStore((state) => state.user_id);
@@ -91,9 +92,15 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
     if (user_id) {
       const fetchNotifications = async () => {
         try {
+          // Fetch unread notifications
           const response = await fetch(`/api/notifications?userId=${user_id}`);
           const data = await response.json();
           setNotifications(data);
+
+          // Fetch unread count
+          const countResponse = await fetch(`/api/notifications?userId=${user_id}&count=true`);
+          const countData = await countResponse.json();
+          setUnreadCount(countData.count || 0);
         } catch (error) {
           console.error("Failed to fetch notifications:", error);
         }
@@ -117,14 +124,31 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleDeleteNotification = async (notificationId: number) => {
+  const handleMarkAsRead = async (notificationId: number) => {
     try {
-      await fetch(`/api/notifications?notificationId=${notificationId}`, {
-        method: 'DELETE',
+      await fetch(`/api/notifications?userId=${user_id}&notificationId=${notificationId}`, {
+        method: 'PUT'
       });
-      setNotifications(notifications.filter(n => n.notification_id !== notificationId));
+      // Update local state
+      setNotifications(notifications.map(n => 
+        n.notification_id === notificationId ? { ...n, is_read: true } : n
+      ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error("Failed to delete notification:", error);
+      console.error("Failed to mark notification as read:", error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await fetch(`/api/notifications?userId=${user_id}`, {
+        method: 'PUT'
+      });
+      // Update local state
+      setNotifications(notifications.map(n => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Failed to mark all notifications as read:", error);
     }
   };
 
@@ -269,9 +293,9 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
               onClick={() => setShowNotifications(!showNotifications)}
             >
               <FaBell size={20} />
-              {notifications.length > 0 && (
+              {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {notifications.length}
+                  {unreadCount}
                 </span>
               )}
             </MenuButton>
@@ -279,22 +303,40 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
               <MenuItems className="absolute right-0 mt-2 z-50 w-72 bg-gray-800 rounded-md shadow-xl ring-1 ring-black ring-opacity-5">
                 <div className="py-2">
                   {notifications.length > 0 ? (
-                    notifications.map((notification) => (
-                      <div key={notification.notification_id} className="px-4 py-2 hover:bg-gray-700 flex justify-between items-center">
-                        <div>
-                          <p className="text-sm text-white">{notification.message}</p>
-                          <p className="text-xs text-gray-400">
-                            {new Date(notification.created_at).toLocaleString()}
-                          </p>
-                        </div>
+                    <>
+                      <div className="px-4 py-2 flex justify-between items-center border-b border-gray-700">
+                        <span className="text-sm text-white">Notifications</span>
                         <button
-                          onClick={() => handleDeleteNotification(notification.notification_id)}
-                          className="text-gray-400 hover:text-white ml-2"
+                          onClick={handleMarkAllAsRead}
+                          className="text-xs text-gray-400 hover:text-white"
                         >
-                          <FaTimes size={14} />
+                          Mark all as read
                         </button>
                       </div>
-                    ))
+                      {notifications.map((notification) => (
+                        <div 
+                          key={notification.notification_id} 
+                          className={`px-4 py-2 hover:bg-gray-700 flex justify-between items-center ${
+                            !notification.is_read ? 'bg-gray-700/50' : ''
+                          }`}
+                        >
+                          <div>
+                            <p className="text-sm text-white">{notification.message}</p>
+                            <p className="text-xs text-gray-400">
+                              {new Date(notification.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                          {!notification.is_read && (
+                            <button
+                              onClick={() => handleMarkAsRead(notification.notification_id)}
+                              className="text-xs text-gray-400 hover:text-white ml-2"
+                            >
+                              Mark as read
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </>
                   ) : (
                     <div className="text-gray-400 px-4 py-2 text-sm">No notifications</div>
                   )}
