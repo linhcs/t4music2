@@ -52,20 +52,19 @@ export default function LikedSongsPage() {
                       <span className="text-gray-400 w-6 text-right">{index + 1}</span>
 
                       <div>
-                        {/* Title is clickable to play */}
                         <p
-                          className="font-semibold text-white cursor-pointer hover:underline"
+                          className="font-semibold text-white cursor-pointer hover:underline" //click on title to play or play/pause
                           onClick={() => playSong(song as Song)}
                         >
                           {song.title}
                         </p>
                         <p className="font-semibold text-white">
-                          {song.users?.username || "Unknown Artist"}
+                          {song.users?.username || "Unknown Artist"} {/*artist name*/}
                         </p>
+
                         <p className="text-sm text-gray-400">{song.genre}</p>
                       </div>
                     </div>
-
                     <span className="text-sm text-gray-400">
                       {song.liked_at ? new Date(song.liked_at).toLocaleDateString() : ""}
                     </span>

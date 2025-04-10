@@ -12,9 +12,11 @@ export default function TopArtists() {
   >();
 
   for (const song of streamingHistory) {
-    const artistName = song.users?.username || "Unknown";
-    const artistId = song.user_id || 0;
-    const pfp = song.users?.pfp;
+    const artistName = song.artist_username || "Unknown";
+    const artistId = song.artist_id;
+    const pfp = song.artist_pfp;
+    
+    if (!artistId) continue; 
 
     if (!artistMap.has(artistId.toString())) {
       artistMap.set(artistId.toString(), {

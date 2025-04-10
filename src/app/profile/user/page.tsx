@@ -108,7 +108,7 @@ export default function ListenerUserProfile() {
           {role === "listener" && (
             <>
               <section>
-                <h2 className="text-2xl font-bold mb-4">Top artists this month</h2>
+                <h2 className="text-2xl font-bold mb-4">Your top artists this month</h2>
                 <TopArtists />
               </section>
 
@@ -119,7 +119,31 @@ export default function ListenerUserProfile() {
 
               <section>
                 <h2 className="text-2xl font-bold mb-4">My Playlists</h2>
-                <UserPlaylists/>
+                <UserPlaylists />
+              </section>
+            </>
+          )}
+
+          {role === "artist" && (
+            <>
+              <section>
+                <h2 className="text-2xl font-bold mb-4">Top Tracks</h2>
+                <ArtistTopTracks />
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-4">♫ My Uploaded Songs</h2>
+                <ArtistSongs />
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-4">My Albums</h2>
+                <ArtistAlbums />
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-4">My Playlists</h2>
+                <UserPlaylists />
               </section>
             </>
           )}
