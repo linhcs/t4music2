@@ -83,6 +83,13 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
     return () => clearTimeout(delayDebounce);
   }, [searchTerm]);
 
+  let profileRoute = "/profile/user";
+  if (role === "artist") {
+    profileRoute = "/profile/artist";
+  } else if (role === "admin") {
+    profileRoute = "/reportadmin";
+  }
+
   return (
     <nav className="bg-black text-white px-5 py-2 shadow-md">
       <div className="w-full flex items-center justify-between px-4">
@@ -233,7 +240,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
                 </div>
                 <MenuItem>
                   <Link
-                    href={role === "artist" ? "/profile/artist" : "/profile/user"}
+                     href={profileRoute}
                     className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                   >
                     Profile

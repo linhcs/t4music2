@@ -276,8 +276,8 @@ h1{
 }
 
 .custom-gradient-container {
-  width: 200px;
-  padding: 16px 12px;
+  width: 220px;
+  padding: 20px 12px;
   background: linear-gradient(to right, rgba(59, 130, 246, 0.4), rgba(168, 85, 247, 0.4), rgba(244, 114, 182, 0.4));
   border-radius: 14px; 
   border: 3px solid rgb(0, 0, 0);  
@@ -285,6 +285,8 @@ h1{
   position: relative;
 }
 .custom-gradient-container2 {
+  width: 1000px;
+  height: 420px;
   padding: 12px 12px;
   background: linear-gradient(to right, rgba(59, 130, 246, 0.4), rgba(168, 85, 247, 0.4), rgba(244, 114, 182, 0.4));
   border-radius: 14px; 

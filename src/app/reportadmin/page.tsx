@@ -10,6 +10,7 @@ import Form from "@/app/reportadmin/component/form";
 import HeaderSelection from '@/app/reportadmin/component/tableheader1';
 import TableSection from '@/app/reportadmin/component/table1';
 import ArtTableSection from '@/app/reportadmin/component/artistTable';
+import NavBar from "@/components/ui/NavBar";
 
 interface listeners {user_id: number; username: string;}
 interface artists {user_id: number; username: string;}
@@ -317,6 +318,7 @@ const ReportAdminPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-black">
+      <NavBar role="admin"/>
       <InactivityTimer />
       <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1">
         <motion.h1

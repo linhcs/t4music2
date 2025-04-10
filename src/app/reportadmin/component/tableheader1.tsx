@@ -14,7 +14,7 @@ const HeaderSelection: React.FC<HeaderSelectionProps> = ({ setSelectedCategory }
   const categories: (keyof CategoryData)[] = ['listeners', 'artists', 'likes', 'follows', 'streaminghours', 'uploads'];
   console.log(selectedCategory)
   return (
-    <div className="flex flex-col items-center space-y-2 text-lg">
+    <div className="flex flex-col items-center space-y-5 text-lg">
       {categories.map((category) => (
         <motion.button
           key={category}
@@ -26,7 +26,7 @@ const HeaderSelection: React.FC<HeaderSelectionProps> = ({ setSelectedCategory }
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          {category.charAt(0).toUpperCase() + category.slice(1)}
+          {category == 'streaminghours'? category.charAt(0).toUpperCase() + category.slice(1,9) + ' ' + category.charAt(9).toUpperCase() + category.slice(10): category.charAt(0).toUpperCase() + category.slice(1)}
         </motion.button>
       ))}
     </div>

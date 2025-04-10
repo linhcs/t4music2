@@ -28,7 +28,6 @@ const InactivityTimer = () => {
         store.logout();
         localStorage.removeItem('user');
         sessionStorage.removeItem('user');
-
         console.log("User is inactive. Redirecting to login...");
         router.push("/login"); // Redirect to login page (change the path if necessary)
       };
