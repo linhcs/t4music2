@@ -31,12 +31,19 @@ type ArtistResult = {
   pfp?: string;
 };
 
+type notiftype = {
+  notification_id: number;
+  message: string;
+  created_at: string;
+  is_read: boolean;
+};
+
 export default function NavBar({ role = "listener" }: NavBarProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<{ songs: SongResult[]; artists: ArtistResult[] }>({ songs: [], artists: [] });
   const [showDropdown, setShowDropdown] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<notiftype[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const username = useUserStore((state) => state.username);
@@ -151,6 +158,13 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
       console.error("Failed to mark all notifications as read:", error);
     }
   };
+
+  let profileRoute = "/profile/user";
+  if (role === "artist") {
+    profileRoute = "/profile/artist";
+  } else if (role === "admin") {
+    profileRoute = "/reportadmin";
+  }
 
   return (
     <nav className="bg-black text-white px-5 py-2 shadow-md">
@@ -349,7 +363,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
                 </div>
                 <MenuItem>
                   <Link
-                    href={role === "artist" ? "/profile/artist" : "/profile/user"}
+                     href={profileRoute}
                     className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                   >
                     Profile

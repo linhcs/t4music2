@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 
 // Helper function to convert BigInt to Number
-const convertBigIntToNumber = (obj: any): any => {
+const convertBigIntToNumber = (obj: unknown): unknown => {
   if (typeof obj === 'bigint') {
     return Number(obj);
   }

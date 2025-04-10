@@ -76,7 +76,7 @@ export default function ReportPage() {
           totalPlayTime: Number(data.totalPlayTime) || 0,
           totalSongsPlayed: Number(data.totalSongsPlayed) || 0,
           mostActiveHour: Number(data.mostActiveHour) || 0,
-          monthlyStats: Array.isArray(data.monthlyStats) ? data.monthlyStats.map((stat: any) => ({
+          monthlyStats: Array.isArray(data.monthlyStats) ? data.monthlyStats.map((stat: ReportData['monthlyStats'][0]) => ({
             ...stat,
             topSongs: Array.isArray(stat.topSongs) ? stat.topSongs : []
           })) : []
@@ -117,6 +117,7 @@ export default function ReportPage() {
       const date = new Date(parseInt(year), parseInt(month) - 1, 1);
       return date.toLocaleString('default', { year: 'numeric', month: 'long' });
     } catch (e) {
+      console.log('error, ', e);
       return monthStr;
     }
   };

@@ -49,9 +49,9 @@ Order by score desc;`;
 
     const tranks = transformBigIntToNumber(ranks);
     const trankspre = transformBigIntToNumber(rankspre);
-    console.log('tranks in route: ',tranks)
-    console.log('trankspre in route: ',trankspre)
-    console.log('ranks in route: ',ranks)
+    //console.log('tranks in route: ',tranks)
+    //console.log('trankspre in route: ',trankspre)
+    //console.log('ranks in route: ',ranks)
 
     const infoarr : [string[]] = [[]];
 
@@ -76,7 +76,7 @@ Order by score desc;`;
       };
     };
 
-    console.log('genre list: ',infoarr);
+    //console.log('genre list: ',infoarr);
 
     return NextResponse.json({tranks, trankspre, infoarr})
   } catch (error:unknown) {

@@ -154,30 +154,30 @@ const ArtTableSection = () => {
         <thead>
           <tr>
             <th className="p-2 w-32 test-white text-[28px]">{tname}</th>
-            <th className="p-2 border-2 border-black w-[140px]">Follows</th>
-            <th className="p-2 border-2 border-black w-[110px]">Likes</th>
-            <th className="p-2 border-2 border-black w-[280px]">Streaming Hours</th>
+            <th className="p-2 border-4 border-black w-[140px]">Follows</th>
+            <th className="p-2 border-4 border-black w-[110px]">Likes</th>
+            <th className="p-2 border-4 border-black w-[280px]">Streaming Hours</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td className="p-2 border-2 border-black text-[20px]">Total</td>
-            <td className="p-2 border-2 border-black ">{tf}</td>
-            <td className="p-2 border-2 border-black ">{tl}</td>
-            <td className="p-2 border-2 border-black ">{tsh}</td>
+            <td className="p-2 border-4 border-black text-[20px]">Total</td>
+            <td className="p-2 border-4 border-black ">{tf}</td>
+            <td className="p-2 border-4 border-black ">{tl}</td>
+            <td className="p-2 border-4 border-black ">{tsh}</td>
           </tr>
           <tr>
-            <td className="p-2 border-2 border-black text-[16px]"> New users this Quarter</td>
-            <td className="p-2 border-2 border-black ">{nft}</td>
-            <td className="p-2 border-2 border-black ">{nlt}</td>
-            <td className="p-2 border-2 border-black ">{nsht}</td>
+            <td className="p-2 border-4 border-black text-[16px]"> New users this Quarter</td>
+            <td className="p-2 border-4 border-black ">{nft}</td>
+            <td className="p-2 border-4 border-black ">{nlt}</td>
+            <td className="p-2 border-4 border-black ">{nsht}</td>
           </tr>
 
           <tr>
-            <td className="p-2 border-2 border-black ="> % Growth </td>
-            <td className="p-2 border-2 border-black ">{gft} </td>
-            <td className="p-2 border-2 border-black ">{glt}</td>
-            <td className="p-2 border-2 border-black ">{gsht}</td>
+            <td className="p-2 border-4 border-black ="> % Growth </td>
+            <td className="p-2 border-4 border-black ">{gft} </td>
+            <td className="p-2 border-4 border-black ">{glt}</td>
+            <td className="p-2 border-4 border-black ">{gsht}</td>
           </tr>
 
         </tbody>
@@ -187,30 +187,30 @@ const ArtTableSection = () => {
         <thead>
           <tr>
             <th className="p-2 w-32 text-[20px]"> {Avgname}</th>
-            <th className="p-2 border-2 border-black w-[140px]">Follows</th>
-            <th className="p-2 border-2 border-black w-[110px]">Likes</th>
-            <th className="p-2 border-2 border-black w-[280px]">Streaming Hours</th>
+            <th className="p-2 border-4 border-black w-[140px]">Follows</th>
+            <th className="p-2 border-4 border-black w-[110px]">Likes</th>
+            <th className="p-2 border-4 border-black w-[280px]">Streaming Hours</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td className="p-2 border-2 border-black text-[20px]">Total</td>
-            <td className="p-2 border-2 border-black ">{af}</td>
-            <td className="p-2 border-2 border-black ">{al}</td>
-            <td className="p-2 border-2 border-black ">{ash}</td>
+            <td className="p-2 border-4 border-black text-[20px]">Total</td>
+            <td className="p-2 border-4 border-black ">{af}</td>
+            <td className="p-2 border-4 border-black ">{al}</td>
+            <td className="p-2 border-4 border-black ">{ash}</td>
           </tr>
           <tr>
-            <td className="p-2 border-2 border-black text-[16px]"> New users this Quarter </td>
-            <td className="p-2 border-2 border-black ">{nfa}</td>
-            <td className="p-2 border-2 border-black ">{nla}</td>
-            <td className="p-2 border-2 border-black ">{nsha}</td>
+            <td className="p-2 border-4 border-black text-[16px]"> New users this Quarter </td>
+            <td className="p-2 border-4 border-black ">{nfa}</td>
+            <td className="p-2 border-4 border-black ">{nla}</td>
+            <td className="p-2 border-4 border-black ">{nsha}</td>
           </tr>
 
           <tr>
-            <td className="p-2 border-2 border-black ="> % Growth </td>
-            <td className="p-2 border-2 border-black ">{gfa}</td>
-            <td className="p-2 border-2 border-black ">{gla}</td>
-            <td className="p-2 border-2 border-black ">{gsha}</td>
+            <td className="p-2 border-4 border-black ="> % Growth </td>
+            <td className="p-2 border-4 border-black ">{gfa}</td>
+            <td className="p-2 border-4 border-black ">{gla}</td>
+            <td className="p-2 border-4 border-black ">{gsha}</td>
           </tr>
 
         </tbody>
