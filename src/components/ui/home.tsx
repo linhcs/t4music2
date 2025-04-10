@@ -97,54 +97,53 @@ const ListenerHome = () => {
   };
 
   const SongGallerySection = ({ title, items }: { title: string; items: Song[] }) => (
-    <section className="w-full max-w-7xl">
-      <h2 className="text-xl font-bold text-white mt-8 mb-3">{title}</h2>
-      <div className="grid grid-cols-5 gap-4">
+    <section className="w-full max-w-7xl mx-auto relative">
+      <h2 className="text-xl font-bold text-white mt-8 mb-4">{title}</h2>
+  
+      {/* Scrollable Row */}
+      <div className="flex gap-6 overflow-x-auto scrollbar-hide px-1 pb-2">
         {items.map((song) => {
           const album_art = song.album?.album_art || "";
           const isSongCurrentlyPlaying = currentSong?.song_id === song.song_id && isPlaying;
           const artistName = formatArtistName(song.users?.username);
+  
           return (
             <div
-              key={song.song_id}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                setContextMenu({ x: e.clientX, y: e.clientY, song });
-              }}
-              onClick={() => playSong(song)}
-              className="group relative rounded-lg overflow-hidden shadow-md"
-              style={{
-                backgroundImage: `url(${album_art})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                width: "60%",
-                paddingTop: "60%",
-              }}
-            >
-              <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out flex items-center justify-center">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    playSong(song);
-                  }}
-                  className="text-5xl text-white"
-                >
-                  {isSongCurrentlyPlaying ? <FiPauseCircle /> : <FiPlayCircle />}
-                </button>
-              </div>
-              <div className="absolute bottom-0 w-full bg-black bg-opacity-50 px-2 py-1">
-                <h3 className="text-white text-sm font-semibold truncate">{song.title}</h3>
-                <p className="text-gray-300 text-xs truncate">
-                {artistName}
-              </p>
-              </div>
-            </div>
-          );
+  key={song.song_id}
+  onContextMenu={(e) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, song });
+  }}
+  onClick={() => playSong(song)}
+  className="group relative rounded-xl overflow-hidden shadow-md w-[200px] h-[200px] cursor-pointer flex-shrink-0"
+  style={{
+    backgroundImage: `url(${album_art})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+>
+  <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        playSong(song);
+      }}
+      className="text-4xl text-white"
+    >
+      {isSongCurrentlyPlaying ? <FiPauseCircle /> : <FiPlayCircle />}
+    </button>
+  </div>
+  <div className="absolute bottom-0 w-full bg-black bg-opacity-50 px-2 py-1">
+    <h3 className="text-white text-sm font-semibold truncate">{song.title}</h3>
+    <p className="text-gray-300 text-xs truncate">{artistName}</p>
+  </div>
+</div>
+        );
         })}
       </div>
     </section>
   );
-
+  
   if (!hasMounted || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-black">
@@ -161,12 +160,15 @@ const ListenerHome = () => {
       <div className="flex flex-col flex-1 min-w-0">
         <NavBar />
         <main className="p-6 overflow-auto">
-          <SongGallerySection title="Recently Added" items={songs.slice(0, 5)} />
-          <SongGallerySection title="Popular Songs" items={popularSongs.slice(0, 5)} />
-          <YourLibrary />
-          <SongGallerySection title="Recommended For You" items={recommendedSongs.slice(0, 5)} />
-        </main>
-      </div>
+  <SongGallerySection title="Recently Added" items={songs.slice(0, 15)} />
+  <SongGallerySection title="Popular Songs" items={popularSongs.slice(0, 15)} />
+  <SongGallerySection title="Recommended For You" items={recommendedSongs.slice(0, 15)} />
+  
+  <section className="w-full max-w-7xl mx-auto relative">
+    <YourLibrary />
+  </section>
+</main>
+</div>
 
       {contextMenu && (
         <div

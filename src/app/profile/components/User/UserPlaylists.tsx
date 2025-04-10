@@ -85,8 +85,6 @@ export default function UserPlaylists() {
 
   return (
     <div className="mt-10 w-full relative">
-      <h3 className="text-3xl font-semibold mb-5 text-white">My Playlists</h3>
-
       {/* Scroll Arrows */}
       <button
         onClick={() => scroll("left")}
@@ -162,7 +160,7 @@ export default function UserPlaylists() {
 
         {/* Add Playlist */}
         <button onClick={() => setShowModal(true)}>
-          <div className="min-w-[200px] max-w-[200px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center py-4">
+          <div className="min-w-[180px] max-w-[180px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center py-4">
             <div className="h-36 w-36 bg-gradient-to-b from-purple-500 via-pink-500 to-blue-400 animate-gradient rounded-xl flex items-center justify-center">
               <FaPlus size={48} className="text-white" />
             </div>

@@ -17,9 +17,12 @@ import cuteAnimation from "@/assets/cute_animation.json";
 import ArtistAlbums from "../components/Artist/ArtistAlbums";
 import UserCard from "../components/User/UserCard";
 import ArtistSongs from "../components/Artist/ArtistSongs";
-
+import { FaChartLine } from 'react-icons/fa';
+import Link from "next/link";
+import CreatePlaylistModal from "../components/User/CreatePlaylistModal";
+console.log(CreatePlaylistModal);
 console.log(ChangeProfilePic);
-
+console.log(ArtistSongs,ArtistTopTracks,ArtistAlbums)// feel free to delete later
 export default function ListenerUserProfile() {
   const {
     role,
@@ -115,33 +118,21 @@ export default function ListenerUserProfile() {
               </section>
 
               <section>
-                <UserPlaylists />
+                <h2 className="text-2xl font-bold mb-4">My Playlists</h2>
+                <UserPlaylists/>
               </section>
             </>
           )}
 
-          {role === "artist" && (
-            <>
-              <section>
-                <h2 className="text-2xl font-bold mb-4">Your Top Tracks</h2>
-                <ArtistTopTracks />
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-bold mb-4">♫ My Uploaded Songs</h2>
-                <ArtistSongs />
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-bold mb-4">My Albums</h2>
-                <ArtistAlbums />
-              </section>
-
-              <section>
-                <UserPlaylists />
-              </section>
-            </>
-          )}
+          <div className="mt-8 flex justify-center">
+            <Link
+              href="/report"
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
+            >
+              <FaChartLine />
+              <span>View Your Music Journey</span>
+            </Link>
+          </div>
         </main>
       </div>
 
@@ -153,6 +144,7 @@ export default function ListenerUserProfile() {
         onSeek={handleSeek}
         volume={volume}
         setVolume={setVolume}
+
       />
     </div>
   );
