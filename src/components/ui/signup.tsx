@@ -91,8 +91,11 @@ export default function Signup() {
       alert("Signup successful! Welcome to Amplifi 🎧");
 
       // redirecting based on role 
-      window.location.href = "/profile/user";
-    } catch (err) {
+      if (extra.role === "listener") window.location.href = "/home";
+      else if (extra.role === "artist") window.location.href = "/profile/user";
+      else if (extra.role === "admin") window.location.href = "/reportadmin";
+      else window.location.href = "/";
+          } catch (err) {
       if (err instanceof Error) setError(err.message);
       else setError("An unknown error occurred.");
     }

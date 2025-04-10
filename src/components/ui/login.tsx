@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+
+import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
@@ -12,36 +13,6 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const verifyUser = async () => {
-      try {
-        const res = await fetch("/api/user/me", { credentials: "include" });
-        if (!res.ok) return; // if user not logged in, stay on login page
-
-        const user = await res.json();
-
-        store.setUser(user.username, user.role, user.pfp || "", user.user_id);
-        store.setLikedSongs(user.likedSongs || []);
-        store.setPlaylists(user.playlists || []);
-        store.setStreamingHistory(user.streamingHistory || []);
-        store.setTopTracks(user.topTracks || []);
-        store.setFollowedArtists(user.topArtists || []);
-        store.setFollowers(user.followers?.length || 0);
-        store.setFollowing(user.following?.length || 0);
-
-        // Redirect based on role
-        if (user.role === "listener") router.push("/home");
-        else if (user.role === "artist") router.push("/profile/user");
-        else if (user.role === "admin") router.push("/reportadmin");
-        else router.push("/home");
-      } catch (err) {
-        console.log("User not logged in or error verifying:", err);
-      }
-    };
-
-    verifyUser();
-  }, [router, store]);
-
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -50,6 +21,10 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    // Clear Zustand and cookie BEFORE logging in
+    store.logout();
+    document.cookie = "user_id=; Max-Age=0; path=/;";
 
     try {
       const res = await fetch("/api/login", {
