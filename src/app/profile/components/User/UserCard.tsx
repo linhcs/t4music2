@@ -22,10 +22,24 @@ export default function UserCard() {
   useEffect(() => {
     const loadUserData = async () => {
       if (user_id === null) return;
-      const response = await fetch(`/api/user/${user_id}`);
-      const userData = await response.json();
-      setPfp(userData.pfp);
+
+      try {
+        const response = await fetch(`/api/user/${user_id}`);
+
+        if (!response.ok) {
+          console.error(`Error loading user data: ${response.status}`);
+          return;
+        }
+
+        const userData = await response.json();
+        if (userData?.pfp) {
+          setPfp(userData.pfp);
+        }
+      } catch (err) {
+        console.error("Failed to load user data:", err);
+      }
     };
+
     loadUserData();
   }, [user_id, setPfp]);
 
@@ -64,7 +78,9 @@ export default function UserCard() {
         )}
         <div className="flex flex-col gap-2">
           <div>
-            <p className="text-sm uppercase text-gray-400 font-semibold">Profile</p>
+            <p className="text-sm uppercase text-gray-400 font-semibold">
+              Profile
+            </p>
             <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500">
               {username || "Loading..."}
             </h1>
