@@ -36,9 +36,13 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<{ songs: SongResult[]; artists: ArtistResult[] }>({ songs: [], artists: [] });
   const [showDropdown, setShowDropdown] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const username = useUserStore((state) => state.username);
+  const user_id = useUserStore((state) => state.user_id);
   const { currentSong, isPlaying, playSong, togglePlayPause } = useAudioPlayer();
   const searchRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
 
   function logout() {
     const store = useUserStore.getState();
@@ -82,6 +86,47 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
 
     return () => clearTimeout(delayDebounce);
   }, [searchTerm]);
+
+  useEffect(() => {
+    if (user_id) {
+      const fetchNotifications = async () => {
+        try {
+          const response = await fetch(`/api/notifications?userId=${user_id}`);
+          const data = await response.json();
+          setNotifications(data);
+        } catch (error) {
+          console.error("Failed to fetch notifications:", error);
+        }
+      };
+
+      fetchNotifications();
+      // Poll for new notifications every 30 seconds
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user_id]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleDeleteNotification = async (notificationId: number) => {
+    try {
+      await fetch(`/api/notifications?notificationId=${notificationId}`, {
+        method: 'DELETE',
+      });
+      setNotifications(notifications.filter(n => n.notification_id !== notificationId));
+    } catch (error) {
+      console.error("Failed to delete notification:", error);
+    }
+  };
 
   return (
     <nav className="bg-black text-white px-5 py-2 shadow-md">
@@ -211,15 +256,44 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
 
         {/* Right - Profile & Notifications */}
         <div className="flex items-center space-x-4 z-50">
-          <Menu as="div" className="relative">
-            <MenuButton className="hover:text-gray-300">
+          <Menu as="div" className="relative" ref={notificationsRef}>
+            <MenuButton 
+              className="hover:text-gray-300 relative"
+              onClick={() => setShowNotifications(!showNotifications)}
+            >
               <FaBell size={20} />
+              {notifications.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  {notifications.length}
+                </span>
+              )}
             </MenuButton>
-            <MenuItems className="absolute right-0 mt-2 z-50 w-72 bg-gray-800 rounded-md shadow-xl ring-1 ring-black ring-opacity-5">
-              <div className="py-2">
-                <div className="text-gray-400 px-4 py-2 text-sm">No notifications</div>
-              </div>
-            </MenuItems>
+            {showNotifications && (
+              <MenuItems className="absolute right-0 mt-2 z-50 w-72 bg-gray-800 rounded-md shadow-xl ring-1 ring-black ring-opacity-5">
+                <div className="py-2">
+                  {notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <div key={notification.notification_id} className="px-4 py-2 hover:bg-gray-700 flex justify-between items-center">
+                        <div>
+                          <p className="text-sm text-white">{notification.message}</p>
+                          <p className="text-xs text-gray-400">
+                            {new Date(notification.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteNotification(notification.notification_id)}
+                          className="text-gray-400 hover:text-white ml-2"
+                        >
+                          <FaTimes size={14} />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-gray-400 px-4 py-2 text-sm">No notifications</div>
+                  )}
+                </div>
+              </MenuItems>
+            )}
           </Menu>
 
           <Menu as="div" className="relative">

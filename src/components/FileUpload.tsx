@@ -4,10 +4,10 @@ import { useState } from "react";
 import { getSignedURL } from "@/app/api/misc/actions";
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
-//import { useUserStore } from "@/store/useUserStore";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function FileUpload() {
-  //const { username } = useUserStore();
+  const { user_id } = useUserStore();
   const [file, setFile] = useState<File | null>(null);
   const [fileURL, setFileURL] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -16,8 +16,8 @@ export default function FileUpload() {
     title: '',
     genre: '',
     albumName: '',
-    artistName: '', // username || ''
-    duration: 0
+    duration: 0,
+    artistName: ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,19 +92,28 @@ export default function FileUpload() {
       return;
     }
 
+    console.log('Current user_id:', user_id);
+
+    if (!user_id) {
+      setUploadStatus('❌ User ID is required. Please log in again.');
+      return;
+    }
+
     setIsUploading(true);
     setUploadStatus('Uploading...');
 
     try {
       const checksum = await computeSHA256(file);
+      console.log('Creating song with user_id:', user_id);
       const urlresult = await getSignedURL(
         file.type,
         file.size,
         checksum,
         songInfo.title,
-        songInfo.artistName,
+        user_id!,
         songInfo.genre,
-        songInfo.duration
+        songInfo.duration,
+        songInfo.albumName
       );
 
       if ("failure" in urlresult) {
@@ -130,8 +139,8 @@ export default function FileUpload() {
         title: '',
         genre: '',
         albumName: '',
-        artistName: '', // username || ''
-        duration: 0
+        duration: 0,
+        artistName: ''
       });
       setFile(null);
       if (fileURL) URL.revokeObjectURL(fileURL);

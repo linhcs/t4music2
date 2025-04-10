@@ -30,11 +30,10 @@ export async function getSignedURL(
   size: number,
   checksum: string,
   songName: string,
-  artistName: string,
+  userId: number,
   genre: string = "Pop",
   duration: number = 180,
-  albumName?: string,
-  userId?: number
+  albumName?: string
 ) {
   if (!acceptedTypes.includes(type) || size > maxFileSize) {
     return { failure: "Invalid file or file size!" };
@@ -53,6 +52,18 @@ export async function getSignedURL(
   try {
     const signedURL = await getSignedUrl(s3, putObj, { expiresIn: 5400 });
 
+    // Verify user exists before creating song
+    const user = await prisma.users.findUnique({
+      where: { user_id: userId }
+    });
+
+    if (!user) {
+      console.error('User not found:', userId);
+      return { failure: "User not found" };
+    }
+
+    console.log('Creating song for user:', user);
+
     const song = await prisma.songs.create({
       data: {
         title: songName,
@@ -60,13 +71,13 @@ export async function getSignedURL(
         duration: duration,
         file_path: fileKey,
         file_format: type.split("/")[1],
-        user_id: userId || 1,
+        user_id: userId,
         plays_count: 0,
       },
     });
 
     //if album name is provided
-    if (albumName && userId) {
+    if (albumName) {
       //find existing album with the same name
       const existingAlbum = await prisma.album.findFirst({
         where: {
@@ -105,16 +116,7 @@ export async function getSignedURL(
       });
     }
 
-    return { 
-      success: { 
-        url: signedURL, 
-        song: {
-          ...song,
-          artistName: artistName //add artist name
-        } 
-      } 
-    };
-
+    return { success: { url: signedURL } };
   } catch (error) {
     console.error("Database error:", error);
     return {
