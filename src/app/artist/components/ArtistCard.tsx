@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
-import { Song } from "@/types";
+import { Song } from "@/types"
 
 export type Artist = {
   user_id: number;
@@ -24,7 +24,7 @@ export type Artist = {
     title: string;
     album_art?: string;
   }[];
-  topTracks: Song[];
+  topTracks: Song[]; 
   playlists?: string[];
 };
 
@@ -64,20 +64,14 @@ export default function ArtistCard({ artist }: { artist: Artist }) {
         <div className="flex items-center gap-6">
           <Image
             src={artist?.pfp || "/artist-default.jpg"}
-            alt={`Profile picture of artist ${
-              artist?.username || "Unknown artist"
-            }`}
+            alt={artist?.username}
             className="w-32 h-32 rounded-full object-cover border-4 border-black shadow-xl"
             width={128}
             height={128}
           />
           <div className="flex flex-col">
-            <h1 className="text-4xl font-extrabold text-white">
-              @{artist?.username}
-            </h1>
-            <p className="text-gray-300 mt-1">
-              {followers.toLocaleString()} followers
-            </p>
+            <h1 className="text-4xl font-extrabold text-white">@{artist?.username}</h1>
+            <p className="text-gray-300 mt-1">{followers.toLocaleString()} followers</p>
 
             <div className="flex items-center gap-6 mt-2 text-sm text-gray-300">
               <span>{artist.songs?.length || 0} Tracks</span>
