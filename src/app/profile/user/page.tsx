@@ -103,6 +103,12 @@ export default function ListenerUserProfile() {
         <main className="p-6 space-y-10">
           <div className="flex gap-6 items-center">
             <UserCard />
+            
+            <ChangeProfilePic
+              currentPfp={useUserStore.getState().pfp || "/default_pfp.jpg"}
+              userId={useUserStore.getState().user_id || 1}
+              onUploadComplete={(url) => setPfp(url)}
+            />
           </div>
 
           {role === "listener" && (
