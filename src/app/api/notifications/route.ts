@@ -5,9 +5,15 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const userId = url.searchParams.get('userId');
+    const count = url.searchParams.get('count');
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
+
+    if (count === 'true') {
+      const count = await NotificationService.getNotificationCount(Number(userId));
+      return NextResponse.json({ count });
     }
 
     const notifications = await NotificationService.getUnreadNotifications(Number(userId));
