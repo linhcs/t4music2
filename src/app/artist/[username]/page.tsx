@@ -8,28 +8,26 @@ import ArtistAlbums from "../components/ArtistAlbums";
 import TopTracks from "../components/TopTracks";
 import ArtistBio from "../components/ArtistBio";
 import { useUserStore } from "@/store/useUserStore";
-import PlayBar from "@/components/ui/playBar";
-import { useAudioPlayer } from "@/context/AudioContext";
-import type { Artist } from "../components/ArtistCard";
+import type { Artist } from "../components/ArtistCard"; // ✅ Only keep this
 
 export default function ArtistPage() {
   const { username } = useParams<{ username: string }>();
   const [artist, setArtist] = useState<Artist | null>(null);
   const { user_id } = useUserStore();
 
-  const { currentSong, isPlaying, progress, togglePlayPause, handleSeek, volume, setVolume } =
-    useAudioPlayer();
-
   useEffect(() => {
     const fetchArtist = async () => {
       const res = await fetch(`/api/artists/${username}?viewer=${user_id}`);
       const data = await res.json();
+      console.log(data);  // Check if the data is structured correctly
       setArtist(data);
     };
     if (username && user_id !== -1) fetchArtist();
   }, [username, user_id]);
 
-  if (!artist) return <div className="text-white p-6">Loading artist profile...</div>;
+  if (!artist || !artist.songs || artist.songs.length === 0) {
+    return <div className="text-white p-6">No songs available.</div>;
+  }
 
   return (
     <div className="bg-black min-h-screen text-white">
@@ -40,18 +38,6 @@ export default function ArtistPage() {
         <TopTracks tracks={artist.songs} />
         <ArtistBio />
       </div>
-
-      {currentSong && (
-        <PlayBar
-          currentSong={currentSong}
-          isPlaying={isPlaying}
-          progress={progress}
-          onPlayPause={togglePlayPause}
-          onSeek={handleSeek}
-          volume={volume}
-          setVolume={setVolume}
-        />
-      )}
     </div>
   );
 }
