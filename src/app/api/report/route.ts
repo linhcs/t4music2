@@ -7,6 +7,7 @@ const convertBigIntToNumber = (obj: unknown): unknown => {
   if (typeof obj === 'bigint') {
     return Number(obj);
   }
+
   if (Array.isArray(obj)) {
     return obj.map(convertBigIntToNumber);
   }
@@ -16,7 +17,8 @@ const convertBigIntToNumber = (obj: unknown): unknown => {
     );
   }
   return obj;
-};
+}
+
 
 interface ReportData {
   topSongs: Array<{

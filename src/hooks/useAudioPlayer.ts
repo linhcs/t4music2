@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { getPlaybackURL } from "@/app/api/misc/actions";
 import { useUserStore } from "@/store/useUserStore";
 import { Song } from "@/types";
@@ -9,22 +9,36 @@ export function useAudioPlayer() {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [volume, setVolume] = useState(1); // Default volume is set to 100%
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Update progress whenever the song is playing
   const updateProgress = useCallback(() => {
     if (audioRef.current && !isNaN(audioRef.current.duration)) {
       setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
     }
   }, []);
 
-  const playSong = useCallback(async (song: Song) => {
-    console.log("Setting current song:", song); // trying to debug play issue/playbar issue
+  // Add the event listener only once when the audioRef is set
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.addEventListener("timeupdate", updateProgress);
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.removeEventListener("timeupdate", updateProgress);
+        }
+      };
+    }
+  }, [updateProgress]);
 
-    setCurrentSong(song);  // setting song
+  // Play or pause song
+  const playSong = useCallback(async (song: Song) => {
+    console.log("Setting current song:", song); // Debugging play issue/playbar issue
+
+    setCurrentSong(song);  // Setting the song
 
     if (!audioRef.current) {
       audioRef.current = new Audio();
-      audioRef.current.addEventListener("timeupdate", updateProgress);
     }
 
     const urlResult = await getPlaybackURL(song.file_path);
@@ -44,9 +58,11 @@ export function useAudioPlayer() {
       return;
     }
 
+    // Change song
     audioRef.current.src = urlResult.success.url;
     audioRef.current.currentTime = 0;
     setProgress(0);
+    audioRef.current.volume = volume;  // Set the volume when the song starts
 
     try {
       await audioRef.current.play();
@@ -56,6 +72,7 @@ export function useAudioPlayer() {
       setIsPlaying(false);
     }
 
+    // Update streaming history and top tracks
     await fetch("/api/streaming/add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -66,12 +83,21 @@ export function useAudioPlayer() {
       }),
     });
 
+    // Update user data after playing song
     const updatedRes = await fetch("/api/user/me", { cache: "no-store" });
     const updatedData = await updatedRes.json();
     const store = useUserStore.getState();
     store.setStreamingHistory(updatedData.streamingHistory);
     store.setTopTracks(updatedData.topTracks);
-  }, [currentSong, updateProgress]);
+  }, [currentSong, volume]);
+
+  // Handle seek bar change
+  const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current) return;
+    const bar = e.currentTarget;
+    const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
+    audioRef.current.currentTime = percent * audioRef.current.duration;
+  }, []);
 
   return {
     currentSong,
@@ -79,5 +105,8 @@ export function useAudioPlayer() {
     progress,
     playSong,
     audioRef,
+    handleSeek,
+    volume,
+    setVolume,
   };
 }

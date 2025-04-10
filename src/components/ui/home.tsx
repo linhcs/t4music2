@@ -30,7 +30,7 @@ const ListenerHome = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user_id, setPlaylists } = useUserStore();
 
-  const { currentSong, isPlaying, playSong, progress, handleSeek } = useAudioPlayer();
+  const { currentSong, isPlaying, playSong, progress, handleSeek, volume, setVolume } = useAudioPlayer();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -271,6 +271,8 @@ const ListenerHome = () => {
         progress={progress}
         onPlayPause={() => currentSong && playSong(currentSong)}
         onSeek={handleSeek}
+        volume={volume}
+        setVolume={setVolume}
       />
     </div>
   );

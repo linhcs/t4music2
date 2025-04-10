@@ -29,7 +29,7 @@ export default function PlaylistPage() {
   const [currentSongIndex, setCurrentSongIndex] = useState<number | null>(null);
   const [songsToRender, setSongsToRender] = useState<Song[]>([]);
 
-  const { currentSong, isPlaying, playSong, togglePlayPause, progress } = useAudioPlayer();
+  const { currentSong, isPlaying, playSong, togglePlayPause, progress, volume, setVolume } = useAudioPlayer();
   const { likedSongs, username } = useUserStore();
   const isLikedPlaylist = id === "liked";
   const { handleSeek } = useAudioPlayer();
@@ -187,15 +187,17 @@ export default function PlaylistPage() {
 
       {currentSong && (
         <PlayBar 
-        currentSong={currentSong}
-        isPlaying={isPlaying}
-        progress={progress}
-        onPlayPause={togglePlayPause}
-        onSeek={handleSeek}
-        onSkipNext={playNextSong}
-        onSkipPrevious={playPreviousSong}
-        isPlaylist={true}
-      />
+          currentSong={currentSong}
+          isPlaying={isPlaying}
+          progress={progress}
+          onPlayPause={togglePlayPause}
+          onSeek={handleSeek}
+          onSkipNext={playNextSong}
+          onSkipPrevious={playPreviousSong}
+          isPlaylist={true}
+          volume={volume}
+          setVolume={setVolume}
+        />
       )}
 
       {showModal && playlist && (

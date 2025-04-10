@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
+import { Song } from "@/types"
 
 export type Artist = {
   user_id: number;
@@ -23,6 +24,7 @@ export type Artist = {
     title: string;
     album_art?: string;
   }[];
+  topTracks: Song[]; 
   playlists?: string[];
 };
 
@@ -73,7 +75,7 @@ export default function ArtistCard({ artist }: { artist: Artist }) {
 
             <div className="flex items-center gap-6 mt-2 text-sm text-gray-300">
               <span>{artist.songs?.length || 0} Tracks</span>
-              <span>{artist.playlists?.length || 0} Playlists</span>
+              <span>{artist.album?.length || 0} Albums</span>
               <button
                 onClick={handleFollow}
                 className="ml-4 px-4 py-1 bg-gradient-to-r from-blue-500 to-green-500 rounded-full text-white font-semibold shadow hover:opacity-90 transition"

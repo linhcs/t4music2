@@ -31,8 +31,15 @@ export default function UserPlaylists() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { currentSong, isPlaying, progress, togglePlayPause, handleSeek } =
-    useAudioPlayer();
+  const {
+    currentSong,
+    isPlaying,
+    progress,
+    playSong,
+    handleSeek,
+    volume,
+    setVolume,
+  } = useAudioPlayer();
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -175,13 +182,15 @@ export default function UserPlaylists() {
           onCreate={handleCreatePlaylist}
         />
       )}
-
+      
       <PlayBar
         currentSong={currentSong}
         isPlaying={isPlaying}
         progress={progress}
-        onPlayPause={() => currentSong && togglePlayPause()}
+        onPlayPause={() => currentSong && playSong(currentSong)}
         onSeek={handleSeek}
+        volume={volume}
+        setVolume={setVolume}
       />
     </div>
   );

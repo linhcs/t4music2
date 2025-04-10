@@ -16,7 +16,7 @@ export interface User {
 }
 
 export interface Album {
-  Album_id: number;
+  album_id: number;
   album_art?: string;
   title: string;
   user_id: number;
@@ -27,7 +27,7 @@ export interface Album {
 export interface Song {
   song_id: number;
   title: string;
-  Album_id?: number;
+  album_id?: number;
   genre?: string;
   duration: number;
   file_path: string;

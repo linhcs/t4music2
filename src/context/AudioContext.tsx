@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useRef, useState, useCallback } from "react";
+import { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
 import { Song } from "@/types";
 import { getPlaybackURL } from "@/app/api/misc/actions";
 import { useUserStore } from "@/store/useUserStore";
@@ -13,6 +13,8 @@ type AudioContextType = {
   togglePlayPause: () => void;
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
   handleSeek: (e: React.MouseEvent<HTMLDivElement>) => void;
+  volume: number;
+  setVolume: (v: number) => void;
 };
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -21,14 +23,21 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null); // audioRef will be null initially
+  const [volume, setVolume] = useState(0.8); // Default volume
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const store = useUserStore();
 
   const updateProgress = () => {
-    if (audioRef.current && !isNaN(audioRef.current.duration) && isFinite(audioRef.current.duration)) { //added additional check to ensure duration is a defined value
+    if (audioRef.current && !isNaN(audioRef.current.duration) && isFinite(audioRef.current.duration)) {
       setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
     }
   };
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
 
   const playSong = useCallback(async (song: Song) => {
     if (!audioRef.current) {
@@ -43,20 +52,20 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (currentSong?.song_id === song.song_id) {
-      togglePlayPause(); 
+      togglePlayPause();
       return;
     }
 
     if (audioRef.current) {
       audioRef.current.src = urlResult.success.url;
       audioRef.current.currentTime = 0;
+      audioRef.current.volume = volume;
       await audioRef.current.play();
       setIsPlaying(true);
       setCurrentSong(song);
       setProgress(0);
     }
 
-    // Log streaming
     await fetch("/api/streaming/add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -71,7 +80,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     const updated = await res.json();
     store.setStreamingHistory(updated.streamingHistory);
     store.setTopTracks(updated.topTracks);
-  }, [currentSong]);
+  }, [currentSong, store, volume]);
 
   const togglePlayPause = () => {
     if (audioRef.current) {
@@ -87,11 +96,9 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!audioRef.current || !currentSong) return;
-    
     const bar = e.currentTarget;
     const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
-    
-    if (audioRef.current && !isNaN(audioRef.current.duration)) {
+    if (!isNaN(audioRef.current.duration)) {
       const newTime = percent * audioRef.current.duration;
       if (isFinite(newTime)) {
         audioRef.current.currentTime = newTime;
@@ -102,7 +109,17 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AudioContext.Provider
-      value={{ currentSong, isPlaying, progress, playSong, togglePlayPause, audioRef, handleSeek }}
+      value={{
+        currentSong,
+        isPlaying,
+        progress,
+        playSong,
+        togglePlayPause,
+        audioRef,
+        handleSeek,
+        volume,
+        setVolume,
+      }}
     >
       {children}
     </AudioContext.Provider>

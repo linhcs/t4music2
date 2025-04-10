@@ -37,7 +37,16 @@ export default function ListenerUserProfile() {
     setPlaylistCount,
   } = useUserStore();
 
-  const { currentSong, isPlaying, progress, playSong } = useAudioPlayer();
+  const {
+    currentSong,
+    isPlaying,
+    progress,
+    playSong,
+    handleSeek,
+    volume,
+    setVolume,
+  } = useAudioPlayer();
+
   const [loading, setLoading] = useState(true);
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -132,14 +141,10 @@ export default function ListenerUserProfile() {
         isPlaying={isPlaying}
         progress={progress}
         onPlayPause={() => currentSong && playSong(currentSong)}
-        onSeek={(e) => {
-          if (!currentSong) return;
-          const bar = e.currentTarget;
-          const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
-          const currentTime = percent * currentSong.duration;
-          console.log(currentTime);
-          playSong(currentSong);
-        }}
+        onSeek={handleSeek}
+        volume={volume}
+        setVolume={setVolume}
+
       />
     </div>
   );
