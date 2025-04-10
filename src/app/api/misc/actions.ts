@@ -64,6 +64,12 @@ export async function getSignedURL(
 
     console.log('Creating song for user:', user);
 
+    // Check if user has any followers
+    const followers = await prisma.follows.findMany({
+      where: { user_id_a: userId }
+    });
+    console.log('User followers:', followers);
+
     const song = await prisma.songs.create({
       data: {
         title: songName,
@@ -75,6 +81,16 @@ export async function getSignedURL(
         plays_count: 0,
       },
     });
+
+    // Check if notifications were created
+    const notifications = await prisma.notifications.findMany({
+      where: {
+        message: {
+          contains: songName
+        }
+      }
+    });
+    console.log('Created notifications:', notifications);
 
     //if album name is provided
     if (albumName) {

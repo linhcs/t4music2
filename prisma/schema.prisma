@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output = "../node_modules/.prisma/client"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -69,6 +69,17 @@ model likes {
   @@index([song_id], map: "song_id")
 }
 
+model notifications {
+  notification_id Int      @id @default(autoincrement())
+  user_id         Int
+  message         String   @db.Text
+  created_at      DateTime @default(now()) @db.DateTime(0)
+  is_read         Boolean  @default(false)
+  users           users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "user_id")
+}
+
 model playlist_songs {
   playlist_id Int
   song_id     Int
@@ -95,6 +106,19 @@ model playlists {
   @@index([user_id], map: "user_id")
 }
 
+model song_plays {
+  id        BigInt   @id @default(autoincrement())
+  user_id   Int
+  song_id   Int
+  played_at DateTime @default(now()) @db.DateTime(0)
+  users     users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "song_plays_ibfk_1")
+  songs     songs    @relation(fields: [song_id], references: [song_id], onDelete: Cascade, onUpdate: NoAction, map: "song_plays_ibfk_2")
+
+  @@index([played_at], map: "idx_song_plays_played_at")
+  @@index([user_id, song_id], map: "idx_song_plays_user_song")
+  @@index([song_id], map: "song_id")
+}
+
 model songs {
   song_id           Int                 @id @default(autoincrement())
   title             String              @db.VarChar(255)
@@ -114,8 +138,8 @@ model songs {
   album             album?              @relation(fields: [album_id], references: [album_id], onUpdate: NoAction, map: "songs_ibfk_2")
   streaming_history streaming_history[]
 
-  @@index([user_id], map: "user_id")
   @@index([album_id], map: "album_id")
+  @@index([user_id], map: "user_id")
 }
 
 model streaming_history {
@@ -165,6 +189,19 @@ model notifications {
   users           users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "user_id")
+}
+
+model song_plays {
+  id        BigInt   @id @default(autoincrement())
+  user_id   Int
+  song_id   Int
+  played_at DateTime @default(now()) @db.DateTime(0)
+  users     users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "song_plays_ibfk_1")
+  songs     songs    @relation(fields: [song_id], references: [song_id], onDelete: Cascade, onUpdate: NoAction, map: "song_plays_ibfk_2")
+
+  @@index([played_at], map: "idx_song_plays_played_at")
+  @@index([user_id, song_id], map: "idx_song_plays_user_song")
+  @@index([song_id], map: "song_id")
 }
 
 enum library_item_type {
