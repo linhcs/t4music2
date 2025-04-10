@@ -44,8 +44,8 @@ No top artists yet! Start listening to music! ✩°｡⋆⸜ 🎧✮      </p>
   return (
     <div className="flex gap-6 overflow-x-auto scrollbar-hide">
       {topArtists.map(([,data]) => (
-        <Link key={data.id} href={`/artist/${data.id}`}>
-          <div className="text-center hover:scale-105 transition-transform duration-300 cursor-pointer">
+        <Link key={data.id} href={`/artist/${encodeURIComponent(data.name)}`}>
+        <div className="text-center hover:scale-105 transition-transform duration-300 cursor-pointer">
             <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-800 shadow-xl mx-auto">
               <Image
                 src={data.pfp || "/artist-default.jpg"}
