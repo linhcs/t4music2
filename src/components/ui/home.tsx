@@ -118,6 +118,11 @@ const ListenerHome = () => {
     fetchRecommendedSongs();
   }, []);
 
+  const formatArtistName = (username: string | undefined) => { //removes characters in username to display artist name
+    if (!username) return 'Unknown Artist';
+    return username.replace(/[_.-]/g, ' ');
+  };
+
   const SongGallerySection = ({ title, items }: { title: string; items: Song[] }) => (
     <section className="w-full max-w-7xl">
       <h2 className="text-xl font-bold text-white mt-8 mb-3">{title}</h2>
@@ -125,7 +130,7 @@ const ListenerHome = () => {
         {items.map((song) => {
           const album_art = song.album?.album_art || "";
           const isSongCurrentlyPlaying = currentSong?.song_id === song.song_id && isPlaying;
-
+          const artistName = formatArtistName(song.users?.username);
           return (
             <div
               key={song.song_id}
@@ -156,6 +161,9 @@ const ListenerHome = () => {
               </div>
               <div className="absolute bottom-0 w-full bg-black bg-opacity-50 px-2 py-1">
                 <h3 className="text-white text-sm font-semibold truncate">{song.title}</h3>
+                <p className="text-gray-300 text-xs truncate">
+                {artistName}
+              </p>
               </div>
             </div>
           );

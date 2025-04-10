@@ -16,6 +16,11 @@ interface PlayBarProps {
   isPlaylist?: boolean; //if its a playlist (can skip)
 }
 
+const formatArtistName = (username: string | undefined) => {
+  if (!username) return 'Unknown Artist';
+  return username.replace(/[_.-]/g, ' ');
+};
+
 const PlayBar = ({ currentSong, isPlaying, progress, onPlayPause, onSeek, onSkipNext, onSkipPrevious, isPlaylist = false }: PlayBarProps) => {
   const { likedSongs, toggleLike, username } = useUserStore();
 
@@ -67,7 +72,7 @@ const PlayBar = ({ currentSong, isPlaying, progress, onPlayPause, onSeek, onSkip
 
         <div className="flex-1 min-w-0">
           <h3 className="text-white font-medium truncate">{currentSong?.title}</h3>
-          <p className="text-gray-400 text-sm truncate">{currentSong?.users?.username || "Unknown artist"}</p>
+          <p className="text-gray-400 text-sm truncate"> {formatArtistName(currentSong?.users?.username)} </p>
         </div>
 
         <div className="flex items-center gap-4">
