@@ -12,7 +12,7 @@ interface PlayBarProps {
   onPlayPause: () => void;
   onSeek: (e: React.MouseEvent<HTMLDivElement>) => void;
   onSkipNext?: () => void; //if it is a single song (will just restart song)
-  onSkipPrevious?: () => void;
+  onSkipPrevious?: () => void; //if it is a single song (will just end song)
   isPlaylist?: boolean; //if its a playlist (can skip)
 }
 
@@ -42,18 +42,40 @@ const PlayBar = ({ currentSong, isPlaying, progress, onPlayPause, onSeek, onSkip
   };
 
   const handleSkipNext = () => {
-    if (isPlaylist && onSkipNext) {
+    if (isPlaylist && onSkipNext) { //if playlist, call function in playlist page
       onSkipNext();
     } else {
-      onSeek({ currentTarget: { getBoundingClientRect: () => ({ left: 0 }), clientWidth: 100 } } as React.MouseEvent<HTMLDivElement>);
+      const endSong = {
+        currentTarget: {
+          getBoundingClientRect: () => ({ left: 0, width: 100 }),
+          clientWidth: 100
+        },
+        clientX: 100 //show song has ended by moving progress to end
+      } as unknown as React.MouseEvent<HTMLDivElement>;
+      onSeek(endSong);
+      if (isPlaying) {
+        setTimeout(() => onPlayPause(), 10);
+      }
     }
   };
 
   const handleSkipPrevious = () => {
-    if (isPlaylist && onSkipPrevious) {
+    if (isPlaylist && onSkipPrevious) { //if playlist, call function in playlist page
       onSkipPrevious();
     } else {
-      onSeek({ currentTarget: { getBoundingClientRect: () => ({ left: 0 }), clientWidth: 100 } } as React.MouseEvent<HTMLDivElement>);
+      const restartSong = {
+        currentTarget: {
+          getBoundingClientRect: () => ({ left: 0, width: 100 }),
+          clientWidth: 100
+        },
+        clientX: 0 //show song has started by moving progress to start
+      } as unknown as React.MouseEvent<HTMLDivElement>;
+      onSeek(restartSong);
+      setTimeout(() => {
+        if (!isPlaying) {
+          onPlayPause();
+        }
+      }, 10);
     }
   };
 

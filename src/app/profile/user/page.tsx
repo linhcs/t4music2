@@ -20,7 +20,6 @@ import ArtistSongs from "../components/Artist/ArtistSongs";
 import { FaChartLine } from 'react-icons/fa';
 import Link from "next/link";
 import CreatePlaylistModal from "../components/User/CreatePlaylistModal";
-
 console.log(CreatePlaylistModal);
 console.log(ChangeProfilePic);
 export default function ListenerUserProfile() {

@@ -33,7 +33,8 @@ export async function getSignedURL(
   userId: number,
   genre: string = "Pop",
   duration: number = 180,
-  albumName?: string
+  albumName?: string,
+  album_art?: string
 ) {
   if (!acceptedTypes.includes(type) || size > maxFileSize) {
     return { failure: "Invalid file or file size!" };
@@ -93,7 +94,7 @@ export async function getSignedURL(
     console.log('Created notifications:', notifications);
 
     //if album name is provided
-    if (albumName) {
+    if (albumName && userId) {
       //find existing album with the same name
       const existingAlbum = await prisma.album.findFirst({
         where: {
@@ -106,12 +107,18 @@ export async function getSignedURL(
       
       if (existingAlbum) {
         albumId = existingAlbum.album_id;
+        if (album_art && existingAlbum.album_art !== album_art) {
+          await prisma.album.update({
+            where: { album_id: albumId },
+            data: { album_art: album_art },
+          });
+        }
       } else {
-        //if there's no existing albums then create a new one
         const newAlbum = await prisma.album.create({
           data: {
             title: albumName,
             user_id: userId,
+            album_art: album_art || null, // set album image
           },
         });
         albumId = newAlbum.album_id;
