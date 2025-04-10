@@ -16,6 +16,8 @@ export default function TopArtists() {
     const artistId = song.artist_id;
     const pfp = song.artist_pfp;
     
+    if (!artistId) continue; 
+
     if (!artistMap.has(artistId.toString())) {
       artistMap.set(artistId.toString(), {
         count: 1,
