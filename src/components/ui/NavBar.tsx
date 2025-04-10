@@ -39,13 +39,6 @@ type ArtistResult = {
   pfp?: string;
 };
 
-type notiftype = {
-  notification_id: number;
-  message: string;
-  created_at: string;
-  is_read: boolean;
-};
-
 export default function NavBar({ role = "listener" }: NavBarProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");

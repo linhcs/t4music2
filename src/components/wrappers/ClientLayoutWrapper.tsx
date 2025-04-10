@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import PlayBar from "@/components/ui/playBar";
 import { useUserStore } from "@/store/useUserStore";
@@ -10,7 +10,18 @@ import { createPlaylist } from "@/app/actions/createPlaylist";
 export default function ClientLayoutWrapper({ children }: { children: React.ReactNode }) {
   const [hasMounted, setHasMounted] = useState(false);
 
-  const { currentSong, isPlaying, progress, playSong, audioRef } = useAudioPlayer();
+  const {
+    currentSong,
+    isPlaying,
+    progress,
+    playSong,
+    handleSeek,
+    volume,
+    setVolume,
+  } = useAudioPlayer();
+
+  // Initialize audioRef with useRef
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const user_id = useUserStore((state) => state.user_id);
   const playlists = useUserStore((state) => state.playlists);
@@ -42,13 +53,9 @@ export default function ClientLayoutWrapper({ children }: { children: React.Reac
             isPlaying={isPlaying}
             progress={progress}
             onPlayPause={() => currentSong && playSong(currentSong)}
-            onSeek={(e) => {
-              if (!audioRef.current) return;
-              const bar = e.currentTarget;
-              const percent =
-                (e.clientX - bar.getBoundingClientRect().left) / bar.clientWidth;
-              audioRef.current.currentTime = percent * audioRef.current.duration;
-            }}
+            onSeek={handleSeek}
+            volume={volume}
+            setVolume={setVolume}
           />
         </>
       )}
