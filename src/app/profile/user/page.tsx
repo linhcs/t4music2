@@ -16,12 +16,7 @@ const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import cuteAnimation from "@/assets/cute_animation.json";
 import ArtistAlbums from "../components/Artist/ArtistAlbums";
 import UserCard from "../components/User/UserCard";
-<<<<<<< HEAD
 import ArtistSongs from "../components/Artist/ArtistSongs";
-=======
-import { FaChartLine } from 'react-icons/fa';
-import Link from "next/link";
->>>>>>> 3de94cdb4f8576d59826c82b629cb54ab8e6edcd
 
 console.log(ChangeProfilePic);
 export default function ListenerUserProfile() {
@@ -109,7 +104,6 @@ export default function ListenerUserProfile() {
                 <TopTracks />
               </section>
 
-<<<<<<< HEAD
               <section>
                 <UserPlaylists />
               </section>
@@ -138,21 +132,6 @@ export default function ListenerUserProfile() {
               </section>
             </>
           )}
-=======
-          <section>
-            {role === "artist" ? <ArtistAlbums /> : <UserPlaylists />}
-          </section>
-
-          <div className="mt-8 pb-24 flex justify-center"> {/*added padding to make space for playbar at bottom*/}
-            <Link 
-              href="/report"
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
-            >
-              <FaChartLine />
-              <span>View Your Music Journey</span>
-            </Link>
-          </div>
->>>>>>> 3de94cdb4f8576d59826c82b629cb54ab8e6edcd
         </main>
       </div>
 
