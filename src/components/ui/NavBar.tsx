@@ -5,154 +5,339 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { FaHome, FaSearch, FaBell, FaUserCircle, FaTimes } from "react-icons/fa";
+import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
 import { useUserStore } from "@/store/useUserStore";
+import { useAudioPlayer } from "@/context/AudioContext";
+import { Song } from "../../../types";
+import { useRef } from "react";
 
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
-console.log(classNames)// can delete later
 interface NavBarProps {
   role?: "listener" | "artist" | "admin";
 }
 
+type SongResult = {
+  song_id: number;
+  title: string;
+  genre: string;
+  file_path: string;
+  album?: {
+    album_art?: string;
+  };
+};
+
+type ArtistResult = {
+  user_id: number;
+  username: string;
+  pfp?: string;
+};
+
 export default function NavBar({ role = "listener" }: NavBarProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [results, setResults] = useState<{ username: string; user_id: number; pfp?: string }[]>([]);
+  const [results, setResults] = useState<{ songs: SongResult[]; artists: ArtistResult[] }>({ songs: [], artists: [] });
   const [showDropdown, setShowDropdown] = useState(false);
-  const username = useUserStore((state) => state.username); // not too sure if this is right cries
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const username = useUserStore((state) => state.username);
+  const user_id = useUserStore((state) => state.user_id);
+  const { currentSong, isPlaying, playSong, togglePlayPause } = useAudioPlayer();
+  const searchRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
 
   function logout() {
     const store = useUserStore.getState();
     store.logout();
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('user');
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     router.push("/");
   }
-
-   useEffect(() => {
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+  
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  
+  useEffect(() => {
     const delayDebounce = setTimeout(async () => {
       if (!searchTerm.trim()) {
-        setResults([]);
+        setResults({ songs: [], artists: [] });
         setShowDropdown(false);
         return;
       }
 
       try {
-        const res = await fetch("/api/search/artists", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: searchTerm }),
-        });
-
-        if (!res.ok) {
-          console.error("Server error:", res.status);
-          setResults([]);
-          return;
-        }
-
+        const res = await fetch(`/api/songs/search?q=${encodeURIComponent(searchTerm)}`);
         const data = await res.json();
-        setResults(data);
+        setResults({
+          songs: data.songs || [],
+          artists: data.artists || [],
+        });
         setShowDropdown(true);
       } catch (error) {
-        console.error("Error searching artists:", error);
-        setResults([]);
+        console.error("Search error:", error);
+        setResults({ songs: [], artists: [] });
       }
     }, 300);
 
     return () => clearTimeout(delayDebounce);
   }, [searchTerm]);
 
-  const handleSelect = (username: string) => {
-    router.push(`/artist/${username}`);
-    setSearchTerm("");
-    setShowDropdown(false);
+  useEffect(() => {
+    if (user_id) {
+      const fetchNotifications = async () => {
+        try {
+          // Fetch unread notifications
+          const response = await fetch(`/api/notifications?userId=${user_id}`);
+          const data = await response.json();
+          setNotifications(data);
+
+          // Fetch unread count
+          const countResponse = await fetch(`/api/notifications?userId=${user_id}&count=true`);
+          const countData = await countResponse.json();
+          setUnreadCount(countData.count || 0);
+        } catch (error) {
+          console.error("Failed to fetch notifications:", error);
+        }
+      };
+
+      fetchNotifications();
+      // Poll for new notifications every 30 seconds
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user_id]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleMarkAsRead = async (notificationId: number) => {
+    try {
+      await fetch(`/api/notifications?userId=${user_id}&notificationId=${notificationId}`, {
+        method: 'PUT'
+      });
+      // Update local state
+      setNotifications(notifications.map(n => 
+        n.notification_id === notificationId ? { ...n, is_read: true } : n
+      ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+    }
   };
 
-  const notifications = [
-    { id: 1, message: "New song released: 'Summer Vibes'" },
-    { id: 2, message: "Your album 'Chill Vibes' was liked" },
-    { id: 3, message: "New artist trending near you" },
-  ];
+  const handleMarkAllAsRead = async () => {
+    try {
+      await fetch(`/api/notifications?userId=${user_id}`, {
+        method: 'PUT'
+      });
+      // Update local state
+      setNotifications(notifications.map(n => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Failed to mark all notifications as read:", error);
+    }
+  };
 
   return (
     <nav className="bg-black text-white px-5 py-2 shadow-md">
       <div className="w-full flex items-center justify-between px-4">
-        {/* Left - Home */}
         <Link href="/home" className="hover:text-gray-300">
           <FaHome size={24} />
         </Link>
 
-        {/* Center - Search */}
-        <div className="relative max-w-xl mx-auto flex-1">
-          <div className="relative flex items-center group w-full max-w-md mx-auto"> {/*added flexbox to keep search within playbar*/}
-          <input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search for artists..."
-            className="w-full py-2 px-4 rounded-full bg-gray-800 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-white
-            focus:ring-opacity-80 transition-all duration-300 ease-in-out border border-gray-700 hover:border-gray-600 group-hover:shadow-lg group-hover:shadow-white/50 truncate" 
-          /> {/*added glow effect*/}
-          {/*search bar is responsive to screen resizing*/}
-          <FaSearch className="absolute right-4 text-gray-400" />
-          {searchTerm && (
-            <button
-             onClick={() => setSearchTerm('')}
-             className="absolute right-10 text-gray-400 hover:text-white transition-colors"
-             aria-label="Clear search" >
-              <FaTimes />
-            </button>
-           )}
-          </div>
-          
+    <div ref={searchRef} className="relative max-w-xl mx-auto flex-1">
+    <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 p-[1px] rounded-xl w-full max-w-xl mx-auto">
+  <div className="relative flex items-center group bg-black rounded-xl">
+    <input
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      placeholder="Search for songs, artists, albums, genres..."
+      className="w-full py-2 px-4 bg-black text-white placeholder-white rounded-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-80 transition-all duration-300 ease-in-out truncate"
+    />
+    <FaSearch className="absolute right-4 text-white" />
+    {searchTerm && (
+      <button
+        onClick={() => setSearchTerm("")}
+        className="absolute right-10 text-gray-400 hover:text-white transition-colors"
+        aria-label="Clear search"
+      >
+        <FaTimes />
+      </button>
+    )}
+  </div>
+</div>
+          {showDropdown && (
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-full max-w-md z-50">
+              <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 p-[1px] rounded-xl shadow-xl">
+                <div className="bg-black rounded-xl p-4 space-y-3 border border-white/10 max-h-96 overflow-y-auto">
 
-          {showDropdown && results.length > 0 && (
-            <ul className="absolute z-50 w-full bg-gray-900 mt-2 rounded-xl shadow-lg max-h-60 overflow-y-auto border border-gray-700">
-              {results.map((artist) => (
-                <li
-                  key={artist.user_id}
-                  onClick={() => handleSelect(artist.username)}
-                  className="flex items-center gap-3 p-3 hover:bg-gray-800 cursor-pointer text-white"
-                >
-                  {artist.pfp && (
-                    <img
-                      src={artist.pfp}
-                      alt={artist.username}
-                      className="w-6 h-6 rounded-full object-cover"
-                    />
+                  {/* Artist Results */}
+                  {results.artists.length > 0 && (
+                    <>
+                      <h3 className="text-sm font-semibold text-white">Artist Profiles</h3>
+                      {results.artists.map((artist) => (
+                        <div
+                          key={artist.user_id}
+                          onClick={() => {
+                            router.push(`/artist/${artist.username}`);
+                            setShowDropdown(false);
+                            setSearchTerm("");
+                          }}
+                          className="flex items-center gap-3 p-2 hover:bg-gray-800 rounded cursor-pointer"
+                        >
+                          {artist.pfp && (
+                            <img
+                              src={artist.pfp || "/default.jpg"}
+                              className="w-8 h-8 rounded-full object-cover"
+                              alt={artist.username}
+                            />
+                          )}
+                          <span className="text-white text-sm">@{artist.username}</span>
+                        </div>
+                      ))}
+                    </>
                   )}
-                  @{artist.username}
-                </li>
-              ))}
-            </ul>
+
+                  {/* Song Results */}
+                  {results.songs.length > 0 && (
+                    <>
+                      <h3 className="text-sm font-semibold text-white mt-2">Songs</h3>
+                      {results.songs.map((song) => {
+                        const isThisPlaying = currentSong?.song_id === song.song_id && isPlaying;
+                        return (
+                          <div
+                            key={song.song_id}
+                            className="flex items-center justify-between gap-3 p-2 hover:bg-gray-800 rounded cursor-pointer"
+                          >
+                            <div
+                              className="flex items-center gap-3 overflow-hidden"
+                              onClick={() => {
+                                playSong(song as Song);
+                                setShowDropdown(false);
+                                setSearchTerm("");
+                              }}
+                            >
+                              {song.album?.album_art && (
+                                <img
+                                  src={song.album.album_art}
+                                  alt={song.title}
+                                  className="w-9 h-9 rounded object-cover shrink-0"
+                                />
+                              )}
+                              <div className="truncate">
+                                <p className="text-white text-sm font-medium truncate">{song.title}</p>
+                                <p className="text-xs text-gray-400 truncate">{song.genre}</p>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (isThisPlaying) {
+                                  togglePlayPause();
+                                } else {
+                                  playSong(song as Song);
+                                }
+                              }}
+                              className="shrink-0 hover:scale-110 transition-transform"
+                              aria-label={isThisPlaying ? "Pause" : "Play"}
+                            >
+                              {isThisPlaying ? (
+                                <FiPauseCircle className="text-white text-xl" />
+                              ) : (
+                                <FiPlayCircle className="text-white text-xl" />
+                              )}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+
+                  {/* No Results */}
+                  {results.artists.length === 0 && results.songs.length === 0 && (
+                    <div className="text-gray-400 text-sm">No results found</div>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
-        {/* Right - Notifications & Menu */}
-        <div className="flex items-center space-x-4 z-50"> {/*added z-50 to ensure drop down appears in front of other elements*/}
-          <Menu as="div" className="relative">
-            <MenuButton className="hover:text-gray-300">
+        {/* Right - Profile & Notifications */}
+        <div className="flex items-center space-x-4 z-50">
+          <Menu as="div" className="relative" ref={notificationsRef}>
+            <MenuButton 
+              className="hover:text-gray-300 relative"
+              onClick={() => setShowNotifications(!showNotifications)}
+            >
               <FaBell size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
             </MenuButton>
-            <MenuItems className="absolute right-0 mt-2 z-50 w-72 bg-gray-800 rounded-md shadow-xl ring-1 ring-black ring-opacity-5">
-              <div className="py-2">
-                {notifications.length === 0 ? (
-                  <div className="text-gray-400 px-4 py-2 text-sm">No notifications</div>
-                ) : (
-                  notifications.map((n) => (
-                    <MenuItem key={n.id}>
-                      <div className="px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
-                        {n.message}
+            {showNotifications && (
+              <MenuItems className="absolute right-0 mt-2 z-50 w-72 bg-gray-800 rounded-md shadow-xl ring-1 ring-black ring-opacity-5">
+                <div className="py-2">
+                  {notifications.length > 0 ? (
+                    <>
+                      <div className="px-4 py-2 flex justify-between items-center border-b border-gray-700">
+                        <span className="text-sm text-white">Notifications</span>
+                        <button
+                          onClick={handleMarkAllAsRead}
+                          className="text-xs text-gray-400 hover:text-white"
+                        >
+                          Mark all as read
+                        </button>
                       </div>
-                    </MenuItem>
-                  ))
-                )}
-              </div>
-            </MenuItems>
+                      {notifications.map((notification) => (
+                        <div 
+                          key={notification.notification_id} 
+                          className={`px-4 py-2 hover:bg-gray-700 flex justify-between items-center ${
+                            !notification.is_read ? 'bg-gray-700/50' : ''
+                          }`}
+                        >
+                          <div>
+                            <p className="text-sm text-white">{notification.message}</p>
+                            <p className="text-xs text-gray-400">
+                              {new Date(notification.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                          {!notification.is_read && (
+                            <button
+                              onClick={() => handleMarkAsRead(notification.notification_id)}
+                              className="text-xs text-gray-400 hover:text-white ml-2"
+                            >
+                              Mark as read
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="text-gray-400 px-4 py-2 text-sm">No notifications</div>
+                  )}
+                </div>
+              </MenuItems>
+            )}
           </Menu>
 
-          {/* Profile Menu */}
           <Menu as="div" className="relative">
             <MenuButton>
               <FaUserCircle size={24} className="hover:text-gray-300" />
@@ -160,12 +345,8 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
             <MenuItems className="absolute right-0 z-50 mt-2 w-56 bg-gray-800 rounded-md shadow-xl ring-1 ring-black ring-opacity-5">
               <div className="py-1">
                 <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-700">
-                  Logged in as{" "}
-                  <span className="text-white font-medium">
-                    {username || "User"}
-                  </span>
+                  Logged in as <span className="text-white font-medium">{username || "User"}</span>
                 </div>
-
                 <MenuItem>
                   <Link
                     href={role === "artist" ? "/profile/artist" : "/profile/user"}
@@ -174,7 +355,6 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
                     Profile
                   </Link>
                 </MenuItem>
-
                 <MenuItem>
                   <Link
                     href="/settings"
@@ -185,9 +365,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
                 </MenuItem>
                 <MenuItem>
                   <button
-                    onClick={() => {
-                      logout();
-                    }}
+                    onClick={logout}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                   >
                     Logout
