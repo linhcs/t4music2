@@ -11,7 +11,6 @@ import { useUserStore } from "@/store/useUserStore";
 import PlayBar from "@/components/ui/playBar";
 import { useAudioPlayer } from "@/context/AudioContext";
 import type { Artist } from "../components/ArtistCard";
-import type { Song, Album } from "@/types";  // Ensure the right types for Song and Album
 
 export default function ArtistPage() {
   const { username } = useParams<{ username: string }>();
@@ -37,9 +36,8 @@ export default function ArtistPage() {
       <NavBar />
       <ArtistCard artist={artist} />
       <div className="relative max-w-6xl mx-auto px-6 pb-10 space-y-12 mt-8">
-        {/* Ensure that the data passed is correct */}
+        <TopTracks tracks={artist.topTracks} />  
         <ArtistAlbums albums={artist.album} />
-        <TopTracks tracks={artist.songs} />
         <ArtistBio />
       </div>
 

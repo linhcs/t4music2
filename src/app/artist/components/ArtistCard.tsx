@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
+import { Song } from "@/types"
 
 export type Artist = {
   user_id: number;
@@ -23,6 +24,7 @@ export type Artist = {
     title: string;
     album_art?: string;
   }[];
+  topTracks: Song[]; 
   playlists?: string[];
 };
 

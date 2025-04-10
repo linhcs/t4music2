@@ -48,6 +48,14 @@ export async function GET(req: Request) {
       where: { user_id_b: user.user_id },
     });
 
+    // Ensure all songs have necessary fields
+    const topTracks = user.songs.map((song) => ({
+      ...song,
+      duration: song.duration || 180, // fallback if missing
+      file_format: song.file_format || "mp3", // fallback if missing
+      user_id: song.user_id || user.user_id, // ensure user_id is set
+    }));
+
     const isFollowing = viewer
       ? !!(await prisma.follows.findFirst({
           where: {
@@ -57,10 +65,12 @@ export async function GET(req: Request) {
         }))
       : false;
 
+    // Include topTracks in the response
     return NextResponse.json({
       ...user,
       followers: followerCount,
       isFollowing,
+      topTracks,  // Include topTracks
     });
   } catch (err) {
     console.error("Error fetching artist:", err);
