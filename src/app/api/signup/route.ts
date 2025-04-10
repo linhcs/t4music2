@@ -2,11 +2,15 @@ import { NextResponse } from "next/server";
 import { prisma } from "../../../../prisma/script";
 import bcrypt from "bcryptjs";
 
-interface users {user_id: number; username: string; role: string;};
+interface users {
+  user_id: number;
+  username: string;
+  role: string;
+}
 
 export async function POST(request: Request) {
   try {
-    const { username, email, password,role } = await request.json();
+    const { username, email, password, role } = await request.json();
 
     // Check if required fields are filled in
     if (!username || !password) {
@@ -44,7 +48,10 @@ export async function POST(request: Request) {
     `);
 
     if (!user || !user[0]) {
-      return NextResponse.json({ error: "Failed to fetch user after signup" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to fetch user after signup" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(
