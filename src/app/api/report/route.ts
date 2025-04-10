@@ -16,23 +16,27 @@ interface TableCheck {
 }
 
 // Helper function to convert BigInt to Number
-const serializeBigInt = (obj: any): any => {
+function serializeBigInt(obj: unknown): unknown {
   if (typeof obj === 'bigint') {
     return Number(obj);
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(serializeBigInt);
   }
-  
-  if (typeof obj === 'object' && obj !== null) {
+
+  if (obj && typeof obj === 'object') {
     return Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => [key, serializeBigInt(value)])
+      Object.entries(obj as Record<string, unknown>).map(([key, value]) => [
+        key,
+        serializeBigInt(value),
+      ])
     );
   }
-  
+
   return obj;
-};
+}
+
 
 export async function GET(request: Request) {
   try {

@@ -1,29 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import { usePlayerStore } from "@/store/useUserStore";
-import type { Song } from "@/store/useUserStore";
+import { useAudioPlayer } from "@/context/AudioContext";
+import type { Song } from "@/types";
 
-export default function TopTracks({ tracks }: { tracks: Song[] }) {
-  const { currentSong, isPlaying, setSong, togglePlay } = usePlayerStore();
+export default function TopTracks({ tracks }: { tracks?: Song[] }) {
+  const { currentSong, isPlaying, playSong, togglePlayPause } = useAudioPlayer();
+
+  if (!tracks || tracks.length === 0) {
+    return <p className="text-gray-400 mt-10">No tracks available.</p>;
+  }
 
   const handlePlay = (track: Song) => {
     const isCurrent = currentSong?.song_id === track.song_id;
     if (isCurrent) {
-      togglePlay();
-      return;
+      togglePlayPause();
+    } else {
+      playSong(track);
     }
-
-    const fallbackAlbum: NonNullable<Song["album"]> = {
-      title: "Unknown Album",
-      album_art: "/albumArt/defaultAlbumArt.png",
-    };
-
-    setSong({
-      ...track,
-      users: track.users ?? { username: "Unknown Artist" },
-      album: track.album ?? fallbackAlbum,
-    });
   };
 
   return (

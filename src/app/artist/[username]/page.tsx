@@ -8,12 +8,17 @@ import ArtistAlbums from "../components/ArtistAlbums";
 import TopTracks from "../components/TopTracks";
 import ArtistBio from "../components/ArtistBio";
 import { useUserStore } from "@/store/useUserStore";
-import type { Artist } from "../components/ArtistCard"; // ✅ Only keep this
+import PlayBar from "@/components/ui/playBar";
+import { useAudioPlayer } from "@/context/AudioContext";
+import type { Artist } from "../components/ArtistCard";
 
 export default function ArtistPage() {
   const { username } = useParams<{ username: string }>();
   const [artist, setArtist] = useState<Artist | null>(null);
   const { user_id } = useUserStore();
+
+  const { currentSong, isPlaying, progress, togglePlayPause, handleSeek, volume, setVolume } =
+    useAudioPlayer();
 
   useEffect(() => {
     const fetchArtist = async () => {
@@ -35,6 +40,18 @@ export default function ArtistPage() {
         <TopTracks tracks={artist.songs} />
         <ArtistBio />
       </div>
+
+      {currentSong && (
+        <PlayBar
+          currentSong={currentSong}
+          isPlaying={isPlaying}
+          progress={progress}
+          onPlayPause={togglePlayPause}
+          onSeek={handleSeek}
+          volume={volume}
+          setVolume={setVolume}
+        />
+      )}
     </div>
   );
 }

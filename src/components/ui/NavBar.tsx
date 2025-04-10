@@ -15,6 +15,14 @@ interface NavBarProps {
   role?: "listener" | "artist" | "admin";
 }
 
+type Notification = {
+  notification_id: number;
+  user_id: number;
+  message: string;
+  created_at: string | Date;
+  is_read: boolean;
+};
+
 type SongResult = {
   song_id: number;
   title: string;
@@ -36,7 +44,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<{ songs: SongResult[]; artists: ArtistResult[] }>({ songs: [], artists: [] });
   const [showDropdown, setShowDropdown] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const username = useUserStore((state) => state.username);

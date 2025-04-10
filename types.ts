@@ -16,7 +16,7 @@ export interface User {
 }
 
 export interface Album {
-  Album_id: number;
+  album_id: number;
   album_art?: string;
   title: string;
   user_id: number;
