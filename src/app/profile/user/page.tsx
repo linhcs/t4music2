@@ -108,7 +108,7 @@ export default function ListenerUserProfile() {
           {role === "listener" && (
             <>
               <section>
-                <h2 className="text-2xl font-bold mb-4">Top artists this month</h2>
+                <h2 className="text-2xl font-bold mb-4">Your top artists this month</h2>
                 <TopArtists />
               </section>
 

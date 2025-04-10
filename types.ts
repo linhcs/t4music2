@@ -37,9 +37,14 @@ export interface Song {
   user_id: number;
   URL?: string;
   album?: Album;
-  users?:{
+
+  users?: {
     username: string;
   };
+
+  artist_username?: string;
+  artist_id?: number;
+  artist_pfp?: string;
 }
 
 export interface Playlist {

@@ -40,16 +40,26 @@ export async function GET(req: NextRequest) {
       FROM playlists 
       WHERE user_id = ${userId}
     `;
-
-    const streamingHistory = await prisma.$queryRaw`
-      SELECT s.song_id, s.title, s.genre, s.file_path, sh.played_at 
-      FROM streaming_history sh 
-      JOIN songs s ON sh.song_id = s.song_id 
-      WHERE sh.listener_id = ${userId} 
-      ORDER BY sh.played_at DESC 
+    const streamingHistory = await prisma.$queryRawUnsafe(`
+      SELECT 
+        s.song_id,
+        s.title,
+        s.genre,
+        s.file_path,
+        s.duration,
+        s.file_format,
+        sh.played_at,
+        u.user_id AS artist_id,
+        u.username AS artist_username,
+        u.pfp AS artist_pfp
+      FROM streaming_history sh
+      JOIN songs s ON sh.song_id = s.song_id
+      JOIN users u ON s.user_id = u.user_id
+      WHERE sh.listener_id = ${userId}
+      ORDER BY sh.played_at DESC
       LIMIT 10
-    `;
-
+    `);
+    
     const followers = await prisma.follows.findMany({ where: { user_id_b: userId } });
     const following = await prisma.follows.findMany({ where: { user_id_a: userId } });
 

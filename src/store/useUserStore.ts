@@ -18,8 +18,11 @@ export type Song = {
     title?: string;
     album_art?: string;
   };
-};
 
+  artist_username?: string;
+  artist_id?: number;
+  artist_pfp?: string;
+};
 type PlayerState = {
   currentSong: Song | null;
   isPlaying: boolean;
