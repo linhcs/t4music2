@@ -536,43 +536,6 @@ export default function ReportPage() {
           duration: 178,
         },
       ],
-      "2025-05": [
-        {
-          song_id: 82,
-          title: "As It Was",
-          artist: "Harry Styles",
-          genre: "Pop",
-          duration: 167,
-        },
-        {
-          song_id: 83,
-          title: "Anti-Hero",
-          artist: "Taylor Swift",
-          genre: "Pop",
-          duration: 200,
-        },
-        {
-          song_id: 85,
-          title: "Jimmy Cooks",
-          artist: "Drake",
-          genre: "Hip-Hop",
-          duration: 218,
-        },
-        {
-          song_id: 86,
-          title: "Wait For U",
-          artist: "artisttest",
-          genre: "R&B",
-          duration: 189,
-        },
-        {
-          song_id: 88,
-          title: "Die For You",
-          artist: "The Weeknd",
-          genre: "R&B",
-          duration: 239,
-        },
-      ],
     };
 
     return (fallbackSongs[month as keyof typeof fallbackSongs] || []).map(
@@ -635,13 +598,7 @@ export default function ReportPage() {
   console.log("Available months in allMonths:", allMonths);
 
   // Get the hardcoded 2025 months to fallback to if needed
-  const hardcodedMonths = [
-    "2025-01",
-    "2025-02",
-    "2025-03",
-    "2025-04",
-    "2025-05",
-  ];
+  const hardcodedMonths = ["2025-01", "2025-02", "2025-03", "2025-04"];
   const shouldUseHardcoded = allMonths.length === 0;
 
   // Dropdown should now have months from either allMonths or hardcoded values
