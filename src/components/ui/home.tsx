@@ -1,66 +1,51 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
 import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
 import { useUserStore } from "@/store/useUserStore";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { Song } from "../../../types";
 import { useAudioPlayer } from "@/context/AudioContext";
 import PlayBar from "@/components/ui/playBar";
 import dynamic from "next/dynamic";
-const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import cuteAnimation from "@/assets/cute_animation.json";
 import YourLibrary from "@/components/ui/YourLibrary";
-import { useRef } from "react";
+import CreatePlaylistModal from "@/app/profile/components/User/CreatePlaylistModal";
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 const ListenerHome = () => {
-  const router = useRouter();
+  // const router = useRouter();
   const { username, toggleLike, likedSongs, playlists } = useUserStore();
-  // const { setSong } = usePlayerStore();
   const [popularSongs, setPopularSongs] = useState<Song[]>([]);
   const [songs, setSongs] = useState<Song[]>([]);
   const [recommendedSongs, setRecommendedSongs] = useState<Song[]>([]);
   const [hasMounted, setHasMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const contextMenuRef = useRef<HTMLDivElement>(null);
-  const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-    song: Song | null;
-  } | null>(null);
-
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; song: Song | null } | null>(null);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState<Song | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const { user_id, setPlaylists } = useUserStore();
 
-  const {
-    currentSong,
-    isPlaying,
-    playSong,
-    progress,
-    handleSeek,
-  } = useAudioPlayer();
+  const { currentSong, isPlaying, playSong, progress, handleSeek } = useAudioPlayer();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        contextMenuRef.current &&
-        !contextMenuRef.current.contains(event.target as Node)
-      ) {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target as Node)) {
         setContextMenu(null);
       }
     }
-  
     if (contextMenu) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-  
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [contextMenu]);
-  
+
   useEffect(() => {
     async function fetchUserData() {
       const res = await fetch("/api/user/me", { cache: "no-store" });
@@ -80,43 +65,36 @@ const ListenerHome = () => {
 
   useEffect(() => {
     setHasMounted(true);
-
     const fetchData = async () => {
       try {
         const response = await fetch("/api/songs");
         const data: Song[] = await response.json();
         setSongs(data);
-      } catch (error) {
-        console.error("Failed to fetch songs:", error);
+      } catch {
+        console.error("Failed to fetch songs");
       } finally {
         setLoading(false);
       }
     };
-
     const fetchPopularSongs = async () => {
-      try {
-        const response = await fetch("/api/songs/popular");
-        const data: Song[] = await response.json();
-        setPopularSongs(data);
-      } catch (error) {
-        console.error("Failed to fetch popular songs:", error);
-      }
+      const res = await fetch("/api/songs/popular");
+      const data = await res.json();
+      setPopularSongs(data);
     };
-
     const fetchRecommendedSongs = async () => {
-      try {
-        const response = await fetch("/api/songs/recommended");
-        const data = await response.json();
-        setRecommendedSongs(data.songs);
-      } catch (error) {
-        console.error("Failed to fetch recommended songs:", error);
-      }
+      const res = await fetch("/api/songs/recommended");
+      const data = await res.json();
+      setRecommendedSongs(data.songs);
     };
-
     fetchData();
     fetchPopularSongs();
     fetchRecommendedSongs();
   }, []);
+
+  const formatArtistName = (username: string | undefined) => { //removes characters in username to display artist name
+    if (!username) return 'Unknown Artist';
+    return username.replace(/[_.-]/g, ' ');
+  };
 
   const SongGallerySection = ({ title, items }: { title: string; items: Song[] }) => (
     <section className="w-full max-w-7xl">
@@ -125,7 +103,7 @@ const ListenerHome = () => {
         {items.map((song) => {
           const album_art = song.album?.album_art || "";
           const isSongCurrentlyPlaying = currentSong?.song_id === song.song_id && isPlaying;
-
+          const artistName = formatArtistName(song.users?.username);
           return (
             <div
               key={song.song_id}
@@ -134,7 +112,7 @@ const ListenerHome = () => {
                 setContextMenu({ x: e.clientX, y: e.clientY, song });
               }}
               onClick={() => playSong(song)}
-              className="group relative rounded-lg overflow-hidden shadow-md no-flicker"
+              className="group relative rounded-lg overflow-hidden shadow-md"
               style={{
                 backgroundImage: `url(${album_art})`,
                 backgroundSize: "cover",
@@ -149,13 +127,16 @@ const ListenerHome = () => {
                     e.stopPropagation();
                     playSong(song);
                   }}
-                  className="text-5xl text-white transition-transform duration-100 hover:scale-105"
+                  className="text-5xl text-white"
                 >
                   {isSongCurrentlyPlaying ? <FiPauseCircle /> : <FiPlayCircle />}
                 </button>
               </div>
               <div className="absolute bottom-0 w-full bg-black bg-opacity-50 px-2 py-1">
                 <h3 className="text-white text-sm font-semibold truncate">{song.title}</h3>
+                <p className="text-gray-300 text-xs truncate">
+                {artistName}
+              </p>
               </div>
             </div>
           );
@@ -188,26 +169,22 @@ const ListenerHome = () => {
       </div>
 
       {contextMenu && (
-     <div
-     ref={contextMenuRef}
-     className="fixed bg-gray-800 text-white rounded shadow-lg z-50"
-     style={{ top: contextMenu.y, left: contextMenu.x }}
-   >   
+        <div
+          ref={contextMenuRef}
+          className="fixed bg-gray-800 text-white rounded shadow-lg z-50"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+        >
           <ul>
             <li
               className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
               onClick={async () => {
                 const song = contextMenu.song!;
                 toggleLike(song);
-                try {
-                  await fetch("/api/likes/toggle", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, songId: song.song_id }),
-                  });
-                } catch (err) {
-                  console.error("Failed to sync like:", err);
-                }
+                await fetch("/api/likes/toggle", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ username, songId: song.song_id }),
+                });
                 setContextMenu(null);
               }}
             >
@@ -253,7 +230,10 @@ const ListenerHome = () => {
             ))}
             <button
               className="w-full mt-2 py-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 rounded text-white font-medium"
-              onClick={() => router.push("/listener/my-playlists?create=true")}
+              onClick={() => {
+                setShowCreateModal(true);
+                setShowPlaylistModal(false);
+              }}
             >
               + Create New Playlist
             </button>
@@ -261,6 +241,28 @@ const ListenerHome = () => {
         </div>
       )}
 
+{showCreateModal && (
+  <CreatePlaylistModal
+    onClose={() => setShowCreateModal(false)}
+    onCreate={(name, playlist_art) => {
+      fetch("/api/playlists/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id, name, playlist_art }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to create playlist");
+          return res.json();
+        })
+        .then((newPlaylist) => {
+          const updated = [...playlists, newPlaylist];
+          setPlaylists(updated);
+        })
+        .finally(() => setShowCreateModal(false))
+        .catch((err) => console.error("Error creating playlist:", err));
+    }}
+  />
+)}
       <PlayBar
         currentSong={currentSong}
         isPlaying={isPlaying}

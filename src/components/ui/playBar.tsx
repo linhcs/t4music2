@@ -12,9 +12,14 @@ interface PlayBarProps {
   onPlayPause: () => void;
   onSeek: (e: React.MouseEvent<HTMLDivElement>) => void;
   onSkipNext?: () => void; //if it is a single song (will just restart song)
-  onSkipPrevious?: () => void;
+  onSkipPrevious?: () => void; //if it is a single song (will just end song)
   isPlaylist?: boolean; //if its a playlist (can skip)
 }
+
+const formatArtistName = (username: string | undefined) => {
+  if (!username) return 'Unknown Artist';
+  return username.replace(/[_.-]/g, ' ');
+};
 
 const PlayBar = ({ currentSong, isPlaying, progress, onPlayPause, onSeek, onSkipNext, onSkipPrevious, isPlaylist = false }: PlayBarProps) => {
   const { likedSongs, toggleLike, username } = useUserStore();
@@ -37,18 +42,40 @@ const PlayBar = ({ currentSong, isPlaying, progress, onPlayPause, onSeek, onSkip
   };
 
   const handleSkipNext = () => {
-    if (isPlaylist && onSkipNext) {
+    if (isPlaylist && onSkipNext) { //if playlist, call function in playlist page
       onSkipNext();
     } else {
-      onSeek({ currentTarget: { getBoundingClientRect: () => ({ left: 0 }), clientWidth: 100 } } as React.MouseEvent<HTMLDivElement>);
+      const endSong = {
+        currentTarget: {
+          getBoundingClientRect: () => ({ left: 0, width: 100 }),
+          clientWidth: 100
+        },
+        clientX: 100 //show song has ended by moving progress to end
+      } as unknown as React.MouseEvent<HTMLDivElement>;
+      onSeek(endSong);
+      if (isPlaying) {
+        setTimeout(() => onPlayPause(), 10);
+      }
     }
   };
 
   const handleSkipPrevious = () => {
-    if (isPlaylist && onSkipPrevious) {
+    if (isPlaylist && onSkipPrevious) { //if playlist, call function in playlist page
       onSkipPrevious();
     } else {
-      onSeek({ currentTarget: { getBoundingClientRect: () => ({ left: 0 }), clientWidth: 100 } } as React.MouseEvent<HTMLDivElement>);
+      const restartSong = {
+        currentTarget: {
+          getBoundingClientRect: () => ({ left: 0, width: 100 }),
+          clientWidth: 100
+        },
+        clientX: 0 //show song has started by moving progress to start
+      } as unknown as React.MouseEvent<HTMLDivElement>;
+      onSeek(restartSong);
+      setTimeout(() => {
+        if (!isPlaying) {
+          onPlayPause();
+        }
+      }, 10);
     }
   };
 
@@ -67,7 +94,7 @@ const PlayBar = ({ currentSong, isPlaying, progress, onPlayPause, onSeek, onSkip
 
         <div className="flex-1 min-w-0">
           <h3 className="text-white font-medium truncate">{currentSong?.title}</h3>
-          <p className="text-gray-400 text-sm truncate">{currentSong?.users?.username || "Unknown artist"}</p>
+          <p className="text-gray-400 text-sm truncate"> {formatArtistName(currentSong?.users?.username)} </p>
         </div>
 
         <div className="flex items-center gap-4">
