@@ -45,7 +45,6 @@ export default function TopTracks() {
             className={`flex items-center justify-between bg-gradient-to-l from-pink-800 via-blue-800 to-purple-800 animate-gradient rounded-lg px-4 py-3 shadow-md
               ${isCurrent ? "ring-2 ring-white/70" : ""}`}
           >
-            {/* Left: album + track info */}
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-md overflow-hidden bg-gray-700">
                 <Image
@@ -69,7 +68,6 @@ export default function TopTracks() {
               </div>
             </div>
 
-            {/* Right: rank */}
             <div className="flex items-center gap-2">
               {isCurrent && currentSong?.duration && (
                 <div
