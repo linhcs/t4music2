@@ -8,11 +8,10 @@ import {
   FaMusic,
   FaChartBar,
   FaClock,
-  FaHeart,
+  FaCalendarAlt,
   FaSortUp,
   FaSortDown,
   FaTimes,
-  FaCalendarAlt,
 } from "react-icons/fa";
 import {
   BarChart,
@@ -21,10 +20,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
-  LineChart,
-  Line,
 } from "recharts";
 
 interface ReportData {
@@ -65,12 +61,15 @@ interface ReportData {
   }>;
 }
 
-// Define a type for individual song entries for clarity
-type SongEntry = ReportData["allSongsPlayed"][0];
-// Define a type for the mapped entry which might have null played_at
-type MappedSongEntry = Omit<SongEntry, "played_at"> & {
-  played_at: string | null;
-};
+// Define interface for played_at object from MySQL
+interface MySQLDateObject {
+  year: number;
+  month: string | number;
+  day?: number;
+  hours?: number;
+  minutes?: number;
+  seconds?: number;
+}
 
 const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
@@ -133,75 +132,87 @@ export default function ReportPage() {
               }))
             : [],
           allSongsPlayed: Array.isArray(data.allSongsPlayed)
-            ? data.allSongsPlayed.map((song: any) => {
-                // Extract month from played_at object (e.g., 2025-05)
-                let playedAtDisplay = "Unknown Date";
-                let monthStr = "";
+            ? data.allSongsPlayed.map(
+                (song: {
+                  song_id: number;
+                  title?: string;
+                  artist?: string;
+                  genre?: string;
+                  duration?: number;
+                  played_at?: string | MySQLDateObject;
+                }) => {
+                  // Extract month from played_at object (e.g., 2025-05)
+                  let playedAtDisplay = "Unknown Date";
+                  let monthStr = "";
 
-                try {
-                  if (song.played_at) {
-                    // Log raw played_at to understand its structure
-                    console.log("Raw played_at:", song.played_at);
+                  try {
+                    if (song.played_at) {
+                      // Log raw played_at to understand its structure
+                      console.log("Raw played_at:", song.played_at);
 
-                    // Check if played_at is an object with date parts
-                    if (typeof song.played_at === "object") {
-                      // MySQL date objects typically have properties like year, month, day
-                      // Extract from whatever format is available
-                      if (
-                        "year" in song.played_at &&
-                        "month" in song.played_at
-                      ) {
-                        // Format as YYYY-MM-DD HH:MM:SS
-                        const year = song.played_at.year;
-                        // Month is 1-indexed in MySQL
-                        const month = parseInt(song.played_at.month);
-                        const day = song.played_at.day || 1;
-                        const hours = song.played_at.hours || 0;
-                        const minutes = song.played_at.minutes || 0;
-                        const seconds = song.played_at.seconds || 0;
+                      // Check if played_at is an object with date parts
+                      if (typeof song.played_at === "object") {
+                        // MySQL date objects typically have properties like year, month, day
+                        // Extract from whatever format is available
+                        if (
+                          "year" in song.played_at &&
+                          "month" in song.played_at
+                        ) {
+                          // Format as YYYY-MM-DD HH:MM:SS
+                          const year = song.played_at.year;
+                          // Month is 1-indexed in MySQL
+                          const month =
+                            typeof song.played_at.month === "string"
+                              ? parseInt(song.played_at.month)
+                              : song.played_at.month;
+                          const day = song.played_at.day || 1;
+                          const hours = song.played_at.hours || 0;
+                          const minutes = song.played_at.minutes || 0;
+                          const seconds = song.played_at.seconds || 0;
 
-                        // Format as YYYY-MM-DD HH:MM:SS
-                        playedAtDisplay = `${year}-${month
-                          .toString()
-                          .padStart(2, "0")}-${day
-                          .toString()
-                          .padStart(2, "0")} ${hours
-                          .toString()
-                          .padStart(2, "0")}:${minutes
-                          .toString()
-                          .padStart(2, "0")}:${seconds
-                          .toString()
-                          .padStart(2, "0")}`;
+                          // Format as YYYY-MM-DD HH:MM:SS
+                          playedAtDisplay = `${year}-${month
+                            .toString()
+                            .padStart(2, "0")}-${day
+                            .toString()
+                            .padStart(2, "0")} ${hours
+                            .toString()
+                            .padStart(2, "0")}:${minutes
+                            .toString()
+                            .padStart(2, "0")}:${seconds
+                            .toString()
+                            .padStart(2, "0")}`;
 
-                        // Extract just YYYY-MM for filtering - make sure month is padded correctly
-                        monthStr = `${year}-${month
-                          .toString()
-                          .padStart(2, "0")}`;
+                          // Extract just YYYY-MM for filtering - make sure month is padded correctly
+                          monthStr = `${year}-${month
+                            .toString()
+                            .padStart(2, "0")}`;
 
-                        // Debug output for May 2025
-                        console.log(
-                          `Song: ${song.title}, Year: ${year}, Month: ${month}, MonthStr: ${monthStr}`
-                        );
+                          // Debug output for May 2025
+                          console.log(
+                            `Song: ${song.title}, Year: ${year}, Month: ${month}, MonthStr: ${monthStr}`
+                          );
+                        }
+                      } else if (typeof song.played_at === "string") {
+                        playedAtDisplay = song.played_at;
+                        monthStr = song.played_at.substring(0, 7);
                       }
-                    } else if (typeof song.played_at === "string") {
-                      playedAtDisplay = song.played_at;
-                      monthStr = song.played_at.substring(0, 7);
                     }
+                  } catch (e) {
+                    console.error("Error processing date:", e);
                   }
-                } catch (e) {
-                  console.error("Error processing date:", e);
-                }
 
-                return {
-                  song_id: song.song_id,
-                  title: song.title || "Unknown",
-                  artist: song.artist || "Unknown",
-                  genre: song.genre || null,
-                  duration: Number(song.duration || 0),
-                  played_at: playedAtDisplay,
-                  month: monthStr, // Store the month string for filtering
-                };
-              })
+                  return {
+                    song_id: song.song_id,
+                    title: song.title || "Unknown",
+                    artist: song.artist || "Unknown",
+                    genre: song.genre || null,
+                    duration: Number(song.duration || 0),
+                    played_at: playedAtDisplay,
+                    month: monthStr, // Store the month string for filtering
+                  };
+                }
+              )
             : [],
         };
 
