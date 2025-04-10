@@ -86,8 +86,8 @@ export default function Sidebar() {
             : "/albumArt/defaultAlbumArt.png")
          }
            alt={playlist.name}
-           width={40}
-          height={40}
+           width={80}
+          height={80}
            className="object-cover rounded-md"
 />
 
