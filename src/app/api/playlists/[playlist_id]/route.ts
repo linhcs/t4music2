@@ -1,4 +1,3 @@
-// src/app/api/playlists/[id]/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { extractParamFromUrl } from "@/lib/utils"; 
@@ -17,7 +16,15 @@ export async function GET(req: Request) {
       include: {
         playlist_songs: {
           include: {
-            songs: true,
+            songs: {
+              include: {
+                users: {
+                  select: {
+                    username: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
