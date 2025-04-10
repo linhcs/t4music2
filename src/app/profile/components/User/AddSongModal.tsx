@@ -6,6 +6,14 @@ type Song = {
   song_id: number;
   title: string;
   genre?: string;
+  users?: {
+    username: string; //to add in artist name to card
+  };
+};
+
+const formatArtistName = (username: string | undefined) => {
+  if (!username) return "Unknown Artist";
+  return username.replace(/[_.-]/g, " ");
 };
 
 export default function AddSongModal({
@@ -92,11 +100,24 @@ export default function AddSongModal({
               className="flex justify-between items-center p-4 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl hover:scale-[1.02] hover:shadow-lg transition-transform duration-300 cursor-pointer"
               onClick={() => handleAdd(song.song_id)}
             >
-              <div>
-                <p className="font-semibold text-white text-lg">{song.title}</p>
-                <p className="text-sm text-gray-400">{song.genre}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-white text-lg truncate">{song.title}</p>
+                <div className="flex gap-2">
+                  <p className="text-gray-400 text-sm truncate">
+                    {formatArtistName(song.users?.username)}
+                  </p>
+                  {song.genre && (
+                    <span className="text-gray-500 text-sm">• {song.genre}</span>
+                  )}
+                </div>
               </div>
-              <button className="bg-gradient-to-r from-pink-300 via-blue-300 to-purple-300 hover:bg-gradient-to-l from-pink-600 via-blue-600 to-purple-600 text-black font-bold px-4 py-1 rounded-full text-sm shadow">
+              <button 
+                className="bg-gradient-to-r from-pink-300 via-blue-300 to-purple-300 hover:bg-gradient-to-l from-pink-600 via-blue-600 to-purple-600 text-black font-bold px-4 py-1 rounded-full text-sm shadow"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAdd(song.song_id);
+                }}
+              >
                 Add
               </button>
             </li>

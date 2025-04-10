@@ -9,6 +9,9 @@ import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
 import { useAudioPlayer } from "@/context/AudioContext";
 import { useUserStore } from "@/store/useUserStore";
 import PlayBar from "@/components/ui/playBar";
+import dynamic from "next/dynamic";
+import cuteAnimation from "@/assets/cute_animation.json";
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 interface Playlist {
   playlist_id: number;
@@ -18,6 +21,11 @@ interface Playlist {
     songs: Song;
   }[];
 }
+
+const formatArtistName = (username: string | undefined) => {
+  if (!username) return "Unknown Artist";
+  return username.replace(/[_.-]/g, " ");
+};
 
 export default function PlaylistPage() {
   const router = useRouter();
@@ -33,6 +41,9 @@ export default function PlaylistPage() {
   const { likedSongs, username } = useUserStore();
   const isLikedPlaylist = id === "liked";
   const { handleSeek } = useAudioPlayer();
+
+  const [hasMounted, setHasMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fetchPlaylist = useCallback(async () => {
     const res = await fetch(`/api/playlists/${id}`);
@@ -84,6 +95,23 @@ export default function PlaylistPage() {
     alert("❌ Song removed");
     fetchPlaylist();
   };
+
+  useEffect(() => {
+    setHasMounted(true);
+    if ((!isLikedPlaylist && playlist) || (isLikedPlaylist && songsToRender.length > 0)) {
+      setLoading(false);
+    }
+  }, [playlist, isLikedPlaylist, songsToRender]);
+
+  if (!hasMounted || loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <div className="w-64 h-64">
+          <Lottie animationData={cuteAnimation} loop={true} />
+        </div>
+      </div>
+    );
+  }
 
   if (!isLikedPlaylist && !playlist) {
     return <div className="text-white p-10">Loading...</div>;
@@ -138,52 +166,68 @@ export default function PlaylistPage() {
         </div>
       </div>
 
-      <div className="mt-10">
-        {songsToRender.length === 0 ? (
-          <p className="text-gray-500">No songs yet. Add some!</p>
-        ) : (
-          songsToRender.map((song, i) => (
-            <div
-              key={song.song_id}
-              className="flex justify-between items-center py-4 px-4 border-b border-gray-700 bg-gray-900 rounded-lg mb-4 hover:shadow-xl hover:scale-[1.02] transition-transform duration-300 group"
-            >
-              <div>
-                <p className="font-semibold text-lg group-hover:text-white text-gray-300">
-                  {i + 1}. {song.title}
+<div className="mt-10">
+  {songsToRender.length === 0 ? (
+    <p className="text-gray-500">No songs yet. Add some!</p>
+  ) : (
+    songsToRender.map((song, i) => (
+      <div
+        key={song.song_id}
+        className="flex justify-between items-center py-4 px-4 border-b border-gray-700 bg-gray-900 rounded-lg mb-4 hover:shadow-xl hover:scale-[1.02] transition-transform duration-300 group"
+      >
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-lg group-hover:text-white text-gray-300">
+            {i + 1}. {song.title}
+          </p>
+          <div className="flex gap-2 items-center">
+            <p className="text-sm text-gray-500 group-hover:text-gray-400">
+              {formatArtistName(song.users?.username)}
+            </p>
+            {song.genre && (
+              <>
+                <span className="text-gray-600">•</span>
+                <p className="text-sm text-gray-500 group-hover:text-gray-400">
+                  {song.genre}
                 </p>
-                <p className="text-sm text-gray-500 group-hover:text-gray-400">{song.genre}</p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    if (currentSong?.song_id === song.song_id) {
-                      togglePlayPause();
-                    } else {
-                      playSong(song as Song);
-                    }
-                  }}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full hover:scale-105 text-sm shadow"
-                >
-                  {isPlaying && currentSong?.song_id === song.song_id ? (
-                    <FiPauseCircle />
-                  ) : (
-                    <FiPlayCircle />
-                  )}
-                </button>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (currentSong?.song_id === song.song_id) {
+                togglePlayPause();
+              } else {
+                playSong(song as Song);
+              }
+            }}
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full hover:scale-105 text-sm shadow"
+          >
+            {isPlaying && currentSong?.song_id === song.song_id ? (
+              <FiPauseCircle />
+            ) : (
+              <FiPlayCircle />
+            )}
+          </button>
 
-                {!isLikedPlaylist && (
-                  <button
-                    onClick={() => handleRemove(song.song_id)}
-                    className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 text-sm shadow"
-                  >
-                    ❌ Remove
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
-        )}
+          {!isLikedPlaylist && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemove(song.song_id);
+              }}
+              className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 text-sm shadow"
+            >
+              ❌ Remove
+            </button>
+          )}
+        </div>
       </div>
+    ))
+  )}
+</div>
 
       {currentSong && (
         <PlayBar 
