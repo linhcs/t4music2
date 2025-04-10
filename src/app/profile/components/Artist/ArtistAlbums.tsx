@@ -43,8 +43,6 @@ export default function ArtistAlbums() {
 
   return (
     <div className="mt-10 w-full max-w-4xl">
-      <h3 className="text-3xl font-semibold mb-5">My Albums</h3>
-
       <div className="flex gap-6 overflow-x-auto scrollbar-hide">
         {albums.map((album) => (
           <div
@@ -79,7 +77,7 @@ export default function ArtistAlbums() {
         {/* ➕ Add Album Button */}
         <Link href="/albums/create">
           <div className="min-w-[180px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center py-4">
-            <div className="h-36 w-36 bg-gradient-to-br from-green-500 to-blue-500 rounded-xl flex items-center justify-center">
+            <div className="h-36 w-36 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
               <FaPlus size={48} className="text-white" />
             </div>
             <p className="text-center py-3 font-semibold">Add Album</p>
