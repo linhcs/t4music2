@@ -22,6 +22,7 @@ import Link from "next/link";
 import CreatePlaylistModal from "../components/User/CreatePlaylistModal";
 console.log(CreatePlaylistModal);
 console.log(ChangeProfilePic);
+console.log(ArtistSongs,ArtistTopTracks,ArtistAlbums)// feel free to delete later
 export default function ListenerUserProfile() {
   const {
     role,
