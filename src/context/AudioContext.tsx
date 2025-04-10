@@ -40,59 +40,64 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   }, [volume]);
 
   const playSong = useCallback(async (song: Song) => {
+    const isSameSong = currentSong?.song_id === song.song_id;
+  
     if (!audioRef.current) {
       audioRef.current = new Audio();
-      audioRef.current.addEventListener("timeupdate", updateProgress);
     }
-
+  
+    audioRef.current.removeEventListener("timeupdate", updateProgress);
+    audioRef.current.addEventListener("timeupdate", updateProgress);
+  
     const urlResult = await getPlaybackURL(song.file_path);
     if ("failure" in urlResult) {
       console.error("Failed to get playback URL:", urlResult.failure);
       return;
     }
-
-    if (currentSong?.song_id === song.song_id) {
-      togglePlayPause();
-      return;
-    }
-
-    if (audioRef.current) {
-      audioRef.current.src = urlResult.success.url;
-      audioRef.current.currentTime = 0;
-      audioRef.current.volume = volume;
-      await audioRef.current.play();
-      setIsPlaying(true);
-      setCurrentSong(song);
-      setProgress(0);
-    }
-
-    await fetch("/api/streaming/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: store.user_id,
-        songId: song.song_id,
-        artistId: song.user_id,
-      }),
-    });
-
-    const res = await fetch("/api/user/me", { cache: "no-store" });
-    const updated = await res.json();
-    store.setStreamingHistory(updated.streamingHistory);
-    store.setTopTracks(updated.topTracks);
-  }, [currentSong, store, volume]);
-
-  const togglePlayPause = () => {
-    if (audioRef.current) {
-      if (audioRef.current.paused) {
-        audioRef.current.play();
+  
+    const audio = audioRef.current;
+  
+    if (isSameSong) {
+      if (audio.paused) {
+        await audio.play();
         setIsPlaying(true);
       } else {
-        audioRef.current.pause();
+        audio.pause();
         setIsPlaying(false);
       }
+      return;
     }
-  };
+  
+    audio.src = urlResult.success.url;
+    audio.currentTime = 0;
+    audio.volume = volume;
+  
+    try {
+      await audio.play();
+      setCurrentSong(song);
+      setIsPlaying(true);
+      setProgress(0);
+  
+      // Now log & refresh user state
+      await fetch("/api/streaming/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: store.user_id,
+          songId: song.song_id,
+          artistId: song.user_id,
+        }),
+      });
+  
+      const res = await fetch("/api/user/me", { cache: "no-store" });
+      const updated = await res.json();
+      store.setStreamingHistory(updated.streamingHistory);
+      store.setTopTracks(updated.topTracks);
+    } catch (err) {
+      console.error("Playback error:", err);
+      setIsPlaying(false);
+    }
+  }, [currentSong, store, volume, updateProgress]);
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!audioRef.current || !currentSong) return;
@@ -107,6 +112,19 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const togglePlayPause = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+  
+    if (audio.paused) {
+      audio.play();
+      setIsPlaying(true);
+    } else {
+      audio.pause();
+      setIsPlaying(false);
+    }
+  };
+  
   return (
     <AudioContext.Provider
       value={{

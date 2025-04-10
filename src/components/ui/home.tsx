@@ -3,9 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import NavBar from "@/components/ui/NavBar";
 import Sidebar from "@/components/ui/Sidebar";
-import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
+import { Play, Pause } from "lucide-react";
 import { useUserStore } from "@/store/useUserStore";
-// import { useRouter } from "next/navigation";
 import { Song } from "../../../types";
 import { useAudioPlayer } from "@/context/AudioContext";
 import PlayBar from "@/components/ui/playBar";
@@ -13,10 +12,15 @@ import dynamic from "next/dynamic";
 import cuteAnimation from "@/assets/cute_animation.json";
 import YourLibrary from "@/components/ui/YourLibrary";
 import CreatePlaylistModal from "@/app/profile/components/User/CreatePlaylistModal";
+
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
+const formatArtistName = (username: string | undefined) => {
+  if (!username) return 'Unknown Artist';
+  return username.replace(/[_.-]/g, ' ');
+};
+
 const ListenerHome = () => {
-  // const router = useRouter();
   const { username, toggleLike, likedSongs, playlists } = useUserStore();
   const [popularSongs, setPopularSongs] = useState<Song[]>([]);
   const [songs, setSongs] = useState<Song[]>([]);
@@ -30,7 +34,16 @@ const ListenerHome = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user_id, setPlaylists } = useUserStore();
 
-  const { currentSong, isPlaying, playSong, progress, handleSeek, volume, setVolume } = useAudioPlayer();
+  const {
+    currentSong,
+    isPlaying,
+    playSong,
+    progress,
+    handleSeek,
+    togglePlayPause,
+    volume,
+    setVolume,
+  } = useAudioPlayer();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -45,23 +58,6 @@ const ListenerHome = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [contextMenu]);
-
-  useEffect(() => {
-    async function fetchUserData() {
-      const res = await fetch("/api/user/me", { cache: "no-store" });
-      if (!res.ok) return;
-      const data = await res.json();
-      const store = useUserStore.getState();
-      store.setUser(data.username, data.role, data.pfp, data.user_id);
-      store.setLikedSongs(data.likedSongs);
-      store.setPlaylists(data.playlists);
-      store.setStreamingHistory(data.streamingHistory);
-      store.setTopTracks(data.topTracks);
-      store.setFollowers(data.followers);
-      store.setFollowing(data.following);
-    }
-    fetchUserData();
-  }, []);
 
   useEffect(() => {
     setHasMounted(true);
@@ -91,22 +87,16 @@ const ListenerHome = () => {
     fetchRecommendedSongs();
   }, []);
 
-  const formatArtistName = (username: string | undefined) => { //removes characters in username to display artist name
-    if (!username) return 'Unknown Artist';
-    return username.replace(/[_.-]/g, ' ');
-  };
-
   const SongGallerySection = ({ title, items }: { title: string; items: Song[] }) => (
     <section className="w-full max-w-7xl mx-auto relative">
       <h2 className="text-xl font-bold text-white mt-8 mb-4">{title}</h2>
-  
-      {/* Scrollable Row */}
       <div className="flex gap-6 overflow-x-auto scrollbar-hide px-1 pb-2">
         {items.map((song) => {
+          const isThisSong = currentSong?.song_id === song.song_id;
+          const showPause = isThisSong && isPlaying;
           const album_art = song.album?.album_art || "";
-          const isSongCurrentlyPlaying = currentSong?.song_id === song.song_id && isPlaying;
           const artistName = formatArtistName(song.users?.username);
-  
+
           return (
             <div
   key={song.song_id}
@@ -114,7 +104,14 @@ const ListenerHome = () => {
     e.preventDefault();
     setContextMenu({ x: e.clientX, y: e.clientY, song });
   }}
-  onClick={() => playSong(song)}
+  onClick={() => {
+    // Handle play/pause functionality on card click
+    if (isThisSong) {
+      togglePlayPause();
+    } else {
+      playSong(song);
+    }
+  }}
   className="group relative rounded-xl overflow-hidden shadow-md w-[200px] h-[200px] cursor-pointer flex-shrink-0"
   style={{
     backgroundImage: `url(${album_art})`,
@@ -122,28 +119,31 @@ const ListenerHome = () => {
     backgroundPosition: "center",
   }}
 >
-  <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+  {/* Larger invisible button area */}
+  <div className="absolute inset-0 flex items-center justify-center">
     <button
-      onClick={(e) => {
-        e.stopPropagation();
-        playSong(song);
-      }}
-      className="text-4xl text-white"
+      className="w-full h-full opacity-0 hover:opacity-100 flex items-center justify-center"
+      aria-label={showPause ? "Pause" : "Play"}
     >
-      {isSongCurrentlyPlaying ? <FiPauseCircle /> : <FiPlayCircle />}
+      {showPause ? (
+        <Pause className="w-12 h-12 text-white" />
+      ) : (
+        <Play className="w-12 h-12 text-white" />
+      )}
     </button>
   </div>
+
   <div className="absolute bottom-0 w-full bg-black bg-opacity-50 px-2 py-1">
     <h3 className="text-white text-sm font-semibold truncate">{song.title}</h3>
     <p className="text-gray-300 text-xs truncate">{artistName}</p>
   </div>
 </div>
-        );
+          );
         })}
       </div>
     </section>
   );
-  
+
   if (!hasMounted || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-black">
@@ -160,15 +160,14 @@ const ListenerHome = () => {
       <div className="flex flex-col flex-1 min-w-0">
         <NavBar />
         <main className="p-6 overflow-auto">
-  <SongGallerySection title="Recently Added" items={songs.slice(0, 15)} />
-  <SongGallerySection title="Popular Songs" items={popularSongs.slice(0, 15)} />
-  <SongGallerySection title="Recommended For You" items={recommendedSongs.slice(0, 15)} />
-  
-  <section className="w-full max-w-7xl mx-auto relative">
-    <YourLibrary />
-  </section>
-</main>
-</div>
+          <SongGallerySection title="Recently Added" items={songs.slice(0, 15)} />
+          <SongGallerySection title="Popular Songs" items={popularSongs.slice(0, 15)} />
+          <SongGallerySection title="Recommended For You" items={recommendedSongs.slice(0, 15)} />
+          <section className="w-full max-w-7xl mx-auto relative">
+            <YourLibrary />
+          </section>
+        </main>
+      </div>
 
       {contextMenu && (
         <div
@@ -243,28 +242,29 @@ const ListenerHome = () => {
         </div>
       )}
 
-{showCreateModal && (
-  <CreatePlaylistModal
-    onClose={() => setShowCreateModal(false)}
-    onCreate={(name, playlist_art) => {
-      fetch("/api/playlists/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id, name, playlist_art }),
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to create playlist");
-          return res.json();
-        })
-        .then((newPlaylist) => {
-          const updated = [...playlists, newPlaylist];
-          setPlaylists(updated);
-        })
-        .finally(() => setShowCreateModal(false))
-        .catch((err) => console.error("Error creating playlist:", err));
-    }}
-  />
-)}
+      {showCreateModal && (
+        <CreatePlaylistModal
+          onClose={() => setShowCreateModal(false)}
+          onCreate={(name, playlist_art) => {
+            fetch("/api/playlists/create", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ user_id, name, playlist_art }),
+            })
+              .then((res) => {
+                if (!res.ok) throw new Error("Failed to create playlist");
+                return res.json();
+              })
+              .then((newPlaylist) => {
+                const updated = [...playlists, newPlaylist];
+                setPlaylists(updated);
+              })
+              .finally(() => setShowCreateModal(false))
+              .catch((err) => console.error("Error creating playlist:", err));
+          }}
+        />
+      )}
+
       <PlayBar
         currentSong={currentSong}
         isPlaying={isPlaying}
