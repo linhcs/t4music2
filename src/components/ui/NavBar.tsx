@@ -128,6 +128,13 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
     }
   };
 
+  let profileRoute = "/profile/user";
+  if (role === "artist") {
+    profileRoute = "/profile/artist";
+  } else if (role === "admin") {
+    profileRoute = "/reportadmin";
+  }
+
   return (
     <nav className="bg-black text-white px-5 py-2 shadow-md">
       <div className="w-full flex items-center justify-between px-4">
