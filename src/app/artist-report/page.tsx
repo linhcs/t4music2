@@ -111,7 +111,7 @@ export default function ReportPage() {
       const [year, month] = monthStr.split('-');
       const date = new Date(parseInt(year), parseInt(month) - 1, 1);
       return date.toLocaleString('default', { year: 'numeric', month: 'long' });
-    } catch (e) {
+    } catch {
       return monthStr;
     }
   };
@@ -176,23 +176,23 @@ export default function ReportPage() {
             <FaMusic className="mr-2" /> Your Uploaded Songs
           </h2>
           <div className="space-y-4">
-            {reportData.artistSongs?.length > 0 ? (
-              reportData.artistSongs.map((song, index) => (
-                <div key={song.song_id} className="flex items-center bg-gray-700/30 rounded-lg p-4">
-                  {song.album_art && (
-                    <img src={song.album_art} alt={song.title} className="w-12 h-12 rounded-lg mr-4" />
-                  )}
-                  <div className="flex-1">
-                    <h3 className="font-medium">{song.title}</h3>
-                  </div>
-                  <div className="text-gray-400">
-                    {song.play_count} plays
-                  </div>
+          {reportData.artistSongs?.length > 0 ? (
+            reportData.artistSongs.map((song) => (
+              <div key={song.song_id} className="flex items-center bg-gray-700/30 rounded-lg p-4">
+                {song.album_art && (
+                  <img src={song.album_art} alt={song.title} className="w-12 h-12 rounded-lg mr-4" />
+                )}
+                <div className="flex-1">
+                  <h3 className="font-medium">{song.title}</h3>
                 </div>
-              ))
-            ) : (
-              <div className="text-gray-400 text-center py-4">No songs uploaded yet</div>
-            )}
+                <div className="text-gray-400">
+                  {song.play_count} plays
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-gray-400 text-center py-4">No songs uploaded yet</div>
+          )}
           </div>
         </div>
 
