@@ -12,6 +12,7 @@ import dynamic from "next/dynamic";
 import cuteAnimation from "@/assets/cute_animation.json";
 import YourLibrary from "@/components/ui/YourLibrary";
 import CreatePlaylistModal from "@/app/profile/components/User/CreatePlaylistModal";
+import Link from "next/link";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
@@ -33,7 +34,16 @@ const ListenerHome = () => {
   const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState<Song | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user_id, setPlaylists } = useUserStore();
-
+  
+  type Album = {
+    album_id: number;
+    title: string;
+    album_art: string;
+    artist: string;
+  };
+  
+  const [albums, setAlbums] = useState<Album[]>([]);
+ 
   const {
     currentSong,
     isPlaying,
@@ -82,10 +92,19 @@ const ListenerHome = () => {
       const data = await res.json();
       setRecommendedSongs(data.songs);
     };
+    
+    const fetchAlbums = async () => {
+      const res = await fetch("/api/albums"); // Fetch albums data
+      const data = await res.json();
+      setAlbums(data); // setting albums in the state
+    };
+
     fetchData();
     fetchPopularSongs();
     fetchRecommendedSongs();
+    fetchAlbums();  // added albums
   }, []);
+
 
   const SongGallerySection = ({ title, items }: { title: string; items: Song[] }) => (
     <section className="w-full max-w-7xl mx-auto relative">
@@ -105,7 +124,7 @@ const ListenerHome = () => {
     setContextMenu({ x: e.clientX, y: e.clientY, song });
   }}
   onClick={() => {
-    // Handle play/pause functionality on card click
+    // play/pause functionality on card click purr
     if (isThisSong) {
       togglePlayPause();
     } else {
@@ -144,6 +163,35 @@ const ListenerHome = () => {
     </section>
   );
 
+  const AlbumGallerySection = ({ title, albums }: { title: string; albums: Album[] }) => (
+    <section className="w-full max-w-7xl mx-auto relative">
+      <h2 className="text-xl font-bold text-white mt-8 mb-4">{title}</h2>
+      <div className="flex gap-6 overflow-x-auto scrollbar-hide px-1 pb-2">
+        {albums.map((album) => (
+          <Link key={album.album_id} href={`/albums/${album.album_id}`} passHref>
+          <div
+              className="group relative rounded-xl overflow-hidden shadow-md w-[200px] h-[200px] cursor-pointer flex-shrink-0"
+              style={{
+                backgroundImage: `url(${album.album_art || "/default_album_art.jpg"})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+  
+              {/* Album title + artist */}
+              <div className="absolute bottom-0 w-full bg-black bg-opacity-60 px-2 py-1">
+                <h3 className="text-white text-sm font-semibold truncate">{album.title}</h3>
+                <p className="text-gray-300 text-xs truncate">{album.artist}</p>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+  
   if (!hasMounted || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-black">
@@ -163,9 +211,9 @@ const ListenerHome = () => {
           <SongGallerySection title="Recently Added" items={songs.slice(0, 15)} />
           <SongGallerySection title="Popular Songs" items={popularSongs.slice(0, 15)} />
           <SongGallerySection title="Recommended For You" items={recommendedSongs.slice(0, 15)} />
+          <AlbumGallerySection title="Albums" albums={albums} />
           <section className="w-full max-w-7xl mx-auto relative">
-            <YourLibrary />
-          </section>
+            <YourLibrary />         </section>
         </main>
       </div>
 

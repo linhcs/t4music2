@@ -24,11 +24,12 @@ export default function UserPlaylists() {
     isLoggedIn,
     user_id,
     likedSongs,
+    playlists,
     setPlaylists: setGlobalPlaylists,
   } = useUserStore();
-
+   
   const [showModal, setShowModal] = useState(false);
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  // const { playlists, setPlaylists: setGlobalPlaylists } = useUserStore();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -55,8 +56,8 @@ export default function UserPlaylists() {
       const res = await fetch(`/api/playlists/user/${username}`);
       const data: Playlist[] = await res.json();
       const cleaned = data.filter((p) => p.playlist_id !== "liked");
-      setPlaylists(cleaned);
       setGlobalPlaylists(cleaned);
+      // setGlobalPlaylists(cleaned);
     }
 
     if (isLoggedIn) fetchPlaylists();
@@ -66,7 +67,7 @@ export default function UserPlaylists() {
     if (user_id !== null) {
       const newPlaylist = await createPlaylist(name, user_id, playlist_art);
       const updated = [...playlists, newPlaylist];
-      setPlaylists(updated);
+      // setPlaylists(updated);
       setGlobalPlaylists(updated);
     }
   };
@@ -86,7 +87,7 @@ export default function UserPlaylists() {
 
     alert("🗑️ Playlist deleted!");
     const updated = playlists.filter((p) => p.playlist_id !== playlistId);
-    setPlaylists(updated);
+    // setPlaylists(updated);
     setGlobalPlaylists(updated);
   };
 

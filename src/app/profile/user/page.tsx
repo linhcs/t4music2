@@ -17,12 +17,12 @@ import cuteAnimation from "@/assets/cute_animation.json";
 import ArtistAlbums from "../components/Artist/ArtistAlbums";
 import UserCard from "../components/User/UserCard";
 import ArtistSongs from "../components/Artist/ArtistSongs";
-import { FaChartLine } from 'react-icons/fa';
+import { FaChartLine, FaChartBar } from "react-icons/fa";
 import Link from "next/link";
 import CreatePlaylistModal from "../components/User/CreatePlaylistModal";
 console.log(CreatePlaylistModal);
 console.log(ChangeProfilePic);
-console.log(ArtistSongs,ArtistTopTracks,ArtistAlbums)// feel free to delete later
+console.log(ArtistSongs, ArtistTopTracks, ArtistAlbums); // feel free to delete later
 export default function ListenerUserProfile() {
   const {
     role,
@@ -108,7 +108,9 @@ export default function ListenerUserProfile() {
           {role === "listener" && (
             <>
               <section>
-                <h2 className="text-2xl font-bold mb-4">Your top artists this month</h2>
+                <h2 className="text-2xl font-bold mb-4">
+                  Your top artists this month
+                </h2>
                 <TopArtists />
               </section>
 
@@ -148,7 +150,7 @@ export default function ListenerUserProfile() {
             </>
           )}
 
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex justify-center gap-4">
             <Link
               href="/report"
               className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
@@ -156,6 +158,16 @@ export default function ListenerUserProfile() {
               <FaChartLine />
               <span>View Your Music Journey</span>
             </Link>
+
+            {role === "artist" && (
+              <Link
+                href="/artist-report"
+                className="flex items-center gap-2 bg-gradient-to-r from-pink-600 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-pink-700 hover:to-orange-700 transition-all duration-300"
+              >
+                <FaChartBar />
+                <span>Artist Dashboard</span>
+              </Link>
+            )}
           </div>
         </main>
       </div>
@@ -168,7 +180,6 @@ export default function ListenerUserProfile() {
         onSeek={handleSeek}
         volume={volume}
         setVolume={setVolume}
-
       />
     </div>
   );
