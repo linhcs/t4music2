@@ -14,7 +14,29 @@ const s3 = new S3Client({
     accessKeyId: process.env.AWS_ACCESS_KEYY!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
+  requestHandler: {
+    httpOptions: {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,HEAD",
+        "Access-Control-Allow-Headers": "*",
+      },
+    },
+  },
 });
+
+// Add error handling for missing credentials
+if (!process.env.AWS_ACCESS_KEYY || !process.env.AWS_SECRET_ACCESS_KEY) {
+  throw new Error(
+    "AWS credentials are not properly configured. Please check your environment variables."
+  );
+}
+
+if (!process.env.AWS_BUCKET) {
+  throw new Error(
+    "AWS bucket name is not configured. Please check your environment variables."
+  );
+}
 
 const prisma = new PrismaClient();
 
@@ -36,40 +58,43 @@ export async function getSignedURL(
   albumName?: string,
   album_art?: string
 ) {
-  if (!acceptedTypes.includes(type) || size > maxFileSize) {
-    return { failure: "Invalid file or file size!" };
-  }
-
-  const fileKey = generateFileName(type);
-
-  const putObj = new PutObjectCommand({
-    Bucket: process.env.AWS_BUCKET!,
-    Key: fileKey,
-    ContentType: type,
-    ContentLength: size,
-    ChecksumSHA256: checksum,
-  });
-
   try {
+    if (!acceptedTypes.includes(type) || size > maxFileSize) {
+      console.error("Invalid file type or size:", { type, size });
+      return { failure: "Invalid file or file size!" };
+    }
+
+    const fileKey = generateFileName(type);
+    console.log("Generating signed URL for file:", fileKey);
+
+    const putObj = new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET!,
+      Key: fileKey,
+      ContentType: type,
+      ContentLength: size,
+      ChecksumSHA256: checksum,
+    });
+
     const signedURL = await getSignedUrl(s3, putObj, { expiresIn: 5400 });
+    console.log("Successfully generated signed URL");
 
     // Verify user exists before creating song
     const user = await prisma.users.findUnique({
-      where: { user_id: userId }
+      where: { user_id: userId },
     });
 
     if (!user) {
-      console.error('User not found:', userId);
+      console.error("User not found:", userId);
       return { failure: "User not found" };
     }
 
-    console.log('Creating song for user:', user);
+    console.log("Creating song for user:", user);
 
     // Check if user has any followers
     const followers = await prisma.follows.findMany({
-      where: { user_id_a: userId }
+      where: { user_id_a: userId },
     });
-    console.log('User followers:', followers);
+    console.log("User followers:", followers);
 
     const song = await prisma.songs.create({
       data: {
@@ -83,15 +108,17 @@ export async function getSignedURL(
       },
     });
 
+    console.log("Successfully created song:", song);
+
     // Check if notifications were created
     const notifications = await prisma.notifications.findMany({
       where: {
         message: {
-          contains: songName
-        }
-      }
+          contains: songName,
+        },
+      },
     });
-    console.log('Created notifications:', notifications);
+    console.log("Created notifications:", notifications);
 
     //if album name is provided
     if (albumName && userId) {
@@ -104,7 +131,7 @@ export async function getSignedURL(
       });
 
       let albumId: number;
-      
+
       if (existingAlbum) {
         albumId = existingAlbum.album_id;
         if (album_art && existingAlbum.album_art !== album_art) {
@@ -141,9 +168,9 @@ export async function getSignedURL(
 
     return { success: { url: signedURL } };
   } catch (error) {
-    console.error("Database error:", error);
+    console.error("Error in getSignedURL:", error);
     return {
-      failure: `Database operation failed: ${
+      failure: `Failed to generate signed URL: ${
         error instanceof Error ? error.message : "Unknown error"
       }`,
     };

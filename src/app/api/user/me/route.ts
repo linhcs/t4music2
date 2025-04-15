@@ -3,6 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
+    const pathParts = req.nextUrl.pathname.split('/');
+    if (pathParts[3] !== 'me') { //if the path is /api/user/[anything-not-me]
+      return NextResponse.redirect(new URL('/api/user/me', req.url));
+    }
+  
     const userId = Number(req.cookies.get("user_id")?.value);
 
     if (!userId || isNaN(userId)) {
