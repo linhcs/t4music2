@@ -401,7 +401,7 @@ const ReportAdminPage = () => {
         >
           Delete Selection
         </Button>
-        <Link href="/fileupload">
+        <Link href="/adminupload">
           <Button
             size="lg"
             variant="outline"
