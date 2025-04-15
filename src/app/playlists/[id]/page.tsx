@@ -11,6 +11,7 @@ import { useUserStore } from "@/store/useUserStore";
 import PlayBar from "@/components/ui/playBar";
 import dynamic from "next/dynamic";
 import cuteAnimation from "@/assets/cute_animation.json";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 interface Playlist {
@@ -44,6 +45,10 @@ export default function PlaylistPage() {
 
   const [hasMounted, setHasMounted] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [songToRemove, setSongToRemove] = useState<Song | null>(null);
+  
 
   const fetchPlaylist = useCallback(async () => {
     const res = await fetch(`/api/playlists/${id}`);
@@ -83,19 +88,24 @@ export default function PlaylistPage() {
     playSong(songsToRender[prevIndex]);
   }, [currentSongIndex, songsToRender, playSong]);
 
-  const handleRemove = async (songId: number) => {
+  const handleRemove = async () => {
+    if (!songToRemove) return;
+  
     const res = await fetch(`/api/playlists/${id}/remove-song`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ song_id: songId }),
+      body: JSON.stringify({ song_id: songToRemove.song_id }),
     });
-
+  
     const result = await res.json();
     if (!res.ok) return alert(result.error || "Failed to remove song");
+  
+    setIsConfirmOpen(false);
+    setSongToRemove(null);
     alert("❌ Song removed");
     fetchPlaylist();
   };
-
+  
   useEffect(() => {
     setHasMounted(true);
     if ((!isLikedPlaylist && playlist) || (isLikedPlaylist && songsToRender.length > 0)) {
@@ -216,7 +226,8 @@ export default function PlaylistPage() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleRemove(song.song_id);
+                setSongToRemove(song);
+                setIsConfirmOpen(true);
               }}
               className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 text-sm shadow"
             >
@@ -251,6 +262,19 @@ export default function PlaylistPage() {
           playlistId={playlist.playlist_id}
         />
       )}
+
+      {isConfirmOpen && songToRemove && (
+        <ConfirmModal
+          title="Remove Song?"
+          message={`Are you sure you want to remove "${songToRemove.title}" from this playlist?`}
+          onConfirm={handleRemove}
+          onCancel={() => {
+            setIsConfirmOpen(false);
+            setSongToRemove(null);
+          }}
+        />
+      )}
+
     </div>
   );
 }
