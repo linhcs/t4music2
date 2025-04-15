@@ -25,6 +25,19 @@ const s3 = new S3Client({
   },
 });
 
+// Add error handling for missing credentials
+if (!process.env.AWS_ACCESS_KEYY || !process.env.AWS_SECRET_ACCESS_KEY) {
+  throw new Error(
+    "AWS credentials are not properly configured. Please check your environment variables."
+  );
+}
+
+if (!process.env.AWS_BUCKET) {
+  throw new Error(
+    "AWS bucket name is not configured. Please check your environment variables."
+  );
+}
+
 const prisma = new PrismaClient();
 
 const acceptedTypes = ["audio/mpeg", "audio/ogg", "audio/wav"];
@@ -45,22 +58,25 @@ export async function getSignedURL(
   albumName?: string,
   album_art?: string
 ) {
-  if (!acceptedTypes.includes(type) || size > maxFileSize) {
-    return { failure: "Invalid file or file size!" };
-  }
-
-  const fileKey = generateFileName(type);
-
-  const putObj = new PutObjectCommand({
-    Bucket: process.env.AWS_BUCKET!,
-    Key: fileKey,
-    ContentType: type,
-    ContentLength: size,
-    ChecksumSHA256: checksum,
-  });
-
   try {
+    if (!acceptedTypes.includes(type) || size > maxFileSize) {
+      console.error("Invalid file type or size:", { type, size });
+      return { failure: "Invalid file or file size!" };
+    }
+
+    const fileKey = generateFileName(type);
+    console.log("Generating signed URL for file:", fileKey);
+
+    const putObj = new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET!,
+      Key: fileKey,
+      ContentType: type,
+      ContentLength: size,
+      ChecksumSHA256: checksum,
+    });
+
     const signedURL = await getSignedUrl(s3, putObj, { expiresIn: 5400 });
+    console.log("Successfully generated signed URL");
 
     // Verify user exists before creating song
     const user = await prisma.users.findUnique({
@@ -91,6 +107,8 @@ export async function getSignedURL(
         plays_count: 0,
       },
     });
+
+    console.log("Successfully created song:", song);
 
     // Check if notifications were created
     const notifications = await prisma.notifications.findMany({
@@ -150,9 +168,9 @@ export async function getSignedURL(
 
     return { success: { url: signedURL } };
   } catch (error) {
-    console.error("Database error:", error);
+    console.error("Error in getSignedURL:", error);
     return {
-      failure: `Database operation failed: ${
+      failure: `Failed to generate signed URL: ${
         error instanceof Error ? error.message : "Unknown error"
       }`,
     };
