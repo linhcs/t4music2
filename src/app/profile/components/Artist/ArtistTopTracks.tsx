@@ -10,11 +10,11 @@ import ConfirmModal from "@/components/ui/ConfirmModal";
 export default function ArtistTopTracks() {
   const { user_id, isLoggedIn } = useUserStore();
   const [songs, setSongs] = useState<Song[]>([]);
-  const { playSong, currentSong, isPlaying, togglePlayPause } = useAudioPlayer();
-
+  const { playSong, currentSong, isPlaying, togglePlayPause } = useAudioPlayer(); 
   const [songToDelete, setSongToDelete] = useState<Song | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
+console.log(isPlaying);
   useEffect(() => {
     async function fetchTopSongs() {
       try {
@@ -74,11 +74,11 @@ export default function ArtistTopTracks() {
 
             {isLoggedIn && (
               <button
-                onClick={() => {
-                  setSongToDelete(song);
-                  setIsConfirmOpen(true);
-                }}
-                className="px-3 py-1 rounded text-white"
+              onClick={() => {
+                setSongToDelete(song);
+                setIsConfirmOpen(true);
+              }}
+              className="px-3 py-1 rounded text-white"
               >
                 ❌
               </button>
