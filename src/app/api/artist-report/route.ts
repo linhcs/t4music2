@@ -2,15 +2,9 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 
-// Helper function to convert BigInt to Number
 const convertBigIntToNumber = (obj: unknown): unknown => {
-  if (typeof obj === 'bigint') {
-    return Number(obj);
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(convertBigIntToNumber);
-  }
+  if (typeof obj === 'bigint') return Number(obj);
+  if (Array.isArray(obj)) return obj.map(convertBigIntToNumber);
   if (obj !== null && typeof obj === 'object') {
     return Object.fromEntries(
       Object.entries(obj).map(([key, value]) => [key, convertBigIntToNumber(value)])
@@ -21,82 +15,71 @@ const convertBigIntToNumber = (obj: unknown): unknown => {
 
 interface SongPlay {
   song_id: number;
-  play_count: number;
-}
-
-interface SongDetail {
-  song_id: number;
-  title: string;
-  users: {
-    username: string;
-  };
-  album: {
-    album_art: string | null;
-  } | null;
+  play_count: bigint; 
 }
 
 interface GenreCount {
   genre: string | null;
-  count: number;
+  count: bigint;
 }
 
 interface MonthSongPlay {
   song_id: number;
-  play_count: number;
+  play_count: bigint;
   month: string;
 }
 
 interface ArtistStats {
-  songs_uploaded: number;
-  total_plays: number;
-  followers_count: number;
+  songs_uploaded: bigint;
+  total_plays: bigint;
+  followers_count: bigint;
 }
 
 interface ArtistSong {
   song_id: number;
   title: string;
-  play_count: number;
-  album_art?: string;
+  play_count: bigint;
+  album_art: string | null;
 }
 
 interface ReportData {
-  topSongs: Array<{
+  topSongs: {
     song_id: number;
     title: string;
     artist: string;
     play_count: number;
     album_art?: string;
-  }>;
-  topGenres: Array<{
+  }[];
+  topGenres: {
     genre: string;
     count: number;
-  }>;
+  }[];
   totalPlayTime: number;
   totalSongsPlayed: number;
   mostActiveHour: number;
-  monthlyStats: Array<{
+  monthlyStats: {
     month: string;
     play_count: number;
     total_play_time: number;
-    topSongs: Array<{
+    topSongs: {
       song_id: number;
       title: string;
       artist: string;
       play_count: number;
       album_art?: string;
-    }>;
-  }>;
+    }[];
+  }[];
   artistStats: {
     songs_uploaded: number;
     total_plays: number;
     followers_count: number;
   };
-  artistSongs: Array<{
+  artistSongs: {
     song_id: number;
     title: string;
     play_count: number;
     album_art?: string;
-  }>;
+  }[];
 }
 
 export async function GET(request: Request) {
@@ -110,207 +93,135 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
+    const numericUserId = Number(userId);
+
     try {
-      // Get user's account creation date
       const user = await prisma.users.findUnique({
-        where: { user_id: Number(userId) },
+        where: { user_id: numericUserId },
         select: { created_at: true }
       });
   
       const accountCreationDate = user?.created_at || new Date(0);
   
-      // Get date range based on period
       const getDateRange = () => {
         const now = new Date();
         switch (period) {
-          case 'year':
-            return new Date(now.getFullYear(), 0, 1);
-          case 'month':
-            return new Date(now.getFullYear(), now.getMonth(), 1);
-          case 'week':
-            return new Date(now.setDate(now.getDate() - 7));
-          default:
-            return accountCreationDate;
+          case 'year': return new Date(now.getFullYear(), 0, 1);
+          case 'month': return new Date(now.getFullYear(), now.getMonth(), 1);
+          case 'week': return new Date(now.setDate(now.getDate() - 7));
+          default: return accountCreationDate;
         }
       };
   
       const startDate = getDateRange();
-  
-      // Get top songs
+
       const topSongs = await prisma.$queryRaw<SongPlay[]>`
-        SELECT song_id, COUNT(*) as play_count
-        FROM song_plays
-        WHERE user_id = ${Number(userId)}
-          AND played_at >= ${startDate}
-        GROUP BY song_id
-        ORDER BY play_count DESC
-        LIMIT 10
-      `;
-  
-      // Get song details for the top songs
-      const songDetails = await prisma.songs.findMany({
-        where: {
-          song_id: {
-            in: topSongs.length > 0 ? topSongs.map((song: SongPlay) => song.song_id) : [0]
-          }
-        },
-        select: {
-          song_id: true,
-          title: true,
-          users: {
-            select: {
-              username: true
-            }
-          },
-          album: {
-            select: {
-              album_art: true
-            }
-          }
-        }
-      }) as unknown as SongDetail[];
-  
-      // Get top genres
+      SELECT 
+        s.song_id, 
+        s.plays_count as play_count
+      FROM songs s
+      WHERE s.user_id = ${numericUserId}
+      ORDER BY s.plays_count DESC
+      LIMIT 10
+    `;
+    
+    const songDetails = await prisma.songs.findMany({
+      where: { 
+        user_id: numericUserId,
+        plays_count: { gt: 0 } //songs with play counts greater than 0
+      },
+      orderBy: { plays_count: 'desc' },
+      take: 10,
+      include: {
+        users: { select: { username: true } },
+        album: { select: { album_art: true } }
+      }
+    });
+
+      //top genres
       const topGenres = await prisma.$queryRaw<GenreCount[]>`
-        SELECT s.genre, COUNT(*) as count
+        SELECT 
+          COALESCE(s.genre, 'Unknown') as genre, 
+          COUNT(*) as count
         FROM song_plays sp
         JOIN songs s ON sp.song_id = s.song_id
-        WHERE sp.user_id = ${Number(userId)}
+        WHERE s.user_id = ${numericUserId}
           AND sp.played_at >= ${startDate}
-          AND s.genre IS NOT NULL
         GROUP BY s.genre
         ORDER BY count DESC
         LIMIT 5
       `;
-  
-      // Get total play time and songs played
-      const stats = await prisma.$queryRaw<{ total_play_time: number; total_songs_played: number }[]>`
+
+      const stats = await prisma.$queryRaw<{ total_play_time: number; total_songs_played: bigint }[]>`
         SELECT 
-          COUNT(*) as total_songs_played,
-          COALESCE(SUM(s.duration), 0) as total_play_time
+          COUNT(DISTINCT sp.id) as total_songs_played,
+          COALESCE(SUM(s.duration)/60, 0) as total_play_time
         FROM song_plays sp
         JOIN songs s ON sp.song_id = s.song_id
-        WHERE sp.user_id = ${Number(userId)}
+        WHERE s.user_id = ${numericUserId}
       `;
-  
-      // Get most active hour
-      const mostActiveHour = await prisma.$queryRaw<{ hour: number; count: number }[]>`
+
+      const mostActiveHour = await prisma.$queryRaw<{ hour: number; count: bigint }[]>`
         SELECT 
-          HOUR(played_at) as hour,
+          HOUR(sp.played_at) as hour,
           COUNT(*) as count
-        FROM song_plays
-        WHERE user_id = ${Number(userId)}
-          AND played_at >= ${startDate}
-        GROUP BY HOUR(played_at)
+        FROM song_plays sp
+        JOIN songs s ON sp.song_id = s.song_id
+        WHERE s.user_id = ${numericUserId}
+          AND sp.played_at >= ${startDate}
+        GROUP BY HOUR(sp.played_at)
         ORDER BY count DESC
         LIMIT 1
       `;
-  
-      // Get monthly stats
+
       const monthlyStats = await prisma.$queryRaw<Array<{
         month: string;
-        play_count: number;
+        play_count: bigint;
         total_play_time: number;
       }>>`
         SELECT 
           DATE_FORMAT(sp.played_at, '%Y-%m') as month,
           COUNT(*) as play_count,
-          COALESCE(SUM(s.duration), 0) as total_play_time
+          COALESCE(SUM(s.duration)/60, 0) as total_play_time
         FROM song_plays sp
         JOIN songs s ON sp.song_id = s.song_id
-        WHERE sp.user_id = ${Number(userId)}
+        WHERE s.user_id = ${numericUserId}
         GROUP BY DATE_FORMAT(sp.played_at, '%Y-%m')
         ORDER BY month ${sort === 'asc' ? Prisma.sql`ASC` : Prisma.sql`DESC`}
       `;
-  
-      // Get top 5 songs per month
+
+      //top songs by month
       const topSongsPerMonth = await prisma.$queryRaw<MonthSongPlay[]>`
         SELECT 
           DATE_FORMAT(sp.played_at, '%Y-%m') as month,
-          sp.song_id,
+          s.song_id,
           COUNT(*) as play_count
         FROM song_plays sp
-        WHERE sp.user_id = ${Number(userId)}
-        GROUP BY DATE_FORMAT(sp.played_at, '%Y-%m'), sp.song_id
+        JOIN songs s ON sp.song_id = s.song_id
+        WHERE s.user_id = ${numericUserId}
+        GROUP BY DATE_FORMAT(sp.played_at, '%Y-%m'), s.song_id
         ORDER BY month ${sort === 'asc' ? Prisma.sql`ASC` : Prisma.sql`DESC`}, play_count DESC
       `;
-  
-      // Create a map to get top 5 songs per month
+
       const monthTopSongsMap = new Map<string, MonthSongPlay[]>();
-      
       topSongsPerMonth.forEach(song => {
-        if (!monthTopSongsMap.has(song.month)) {
-          monthTopSongsMap.set(song.month, []);
-        }
-        const monthSongs = monthTopSongsMap.get(song.month);
-        if (monthSongs && monthSongs.length < 5) {
+        const monthSongs = monthTopSongsMap.get(song.month) || [];
+        if (monthSongs.length < 5) {
           monthSongs.push(song);
+          monthTopSongsMap.set(song.month, monthSongs);
         }
-      });
-      
-      // Get all unique song IDs from top songs per month
-      const allSongIds = [...new Set(
-        Array.from(monthTopSongsMap.values())
-          .flat()
-          .map(song => song.song_id)
-      )];
-      
-      // Get song details for all songs in monthly stats
-      const allSongDetails = await prisma.songs.findMany({
-        where: {
-          song_id: {
-            in: allSongIds.length > 0 ? allSongIds : [0]
-          }
-        },
-        select: {
-          song_id: true,
-          title: true,
-          users: {
-            select: {
-              username: true
-            }
-          },
-          album: {
-            select: {
-              album_art: true
-            }
-          }
-        }
-      }) as unknown as SongDetail[];
-  
-      // Process monthly stats with top songs
-      const monthlyStatsWithSongs = monthlyStats.map(month => {
-        const monthSongs = monthTopSongsMap.get(month.month) || [];
-        
-        const topSongs = monthSongs.map(song => {
-          const songDetail = allSongDetails.find(detail => detail.song_id === song.song_id);
-          return {
-            song_id: song.song_id,
-            title: songDetail?.title || 'Unknown Song',
-            artist: songDetail?.users?.username || 'Unknown Artist',
-            play_count: Number(song.play_count),
-            album_art: songDetail?.album?.album_art || undefined
-          };
-        });
-  
-        return {
-          month: month.month,
-          play_count: Number(month.play_count),
-          total_play_time: Math.round(Number(month.total_play_time) / 60),
-          topSongs: topSongs
-        };
       });
 
-      // Get artist statistics
+      //artist stats
       const artistStats = await prisma.$queryRaw<ArtistStats[]>`
         SELECT 
-          (SELECT COUNT(*) FROM songs WHERE user_id = ${Number(userId)}) as songs_uploaded,
+          (SELECT COUNT(*) FROM songs WHERE user_id = ${numericUserId}) as songs_uploaded,
           (SELECT COUNT(*) FROM song_plays sp JOIN songs s ON sp.song_id = s.song_id 
-           WHERE s.user_id = ${Number(userId)}) as total_plays,
-          (SELECT COUNT(*) FROM followers WHERE artist_id = ${Number(userId)}) as followers_count
+           WHERE s.user_id = ${numericUserId}) as total_plays,
+          (SELECT COUNT(*) FROM follows WHERE user_id_b = ${numericUserId}) as followers_count
       `;
 
-      // Get artist's uploaded songs
+      //show uploaded songs
       const artistSongs = await prisma.$queryRaw<ArtistSong[]>`
         SELECT 
           s.song_id, 
@@ -318,31 +229,48 @@ export async function GET(request: Request) {
           (SELECT COUNT(*) FROM song_plays sp WHERE sp.song_id = s.song_id) as play_count,
           a.album_art
         FROM songs s
-        LEFT JOIN albums a ON s.album_id = a.album_id
-        WHERE s.user_id = ${Number(userId)}
+        LEFT JOIN album a ON s.album_id = a.album_id
+        WHERE s.user_id = ${numericUserId}
         ORDER BY play_count DESC
       `;
-  
-      // Format the response
+
+      const getAlbumArt = (albumArt: string | null | undefined): string | undefined => {
+        return albumArt ?? undefined;
+      }; //show album art
+
       const reportData: ReportData = {
         topSongs: topSongs.map(play => {
-          const songDetail = songDetails.find(detail => detail.song_id === play.song_id);
+          const detail = songDetails.find(s => s.song_id === play.song_id);
           return {
             song_id: play.song_id,
-            title: songDetail?.title || 'Unknown Song',
-            artist: songDetail?.users?.username || 'Unknown Artist',
+            title: detail?.title || 'Unknown',
+            artist: detail?.users?.username || 'Unknown',
             play_count: Number(play.play_count),
-            album_art: songDetail?.album?.album_art || undefined
+            album_art: getAlbumArt(detail?.album?.album_art)
           };
         }),
-        topGenres: topGenres.map(genre => ({
-          genre: genre.genre || 'Unknown Genre',
-          count: Number(genre.count)
+        topGenres: topGenres.map(g => ({
+          genre: g.genre || 'Unknown',
+          count: Number(g.count)
         })),
-        totalPlayTime: Math.round((stats[0]?.total_play_time || 0) / 60),
+        totalPlayTime: Math.round(Number(stats[0]?.total_play_time || 0)),
         totalSongsPlayed: Number(stats[0]?.total_songs_played || 0),
         mostActiveHour: Number(mostActiveHour[0]?.hour || 0),
-        monthlyStats: monthlyStatsWithSongs,
+        monthlyStats: monthlyStats.map(month => ({
+          month: month.month,
+          play_count: Number(month.play_count),
+          total_play_time: Math.round(Number(month.total_play_time)),
+          topSongs: (monthTopSongsMap.get(month.month) || []).map(song => {
+            const detail = songDetails.find(s => s.song_id === song.song_id);
+            return {
+              song_id: song.song_id,
+              title: detail?.title || 'Unknown',
+              artist: detail?.users?.username || 'Unknown',
+              play_count: Number(song.play_count),
+              album_art: getAlbumArt(detail?.album?.album_art)
+            };
+          })
+        })),
         artistStats: {
           songs_uploaded: Number(artistStats[0]?.songs_uploaded || 0),
           total_plays: Number(artistStats[0]?.total_plays || 0),
@@ -352,39 +280,24 @@ export async function GET(request: Request) {
           song_id: song.song_id,
           title: song.title,
           play_count: Number(song.play_count),
-          album_art: song.album_art || undefined
+          album_art: getAlbumArt(song.album_art)
         }))
       };
-  
-      // Convert any BigInt values to numbers before sending the response
-      const convertedData = convertBigIntToNumber(reportData);
-  
-      return NextResponse.json(convertedData);
+
+      return NextResponse.json(convertBigIntToNumber(reportData));
+
     } catch (error) {
-      console.error('Database query error:', error);
-      return NextResponse.json({
-        topSongs: [],
-        topGenres: [],
-        totalPlayTime: 0,
-        totalSongsPlayed: 0,
-        mostActiveHour: 0,
-        monthlyStats: [],
-        artistStats: {
-          songs_uploaded: 0,
-          total_plays: 0,
-          followers_count: 0
-        },
-        artistSongs: []
-      });
+      console.error('Database error:', error);
+      return NextResponse.json({ 
+        error: 'Database error',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }, { status: 500 });
     }
   } catch (error) {
-    console.error('Error fetching report data:', error);
-    return NextResponse.json(
-      { 
-        error: 'Internal Server Error',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }, 
-      { status: 500 }
-    );
+    console.error('Request error:', error);
+    return NextResponse.json({ 
+      error: 'Invalid request',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 400 });
   }
 }

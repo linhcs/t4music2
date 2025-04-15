@@ -150,7 +150,7 @@ export default function ListenerUserProfile() {
             </>
           )}
 
-          <div className="mt-8 flex justify-center gap-4">
+          <div className="mt-8 flex justify-center gap-4 pb-36">
             <Link
               href="/report"
               className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
