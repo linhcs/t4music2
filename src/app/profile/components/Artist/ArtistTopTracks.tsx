@@ -5,12 +5,16 @@ import { useEffect, useState } from "react";
 import { Song } from "@/types";
 import Image from "next/image";
 import { useAudioPlayer } from "@/context/AudioContext";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 export default function ArtistTopTracks() {
   const { user_id, isLoggedIn } = useUserStore();
   const [songs, setSongs] = useState<Song[]>([]);
-  const { playSong, currentSong, isPlaying, togglePlayPause } = useAudioPlayer(); // ⬅️ Add audio context
-console.log(isPlaying);
+  const { playSong, currentSong, isPlaying, togglePlayPause } = useAudioPlayer();
+
+  const [songToDelete, setSongToDelete] = useState<Song | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
   useEffect(() => {
     async function fetchTopSongs() {
       try {
@@ -25,15 +29,16 @@ console.log(isPlaying);
     if (user_id) fetchTopSongs();
   }, [user_id]);
 
-  const handleDelete = async (song_id: number) => {
-    const confirmDelete = confirm("Delete this song?");
-    if (!confirmDelete) return;
+  const handleDelete = async () => {
+    if (!songToDelete) return;
 
-    const res = await fetch(`/api/songs/${song_id}`, { method: "DELETE" });
+    const res = await fetch(`/api/songs/${songToDelete.song_id}`, { method: "DELETE" });
     const result = await res.json();
 
     if (!res.ok) return alert(result.error);
-    setSongs((prev) => prev.filter((s) => s.song_id !== song_id));
+    setSongs((prev) => prev.filter((s) => s.song_id !== songToDelete.song_id));
+    setIsConfirmOpen(false);
+    setSongToDelete(null);
   };
 
   return (
@@ -69,7 +74,10 @@ console.log(isPlaying);
 
             {isLoggedIn && (
               <button
-                onClick={() => handleDelete(song.song_id)}
+                onClick={() => {
+                  setSongToDelete(song);
+                  setIsConfirmOpen(true);
+                }}
                 className="px-3 py-1 rounded text-white"
               >
                 ❌
@@ -78,6 +86,19 @@ console.log(isPlaying);
           </div>
         );
       })}
+
+      {/* 🔒 Confirm Modal */}
+      {isConfirmOpen && songToDelete && (
+        <ConfirmModal
+          title="Delete Song?"
+          message={`Are you sure you want to delete "${songToDelete.title}"?`}
+          onConfirm={handleDelete}
+          onCancel={() => {
+            setIsConfirmOpen(false);
+            setSongToDelete(null);
+          }}
+        />
+      )}
     </div>
   );
 }
