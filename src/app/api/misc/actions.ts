@@ -14,6 +14,15 @@ const s3 = new S3Client({
     accessKeyId: process.env.AWS_ACCESS_KEYY!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
+  requestHandler: {
+    httpOptions: {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,HEAD",
+        "Access-Control-Allow-Headers": "*",
+      },
+    },
+  },
 });
 
 const prisma = new PrismaClient();
@@ -55,21 +64,21 @@ export async function getSignedURL(
 
     // Verify user exists before creating song
     const user = await prisma.users.findUnique({
-      where: { user_id: userId }
+      where: { user_id: userId },
     });
 
     if (!user) {
-      console.error('User not found:', userId);
+      console.error("User not found:", userId);
       return { failure: "User not found" };
     }
 
-    console.log('Creating song for user:', user);
+    console.log("Creating song for user:", user);
 
     // Check if user has any followers
     const followers = await prisma.follows.findMany({
-      where: { user_id_a: userId }
+      where: { user_id_a: userId },
     });
-    console.log('User followers:', followers);
+    console.log("User followers:", followers);
 
     const song = await prisma.songs.create({
       data: {
@@ -87,11 +96,11 @@ export async function getSignedURL(
     const notifications = await prisma.notifications.findMany({
       where: {
         message: {
-          contains: songName
-        }
-      }
+          contains: songName,
+        },
+      },
     });
-    console.log('Created notifications:', notifications);
+    console.log("Created notifications:", notifications);
 
     //if album name is provided
     if (albumName && userId) {
@@ -104,7 +113,7 @@ export async function getSignedURL(
       });
 
       let albumId: number;
-      
+
       if (existingAlbum) {
         albumId = existingAlbum.album_id;
         if (album_art && existingAlbum.album_art !== album_art) {
