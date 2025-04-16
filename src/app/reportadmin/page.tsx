@@ -355,7 +355,7 @@ const ReportAdminPage = () => {
                 className={`py-1 cursor-pointer ${artist === selectedobj ? "border-2 border-red-500" : ""}`}
                 onClick={() => handleUserClick(artist)}
               >
-                {`${artist.user_id} - ${artist.username}`}
+                {`${artist.user_id} - ${artist.username.replace(/\./g, ' ')}`}
               </li>
             ))}
           </ul>
@@ -425,7 +425,7 @@ const ReportAdminPage = () => {
               <TableSection selectedCategory={selectedCategory} data={data} />
             </div>
           </div>
-          <div className="flex flex-row justify-center space-x-10 mt-20 h-[750px]">
+          <div className="flex flex-row justify-center space-x-10 mt-20">
             <div className="custom-gradient-container3">
               <ArtTableSection />
             </div>
