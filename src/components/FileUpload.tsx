@@ -230,20 +230,6 @@ export default function FileUpload() {
                     required
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-300">
-                    Artist Name*
-                  </label>
-                  <input
-                    type="text"
-                    name="artistName"
-                    value={songInfo.artistName}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 bg-gray-800 rounded-md text-white"
-                    required
-                  />
-                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
