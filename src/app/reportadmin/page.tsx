@@ -320,7 +320,7 @@ const ReportAdminPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-black">
       <NavBar role="admin"/>
-      <InactivityTimer />
+      // InactivityTimer 
       <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1">
         <motion.h1
             initial={{ opacity: 0, y: -500 }}
@@ -355,7 +355,7 @@ const ReportAdminPage = () => {
                 className={`py-1 cursor-pointer ${artist === selectedobj ? "border-2 border-red-500" : ""}`}
                 onClick={() => handleUserClick(artist)}
               >
-                {`${artist.user_id} - ${artist.username}`}
+                {`${artist.user_id} - ${artist.username.replace(/\./g, ' ')}`}
               </li>
             ))}
           </ul>
@@ -425,7 +425,7 @@ const ReportAdminPage = () => {
               <TableSection selectedCategory={selectedCategory} data={data} />
             </div>
           </div>
-          <div className="flex flex-row justify-center space-x-10 mt-20 h-[750px]">
+          <div className="flex flex-row justify-center space-x-10 mt-20">
             <div className="custom-gradient-container3">
               <ArtTableSection />
             </div>

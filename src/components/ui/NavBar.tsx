@@ -221,7 +221,7 @@ export default function NavBar({ role = "listener" }: NavBarProps) {
                               alt={artist.username}
                             />
                           )}
-                          <span className="text-white text-sm">@{artist.username}</span>
+                          <span className="text-white text-sm">@{artist.username.replace(/\./g, ' ')}</span>
                         </div>
                       ))}
                     </>
