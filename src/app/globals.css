@@ -243,8 +243,7 @@ h1{
 
 .selection.inactive.selected {
   border-radius: 8px;  
-  padding: 8px 12px;
-  font-size: 20px;    
+  padding: 8px 12px;  
   color: rgb(0, 0, 0);         
   background-color: rgba(255, 255, 255, 0.445); 
   border: 2px solid rgb(255, 255, 255);  

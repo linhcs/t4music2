@@ -4,32 +4,41 @@ import { Decimal } from '@prisma/client/runtime/library';
 
 interface rankinfo {Rank: bigint; user_id: number; username: string; Followers: bigint; likes: bigint; 'Streamed Hours': Decimal; score: Decimal; min: string; };
 interface genrelist{genre: string; count: bigint};
+interface poplist{genre: string; plays: bigint; hours: Decimal};
+interface songslist{title: string; plays: bigint};
   
 const fiscalPeriods = [
-  '2024-03-31', // Q1 2024
-  '2024-06-30', // Q2 2024
-  '2024-09-30', // Q3 2024
-  '2024-12-31', // Q4 2024
-  '2025-03-31', // Q1 2025
-  '2025-06-30', // Q2 2025
+  '2024-01-01', '2024-02-01', '2024-03-01', '2024-04-01', '2024-05-01', '2024-06-01',
+  '2024-07-01', '2024-08-01', '2024-09-01', '2024-10-01', '2024-11-01', '2024-12-01',
+  '2025-01-01', '2025-02-01', '2025-03-01', '2025-04-01', '2025-05-01'
 ];
+
 
 export async function POST(req: Request) {
   try {
-    const { period }: { period: string } = await req.json();
-    console.log('period: ',period);
-    const quarterIndex = parseInt(period[1]) - 1;
-    const yearDigit = period[8];
-    const fiscalOffset = yearDigit === '4' ? 0 : 4;
-    const currentIndex = fiscalOffset + quarterIndex;
-    const currentFiscalDate = fiscalPeriods[currentIndex];
-    const previousFiscalDate = fiscalPeriods[currentIndex - 1] || '2024-01-01';
+    const { period, period2 }: { period: string, period2:string } = await req.json();
+    console.log('Selected month:', period);
+    console.log('Selected month2:', period2);
+
+    const [monthName, year] = period.split(' ');
+    const month = new Date(`${monthName} 1, ${year}`).getMonth(); 
+    const currentFiscalDate = fiscalPeriods[month + (parseInt(year) - 2024) * 12];
+    const previousFiscalDate = fiscalPeriods[month + (parseInt(year) - 2024) * 12 - 1] || '2024-01-01';
+
+    const [monthName2, year2] = period2.split(' ');
+    const month2 = new Date(`${monthName2} 1, ${year2}`).getMonth(); 
+    const currentFiscalDate2 = fiscalPeriods[month2 + (parseInt(year2) - 2024) * 12];
+
+    //console.log("Fiscal Date: ", currentFiscalDate);
+    //console.log("Previous Fiscal Date: ", previousFiscalDate);
 
 
     const ranks: rankinfo[] = await prisma.$queryRaw`With atts AS (
         SELECT
           U.user_id,
-          (SELECT FLOOR(SUM(duration) / 3600) FROM Hours WHERE user_id = U.user_id AND played_at <= ${currentFiscalDate} ) AS tstream,
+          (SELECT round(SUM(duration) / 3600, 2) FROM streaming_history as sh 
+            join songs as s on sh.song_id = s.song_id 
+            WHERE s.user_id = u.user_id AND played_at <= ${currentFiscalDate})AS tstream,
           (SELECT COUNT(*) FROM follows WHERE user_id_b = U.user_id AND follow_at <= ${currentFiscalDate} ) AS tfollows,
           (SELECT COUNT(*) FROM likes AS L JOIN songs AS S ON L.song_id = S.song_id WHERE S.user_id = U.user_id AND liked_at <= ${currentFiscalDate} ) AS tlikes
         FROM (SELECT DISTINCT user_id FROM songs) AS U
@@ -67,7 +76,9 @@ export async function POST(req: Request) {
     const rankspre: rankinfo[] = await prisma.$queryRaw`With atts AS (
         SELECT
           U.user_id,
-          (SELECT FLOOR(SUM(duration) / 3600) FROM Hours WHERE user_id = U.user_id AND played_at <= ${previousFiscalDate} ) AS tstream,
+          (SELECT round(SUM(duration) / 3600, 2) FROM streaming_history as sh 
+            join songs as s on sh.song_id = s.song_id 
+            WHERE s.user_id = u.user_id AND played_at <= ${previousFiscalDate})AS tstream,
           (SELECT COUNT(*) FROM follows WHERE user_id_b = U.user_id AND follow_at <= ${previousFiscalDate} ) AS tfollows,
           (SELECT COUNT(*) FROM likes AS L JOIN songs AS S ON L.song_id = S.song_id WHERE S.user_id = U.user_id AND liked_at <= ${previousFiscalDate} ) AS tlikes
         FROM (SELECT DISTINCT user_id FROM songs) AS U
@@ -127,13 +138,42 @@ export async function POST(req: Request) {
       } else {infoarr.push([]);};
     };
 
+    const popularraw: poplist[] = await prisma.$queryRaw`select count(stream_id) as plays, floor(sum(duration)/3600) as hours, LOWER(trim(genre)) as genre from streaming_history as h
+      join songs as s on h.song_id = s.song_id
+      where h.played_at is not null and played_at <= ${currentFiscalDate2}
+      group by genre
+      order by plays DESC
+      limit 10;`;
 
-    console.log("fiscal Period: ", currentFiscalDate)
-    console.log('Rank Data:', tranks[0]);
+     
+    
+    const songsraw: songslist[] = await prisma.$queryRaw`select count(stream_id) as plays, title from streaming_history as h 
+      join songs as s on h.song_id = s.song_id 
+      where h.played_at is not null and played_at <= ${currentFiscalDate2}
+      group by title
+      order by plays DESC
+      limit 10;`;
+    
+    const popular = popularraw.map(item => ({
+      genre: item.genre,
+      plays: item.plays ? Number(item.plays) : 0,
+      hours: item.hours ? Number(item.hours) : 0,
+    }));
+
+    const popsongs = songsraw.map(item => ({
+      title: item.title,
+      plays: item.plays ? Number(item.plays) : 0,
+    }));
+    
+    //console.log("fiscal Period: ", currentFiscalDate)
+    //console.log('Rank Data:', ranks);
+    //console.log('Rank Data:', tranks);
     //console.log('Pre Rank Data:', alignedTrankspre);
     //console.log('Info Array:', infoarr);
+    //console.log('popular:', popular);
+    console.log('songs: ', popsongs);
 
-    return NextResponse.json({tranks, alignedTrankspre, infoarr})
+    return NextResponse.json({tranks, alignedTrankspre, infoarr, popular, popsongs})
   } catch (error:unknown) {
     console.error("Signup Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
