@@ -7,6 +7,7 @@ import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
 import { useAudioPlayer } from "@/context/AudioContext";
 import PlayBar from "@/components/ui/playBar";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { useUserStore } from "@/store/useUserStore";
 
 interface Song {
   song_id: number;
@@ -33,6 +34,7 @@ export default function AlbumPage() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [songToDelete, setSongToDelete] = useState<Song | null>(null);  
   const album_id = Array.isArray(params.album_id) ? params.album_id[0] : params.album_id;
+  const { user_id } = useUserStore();
   const {
     currentSong,
     isPlaying,
@@ -188,15 +190,18 @@ export default function AlbumPage() {
                     <FiPlayCircle />
                   )}
                 </button>
-                <button
-                  onClick={() => {
-                    setSongToDelete(song);
-                    setIsConfirmOpen(true);
-                  }}
-                  className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 text-sm"
-                >
-                  Delete
-                </button>
+                {album.user_id === user_id && (
+  <button
+    onClick={() => {
+      setSongToDelete(song);
+      setIsConfirmOpen(true);
+    }}
+    className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 text-sm"
+  >
+    Delete
+  </button>
+)}
+
               </div>
             </div>
           ))
