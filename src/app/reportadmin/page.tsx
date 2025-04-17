@@ -320,7 +320,7 @@ const ReportAdminPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-black">
       <NavBar role="admin"/>
-      <InactivityTimer />
+      //InactivityTimer 
       <header className="flex-3 flex flex-col items-center justify-center pt-16 p-1">
         <motion.h1
             initial={{ opacity: 0, y: -500 }}
