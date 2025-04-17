@@ -304,19 +304,19 @@ const ArtTableSection = () => {
                   <tr>
                     <th className="p-2 w-50 test-white text-[28px] whitespace-nowrap">{tname.replace(/[_\.]/g, ' ')}</th>
                     <th
-                      className="p-2 border-4 border-black w-[140px] cursor-pointer hover:text-blue-400"
+                      className="p-2 border-4 border-black underline w-[140px] cursor-pointer hover:text-blue-400"
                       onClick={handleShowFollowers}
                     >
                       Follows
                     </th>
                     <th
-                      className="p-2 border-4 border-black w-[110px] cursor-pointer hover:text-pink-400"
+                      className="p-2 border-4 border-black w-[110px] underline cursor-pointer hover:text-pink-400"
                       onClick={handleShowLikes}
                     >
                       Likes
                     </th>
                     <th
-                      className="p-2 border-4 border-black w-[280px] cursor-pointer hover:text-green-400"
+                      className="p-2 border-4 border-black w-[280px] underline cursor-pointer hover:text-green-400"
                       onClick={handleShowStreamingHours}
                     >
                       Streaming Hours
@@ -358,19 +358,19 @@ const ArtTableSection = () => {
                   <tr>
                     <th className="p-2 w-50 text-[22px] whitespace-nowrap"> {Avgname.replace(/[_\.]/g, ' ')}</th>
                     <th
-                      className="p-2 border-4 border-black w-[140px] cursor-pointer hover:text-blue-400"
+                      className="p-2 border-4 border-black underline w-[140px] cursor-pointer hover:text-blue-400"
                       onClick={handleShowFollowers2}
                     >
                       Follows
                     </th>
                     <th
-                      className="p-2 border-4 border-black w-[110px] cursor-pointer hover:text-pink-400"
+                      className="p-2 border-4 border-black underline w-[110px] cursor-pointer hover:text-pink-400"
                       onClick={handleShowLikes2}
                     >
                       Likes
                     </th>
                     <th
-                      className="p-2 border-4 border-black w-[280px] cursor-pointer hover:text-green-400"
+                      className="p-2 border-4 border-black underline w-[280px] cursor-pointer hover:text-green-400"
                       onClick={handleShowStreamingHours2}
                     >
                       Streaming Hours
@@ -394,7 +394,7 @@ const ArtTableSection = () => {
                     <td className="p-2 border-4 border-black text-[18px]"> New users this Quarter </td>
                     <td className="p-2 border-4 border-black ">{nfa}</td>
                     <td className="p-2 border-4 border-black ">{nla}</td>
-                    <td className="p-2 border-4 border-black ">{nsha}</td>
+                    <td className="p-2 border-4 border-black ">{nsha.toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td className="p-2 border-4 border-black "> % Growth </td>
