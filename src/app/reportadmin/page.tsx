@@ -7,6 +7,8 @@ import {
   FaSearch, FaChartBar, FaClock, FaMusic, FaPlay, FaUsers, FaTrashAlt
 } from "react-icons/fa";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import NewSignupsTable from "./component/NewSignupsTable";
+import TopListenersTable from "./component/TopListenersTable";
 
 interface Artist {
   user_id: number;
@@ -72,7 +74,7 @@ export default function AdminReport() {
       return aYear === bYear ? aMonth - bMonth : aYear - bYear;
     });
   };
-
+  
   useEffect(() => {
     if (role !== "admin") router.push("/login");
 
@@ -104,6 +106,10 @@ export default function AdminReport() {
       </div>
     );
   }
+
+  const periodLabel = filteredMonth
+  ? formatMonth(filteredMonth)       
+  : formatMonth(data.monthlyStats.at(-1)!.month) 
 
   const filteredStats = filteredMonth
     ? data.monthlyStats.find((m) => m.month === filteredMonth)
@@ -374,7 +380,16 @@ export default function AdminReport() {
               <Bar dataKey="count" fill="url(#genreGradient)" />
             </BarChart>
           </ResponsiveContainer>
+          
         </SectionCard>
+        <SectionCard icon={<FaClock />} title="New Sign‑ups by Role">
+        <NewSignupsTable period={periodLabel} />
+      </SectionCard>
+
+      <SectionCard icon={<FaChartBar />} title="Streamed Hours by Month">
+        <TopListenersTable period={periodLabel} />
+      </SectionCard>
+
       </div>
     </div>
   );
