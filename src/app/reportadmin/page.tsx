@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import {
-  FaSearch, FaChartBar, FaClock, FaMusic, FaPlay, FaUsers
+  FaSearch, FaChartBar, FaClock, FaMusic, FaPlay, FaUsers, FaTrashAlt
 } from "react-icons/fa";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import NewSignupsTable from "./component/NewSignupsTable";
+import TopListenersTable from "./component/TopListenersTable";
 
 interface Artist {
   user_id: number;
@@ -58,12 +60,21 @@ export default function AdminReport() {
   const [data, setData] = useState<AdminReportData | null>(null);
   const [filteredMonth, setFilteredMonth] = useState<string | null>(null);
   const [showAllArtists, setShowAllArtists] = useState(false);
+  const [showAllListeners, setShowAllListeners] = useState(false); // ✅ NEW
   const [search, setSearch] = useState("");
-  const [songSearch, setSongSearch] = useState(""); // Search for songs
+  const [songSearch, setSongSearch] = useState("");
   const [sortOption, setSortOption] = useState("most_plays");
   const [filterGenre, setFilterGenre] = useState("");
   const [showAllSongs, setShowAllSongs] = useState(false);
   const [songSortOption, setSongSortOption] = useState("most_plays");
+
+  const sortMonths = (months: MonthlyStats[]) => {
+    return [...months].sort((a, b) => {
+      const [aYear, aMonth] = a.month.split('-').map(Number);
+      const [bYear, bMonth] = b.month.split('-').map(Number);
+      return aYear === bYear ? aMonth - bMonth : aYear - bYear;
+    });
+  };
 
   useEffect(() => {
     if (role !== "admin") router.push("/login");
@@ -97,6 +108,10 @@ export default function AdminReport() {
     );
   }
 
+  const periodLabel = filteredMonth
+    ? formatMonth(filteredMonth)
+    : formatMonth(data.monthlyStats.at(-1)!.month);
+
   const filteredStats = filteredMonth
     ? data.monthlyStats.find((m) => m.month === filteredMonth)
     : null;
@@ -104,8 +119,8 @@ export default function AdminReport() {
   const artistList = showAllArtists
     ? data.allArtists
     : filteredMonth
-    ? data.monthlyTopArtists.find((m) => m.month === filteredMonth)?.artists ?? []
-    : data.topArtists;
+      ? data.monthlyTopArtists.find((m) => m.month === filteredMonth)?.artists ?? []
+      : data.topArtists;
 
   const genres = Array.from(new Set(data.allArtists.map((a) => a.genre)));
 
@@ -125,8 +140,8 @@ export default function AdminReport() {
   const songsToDisplay = showAllSongs
     ? data.allSongs ?? []
     : filteredMonth
-    ? data.monthlyTopSongs.find((m) => m.month === filteredMonth)?.songs ?? []
-    : data.topSongs ?? [];
+      ? data.monthlyTopSongs.find((m) => m.month === filteredMonth)?.songs ?? []
+      : data.topSongs ?? [];
 
   const filteredSongs = songsToDisplay.filter(
     (s) =>
@@ -139,6 +154,43 @@ export default function AdminReport() {
     if (songSortOption === "genre") return a.genre.localeCompare(b.genre);
     return b.play_count - a.play_count;
   });
+
+  const handleDeleteSong = async (song_id: number) => {
+    const confirmDelete = confirm("Are you sure you want to delete this song?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`/api/songs/${song_id}`, {
+        method: "DELETE"
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to delete song");
+      }
+
+      setData(prev => {
+        if (!prev) return null;
+
+        return {
+          ...prev,
+          allSongs: prev.allSongs.filter(s => s.song_id !== song_id),
+          topSongs: prev.topSongs.filter(s => s.song_id !== song_id),
+          monthlyTopSongs: prev.monthlyTopSongs.map(month => ({
+            ...month,
+            songs: month.songs.filter(s => s.song_id !== song_id)
+          }))
+        };
+      });
+
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("An unknown error occurred");
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-6 md:p-10">
@@ -159,7 +211,7 @@ export default function AdminReport() {
               className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600"
             >
               <option value="all">All Months</option>
-              {data.monthlyStats.map((m) => (
+              {sortMonths(data.monthlyStats).map((m) => (
                 <option key={m.month} value={m.month}>
                   {formatMonth(m.month)}
                 </option>
@@ -276,12 +328,21 @@ export default function AdminReport() {
           </div>
           <ul className="divide-y divide-gray-700">
             {sortedSongs.map((song, i) => (
-              <li key={song.song_id} className="py-2 flex justify-between items-center">
+              <li key={song.song_id} className="py-2 flex justify-between items-center group hover:bg-gray-700/30">
                 <div className="flex flex-col">
                   <span className="text-gray-300 font-medium">{i + 1}. {song.title}</span>
                   <span className="text-sm text-gray-400">{song.artist} • {song.genre}</span>
                 </div>
-                <div className="text-sm">{song.play_count.toLocaleString()} plays</div>
+                <div className="flex items-center gap-4">
+                  <div className="text-sm">{song.play_count.toLocaleString()} plays</div>
+                  <button
+                    onClick={() => handleDeleteSong(song.song_id)}
+                    className="text-red-500 opacity-100 group-hover:opacity-75 transition-opacity p-3"
+                    title="Delete song"
+                  >
+                    <FaTrashAlt size={14} />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -302,7 +363,7 @@ export default function AdminReport() {
               <YAxis stroke="#9CA3AF" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1f2937', 
+                  backgroundColor: '#1f2937',
                   border: '1px solid #4B5563',
                   borderRadius: '8px',
                   color: '#fff',
@@ -319,13 +380,26 @@ export default function AdminReport() {
               <Bar dataKey="count" fill="url(#genreGradient)" />
             </BarChart>
           </ResponsiveContainer>
+          </SectionCard>
+
+
+      <SectionCard icon={<FaChartBar />} title="Streamed Hours by Month">
+          <TopListenersTable
+            period={periodLabel}
+            showAllListeners={showAllListeners}
+            setShowAllListeners={setShowAllListeners}
+          />
+        </SectionCard>
+
+        <SectionCard icon={<FaClock />} title="New Sign‑ups by Role">
+          <NewSignupsTable period={periodLabel} />
         </SectionCard>
       </div>
     </div>
+    
   );
 }
 
-// Components
 function StatCard({ icon, title, value }: { icon: React.ReactNode; title: string; value: string | number }) {
   return (
     <div className="bg-gray-800/50 p-4 rounded-xl">
