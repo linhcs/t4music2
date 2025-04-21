@@ -4,9 +4,23 @@ import { useEffect, useState } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import {
-  FaSearch, FaChartBar, FaClock, FaMusic, FaPlay, FaUsers, FaTrashAlt
+  FaSearch,
+  FaChartBar,
+  FaClock,
+  FaMusic,
+  FaPlay,
+  FaUsers,
+  FaTrashAlt,
 } from "react-icons/fa";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import NewSignupsTable from "./component/NewSignupsTable";
 import TopListenersTable from "./component/TopListenersTable";
 
@@ -40,6 +54,14 @@ interface MonthlyStats {
   top_genre: string;
 }
 
+interface Album {
+  album_id: number;
+  title: string;
+  artist: string;
+  total_songs: number;
+  created_at: Date;
+}
+
 interface AdminReportData {
   allArtists: Artist[];
   topArtists: Artist[];
@@ -52,6 +74,7 @@ interface AdminReportData {
   topGenre: string;
   monthlyTopSongs: { month: string; songs: Song[] }[];
   monthlyTopArtists: { month: string; artists: Artist[] }[];
+  allAlbums: Album[];
 }
 
 export default function AdminReport() {
@@ -70,8 +93,8 @@ export default function AdminReport() {
 
   const sortMonths = (months: MonthlyStats[]) => {
     return [...months].sort((a, b) => {
-      const [aYear, aMonth] = a.month.split('-').map(Number);
-      const [bYear, bMonth] = b.month.split('-').map(Number);
+      const [aYear, aMonth] = a.month.split("-").map(Number);
+      const [bYear, bMonth] = b.month.split("-").map(Number);
       return aYear === bYear ? aMonth - bMonth : aYear - bYear;
     });
   };
@@ -119,8 +142,9 @@ export default function AdminReport() {
   const artistList = showAllArtists
     ? data.allArtists
     : filteredMonth
-      ? data.monthlyTopArtists.find((m) => m.month === filteredMonth)?.artists ?? []
-      : data.topArtists;
+    ? data.monthlyTopArtists.find((m) => m.month === filteredMonth)?.artists ??
+      []
+    : data.topArtists;
 
   const genres = Array.from(new Set(data.allArtists.map((a) => a.genre)));
 
@@ -140,8 +164,8 @@ export default function AdminReport() {
   const songsToDisplay = showAllSongs
     ? data.allSongs ?? []
     : filteredMonth
-      ? data.monthlyTopSongs.find((m) => m.month === filteredMonth)?.songs ?? []
-      : data.topSongs ?? [];
+    ? data.monthlyTopSongs.find((m) => m.month === filteredMonth)?.songs ?? []
+    : data.topSongs ?? [];
 
   const filteredSongs = songsToDisplay.filter(
     (s) =>
@@ -161,7 +185,7 @@ export default function AdminReport() {
 
     try {
       const res = await fetch(`/api/songs/${song_id}`, {
-        method: "DELETE"
+        method: "DELETE",
       });
 
       if (!res.ok) {
@@ -169,20 +193,51 @@ export default function AdminReport() {
         throw new Error(error.message || "Failed to delete song");
       }
 
-      setData(prev => {
+      setData((prev) => {
         if (!prev) return null;
 
         return {
           ...prev,
-          allSongs: prev.allSongs.filter(s => s.song_id !== song_id),
-          topSongs: prev.topSongs.filter(s => s.song_id !== song_id),
-          monthlyTopSongs: prev.monthlyTopSongs.map(month => ({
+          allSongs: prev.allSongs.filter((s) => s.song_id !== song_id),
+          topSongs: prev.topSongs.filter((s) => s.song_id !== song_id),
+          monthlyTopSongs: prev.monthlyTopSongs.map((month) => ({
             ...month,
-            songs: month.songs.filter(s => s.song_id !== song_id)
-          }))
+            songs: month.songs.filter((s) => s.song_id !== song_id),
+          })),
         };
       });
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("An unknown error occurred");
+      }
+    }
+  };
 
+  const handleDeleteAlbum = async (album_id: number) => {
+    const confirmDelete = confirm(
+      "Are you sure you want to delete this album? This will also remove all songs from the album."
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`/api/albums/${album_id}/delete`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to delete album");
+      }
+
+      setData((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          allAlbums: prev.allAlbums.filter((a) => a.album_id !== album_id),
+        };
+      });
     } catch (error) {
       if (error instanceof Error) {
         alert(error.message);
@@ -199,14 +254,23 @@ export default function AdminReport() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-500 text-transparent bg-clip-text">
             Admin Music Report Dashboard
           </h1>
-          <p className="text-gray-400 text-sm mt-2"> (For all users across selected month ⋆.˚✮🎧✮˚.⋆) </p>
+          <p className="text-gray-400 text-sm mt-2">
+            {" "}
+            (For all users across selected month ⋆.˚✮🎧✮˚.⋆){" "}
+          </p>
         </header>
 
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-gray-800/50 p-4 rounded-xl">
           <div>
-            <label className="text-sm text-gray-400 block mb-1">Filter by Month</label>
+            <label className="text-sm text-gray-400 block mb-1">
+              Filter by Month
+            </label>
             <select
-              onChange={(e) => setFilteredMonth(e.target.value === "all" ? null : e.target.value)}
+              onChange={(e) =>
+                setFilteredMonth(
+                  e.target.value === "all" ? null : e.target.value
+                )
+              }
               value={filteredMonth || "all"}
               className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600"
             >
@@ -221,12 +285,29 @@ export default function AdminReport() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <StatCard icon={<FaClock />} title="Total Play Time" value={formatTime(filteredStats?.total_play_time || data.totalPlayTime)} />
-          <StatCard icon={<FaMusic />} title="Songs Added" value={filteredStats?.total_songs_added || data.totalSongsAdded} />
-          <StatCard icon={<FaChartBar />} title="Top Genre" value={filteredStats?.top_genre || data.topGenre} />
+          <StatCard
+            icon={<FaClock />}
+            title="Total Play Time"
+            value={formatTime(
+              filteredStats?.total_play_time || data.totalPlayTime
+            )}
+          />
+          <StatCard
+            icon={<FaMusic />}
+            title="Songs Added"
+            value={filteredStats?.total_songs_added || data.totalSongsAdded}
+          />
+          <StatCard
+            icon={<FaChartBar />}
+            title="Top Genre"
+            value={filteredStats?.top_genre || data.topGenre}
+          />
         </div>
 
-        <SectionCard icon={<FaUsers />} title={`${showAllArtists ? "All Artists" : "Top Artists This Month"}`}>
+        <SectionCard
+          icon={<FaUsers />}
+          title={`${showAllArtists ? "All Artists" : "Top Artists This Month"}`}
+        >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div className="flex items-center bg-gray-700 rounded px-3 w-full md:w-60">
               <FaSearch className="text-gray-400 mr-2" />
@@ -262,7 +343,10 @@ export default function AdminReport() {
           </div>
           <div className="text-sm text-right">
             Total: {data.allArtists.length} artists
-            <button onClick={() => setShowAllArtists(!showAllArtists)} className="ml-4 underline text-blue-400 hover:text-blue-300">
+            <button
+              onClick={() => setShowAllArtists(!showAllArtists)}
+              className="ml-4 underline text-blue-400 hover:text-blue-300"
+            >
               {showAllArtists ? "View Top Artists" : "View All Artists"}
             </button>
           </div>
@@ -281,12 +365,21 @@ export default function AdminReport() {
               </thead>
               <tbody>
                 {filtered.map((artist) => (
-                  <tr key={artist.user_id} className="border-b border-gray-700 hover:bg-gray-700/30">
+                  <tr
+                    key={artist.user_id}
+                    className="border-b border-gray-700 hover:bg-gray-700/30"
+                  >
                     <td className="px-4 py-3">{artist.name}</td>
                     <td className="px-4 py-3">{artist.genre}</td>
-                    <td className="px-4 py-3">{artist.followers.toLocaleString()}</td>
-                    <td className="px-4 py-3">{artist.play_count.toLocaleString()}</td>
-                    <td className="px-4 py-3">{artist.total_streaming_minutes}</td>
+                    <td className="px-4 py-3">
+                      {artist.followers.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3">
+                      {artist.play_count.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3">
+                      {artist.total_streaming_minutes}
+                    </td>
                     <td className="px-4 py-3">{artist.total_songs}</td>
                   </tr>
                 ))}
@@ -295,7 +388,10 @@ export default function AdminReport() {
           </div>
         </SectionCard>
 
-        <SectionCard icon={<FaPlay />} title={`${showAllSongs ? "All Songs" : "Top Songs"}`}>
+        <SectionCard
+          icon={<FaPlay />}
+          title={`${showAllSongs ? "All Songs" : "Top Songs"}`}
+        >
           <div className="flex justify-between items-center mb-4">
             <div className="text-sm">Showing: {sortedSongs.length} songs</div>
             <div className="flex items-center gap-2">
@@ -328,13 +424,22 @@ export default function AdminReport() {
           </div>
           <ul className="divide-y divide-gray-700">
             {sortedSongs.map((song, i) => (
-              <li key={song.song_id} className="py-2 flex justify-between items-center group hover:bg-gray-700/30">
+              <li
+                key={song.song_id}
+                className="py-2 flex justify-between items-center group hover:bg-gray-700/30"
+              >
                 <div className="flex flex-col">
-                  <span className="text-gray-300 font-medium">{i + 1}. {song.title}</span>
-                  <span className="text-sm text-gray-400">{song.artist} • {song.genre}</span>
+                  <span className="text-gray-300 font-medium">
+                    {i + 1}. {song.title}
+                  </span>
+                  <span className="text-sm text-gray-400">
+                    {song.artist} • {song.genre}
+                  </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="text-sm">{song.play_count.toLocaleString()} plays</div>
+                  <div className="text-sm">
+                    {song.play_count.toLocaleString()} plays
+                  </div>
                   <button
                     onClick={() => handleDeleteSong(song.song_id)}
                     className="text-red-500 opacity-100 group-hover:opacity-75 transition-opacity p-3"
@@ -363,27 +468,26 @@ export default function AdminReport() {
               <YAxis stroke="#9CA3AF" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid #4B5563',
-                  borderRadius: '8px',
-                  color: '#fff',
+                  backgroundColor: "#1f2937",
+                  border: "1px solid #4B5563",
+                  borderRadius: "8px",
+                  color: "#fff",
                 }}
                 labelStyle={{
-                  color: '#d1d5db',
-                  fontSize: '0.875rem',
+                  color: "#d1d5db",
+                  fontSize: "0.875rem",
                 }}
                 itemStyle={{
-                  color: '#fff',
-                  fontSize: '0.875rem',
+                  color: "#fff",
+                  fontSize: "0.875rem",
                 }}
               />
               <Bar dataKey="count" fill="url(#genreGradient)" />
             </BarChart>
           </ResponsiveContainer>
-          </SectionCard>
+        </SectionCard>
 
-
-      <SectionCard icon={<FaChartBar />} title="Streamed Hours by Month">
+        <SectionCard icon={<FaChartBar />} title="Streamed Hours by Month">
           <TopListenersTable
             period={periodLabel}
             showAllListeners={showAllListeners}
@@ -394,22 +498,78 @@ export default function AdminReport() {
         <SectionCard icon={<FaClock />} title="New Sign‑ups by Role">
           <NewSignupsTable period={periodLabel} />
         </SectionCard>
+
+        <SectionCard icon={<FaMusic />} title="All Albums">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-left border-b border-gray-700">
+                  <th className="p-3">Title</th>
+                  <th className="p-3">Artist</th>
+                  <th className="p-3">Songs</th>
+                  <th className="p-3">Created</th>
+                  <th className="p-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.allAlbums.map((album) => (
+                  <tr
+                    key={album.album_id}
+                    className="border-b border-gray-700 hover:bg-gray-800/50"
+                  >
+                    <td className="p-3">{album.title}</td>
+                    <td className="p-3">{album.artist}</td>
+                    <td className="p-3">{album.total_songs}</td>
+                    <td className="p-3">
+                      {new Date(album.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => handleDeleteAlbum(album.album_id)}
+                        className="text-red-500 hover:text-red-400 transition-colors"
+                      >
+                        <FaTrashAlt />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SectionCard>
       </div>
     </div>
-    
   );
 }
 
-function StatCard({ icon, title, value }: { icon: React.ReactNode; title: string; value: string | number }) {
+function StatCard({
+  icon,
+  title,
+  value,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  value: string | number;
+}) {
   return (
     <div className="bg-gray-800/50 p-4 rounded-xl">
-      <div className="flex items-center gap-2 text-gray-400 mb-1">{icon} {title}</div>
+      <div className="flex items-center gap-2 text-gray-400 mb-1">
+        {icon} {title}
+      </div>
       <div className="text-2xl font-bold">{value}</div>
     </div>
   );
 }
 
-function SectionCard({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+function SectionCard({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-gray-800/50 p-6 rounded-xl">
       <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
