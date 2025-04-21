@@ -38,7 +38,7 @@ export default function PlaylistPage() {
   const [currentSongIndex, setCurrentSongIndex] = useState<number | null>(null);
   const [songsToRender, setSongsToRender] = useState<Song[]>([]);
 
-  const { currentSong, isPlaying, playSong, togglePlayPause, progress, volume, setVolume } = useAudioPlayer();
+  const { currentSong, isPlaying, playSong, togglePlayPause, progress, volume, setVolume, setOnSongEnd} = useAudioPlayer();
   const { likedSongs, username } = useUserStore();
   const isLikedPlaylist = id === "liked";
   const { handleSeek } = useAudioPlayer();
@@ -75,11 +75,18 @@ export default function PlaylistPage() {
   }, [currentSong, songsToRender]);
 
   const playNextSong = useCallback(() => {
+
     if (currentSongIndex === null || songsToRender.length === 0) return;
     
     const nextIndex = (currentSongIndex + 1) % songsToRender.length;
     playSong(songsToRender[nextIndex]);
   }, [currentSongIndex, songsToRender, playSong]);
+
+  useEffect(() => {
+    setOnSongEnd(() => {
+      playNextSong();
+    });
+  }, [playNextSong, setOnSongEnd]);
 
   const playPreviousSong = useCallback(() => {
     if (currentSongIndex === null || songsToRender.length === 0) return;

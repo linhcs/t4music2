@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import {
   FaPlay, FaMusic, FaChartBar, FaClock,
   FaHeart, FaSortUp, FaSortDown, FaUserPlus, FaUpload,
-  FaDatabase
+  FaDatabase, FaArrowLeft
 } from 'react-icons/fa';
 import { formatDuration } from '@/lib/utils';
 import Image from 'next/image';
@@ -57,7 +57,6 @@ export default function ArtistReport() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filteredMonth, setFilteredMonth] = useState<string | null>(null);
 
-  // Filter to only include Jan-Apr 2025 data
   const filterJanToApr2025 = (data: MonthlyStat[]) => {
     return data.filter(stat => {
       const [year, month] = stat.month.split('-');
@@ -127,7 +126,6 @@ export default function ArtistReport() {
     );
   }
 
-  // Filter monthly stats to only Jan-Apr 2025
   const filteredMonthlyStats = filterJanToApr2025(reportData.monthlyStats);
   const currentMonthData = filteredMonth 
     ? filteredMonthlyStats.find(stat => stat.month === filteredMonth)
@@ -142,6 +140,13 @@ export default function ArtistReport() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
+        <button 
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+        >
+          <FaArrowLeft /> Back
+        </button>
+
         <header className="text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-500 text-transparent bg-clip-text">
             Artist Analytics Dashboard
