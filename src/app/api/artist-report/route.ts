@@ -13,11 +13,6 @@ const convertBigIntToNumber = (obj: unknown): unknown => {
   return obj;
 }
 
-interface SongPlay {
-  song_id: number;
-  play_count: bigint; 
-}
-
 interface GenreCount {
   genre: string | null;
   count: bigint;
