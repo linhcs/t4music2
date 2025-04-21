@@ -178,30 +178,6 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Dark Mode Section */}
-        <div className="p-4 bg-gray-800 rounded-2xl shadow-2xl border-2 border-gray-700 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold">Dark Mode</h2>
-            <p className="text-gray-400 text-sm">
-              Toggle between dark and light themes.
-            </p>
-          </div>
-          <Switch
-            checked={darkMode}
-            onChange={setDarkMode}
-            className={`${
-              darkMode ? "bg-blue-600" : "bg-gray-500"
-            } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-          >
-            <span className="sr-only">Enable dark mode</span>
-            <span
-              className={`${
-                darkMode ? "translate-x-6" : "translate-x-1"
-              } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-            />
-          </Switch>
-        </div>
-
         {/* Logout Section */}
         <div className="pt-4 border-t border-gray-700">
           <button
