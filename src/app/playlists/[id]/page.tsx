@@ -38,7 +38,7 @@ export default function PlaylistPage() {
   const [currentSongIndex, setCurrentSongIndex] = useState<number | null>(null);
   const [songsToRender, setSongsToRender] = useState<Song[]>([]);
 
-  const { currentSong, isPlaying, playSong, togglePlayPause, progress, volume, setVolume, setOnSongEnd} = useAudioPlayer();
+  const { currentSong, isPlaying, playSong, togglePlayPause, progress, volume, setVolume} = useAudioPlayer();
   const { likedSongs, username } = useUserStore();
   const isLikedPlaylist = id === "liked";
   const { handleSeek } = useAudioPlayer();
@@ -49,6 +49,7 @@ export default function PlaylistPage() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [songToRemove, setSongToRemove] = useState<Song | null>(null);
   
+  const [isShuffled, setIsShuffled] = useState(false);
 
   const fetchPlaylist = useCallback(async () => {
     const res = await fetch(`/api/playlists/${id}`);
@@ -56,6 +57,19 @@ export default function PlaylistPage() {
     setPlaylist(data);
     setSongsToRender(data.playlist_songs.map(entry => entry.songs));
   }, [id]);
+
+  const shuffleSongs = useCallback(() => {
+    if (songsToRender.length === 0) return;
+  
+    const shuffledSongs = [...songsToRender];
+    for (let i = shuffledSongs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledSongs[i], shuffledSongs[j]] = [shuffledSongs[j], shuffledSongs[i]];
+    }
+  
+    setSongsToRender(shuffledSongs);
+  }, [songsToRender]);
+  
 
   useEffect(() => {
     if (id && !isLikedPlaylist) {
@@ -75,18 +89,18 @@ export default function PlaylistPage() {
   }, [currentSong, songsToRender]);
 
   const playNextSong = useCallback(() => {
-
     if (currentSongIndex === null || songsToRender.length === 0) return;
-    
-    const nextIndex = (currentSongIndex + 1) % songsToRender.length;
+  
+    let nextIndex: number;
+  
+    if (isShuffled) {
+      nextIndex = Math.floor(Math.random() * songsToRender.length);
+    } else { //if not shuffled play in chronological order
+      nextIndex = (currentSongIndex + 1) % songsToRender.length;
+    }
     playSong(songsToRender[nextIndex]);
-  }, [currentSongIndex, songsToRender, playSong]);
-
-  useEffect(() => {
-    setOnSongEnd(() => {
-      playNextSong();
-    });
-  }, [playNextSong, setOnSongEnd]);
+  }, [currentSongIndex, songsToRender, playSong, isShuffled]);
+  
 
   const playPreviousSong = useCallback(() => {
     if (currentSongIndex === null || songsToRender.length === 0) return;
@@ -259,6 +273,9 @@ export default function PlaylistPage() {
           isPlaylist={true}
           volume={volume}
           setVolume={setVolume}
+          isShuffled={isShuffled}
+          setIsShuffled={setIsShuffled}
+          shuffleSongs={shuffleSongs}
         />
       )}
 
