@@ -9,6 +9,7 @@ import {
   FiSkipBack,
   FiSkipForward,
 } from "react-icons/fi";
+import { PiShuffleFill } from "react-icons/pi";
 
 interface PlayBarProps {
   currentSong: Song | null;
@@ -21,6 +22,9 @@ interface PlayBarProps {
   isPlaylist?: boolean;
   volume: number;
   setVolume: (v: number) => void;
+  isShuffled?: boolean;
+  setIsShuffled?: React.Dispatch<React.SetStateAction<boolean>>;
+  shuffleSongs?: () => void;
 }
 
 const formatArtistName = (username: string | undefined) => {
@@ -39,6 +43,9 @@ const PlayBar = ({
   isPlaylist = false,
   volume,
   setVolume,
+  isShuffled,
+  setIsShuffled,
+  shuffleSongs,
 }: PlayBarProps) => {
   const { likedSongs, toggleLike, username } = useUserStore();
 
@@ -120,6 +127,22 @@ const PlayBar = ({
         </div>
 
         <div className="flex items-center gap-4">
+          {/* only render for playlist pages or album pages */}
+          {isShuffled !== undefined && setIsShuffled && shuffleSongs && (
+            <button
+              onClick={() => {
+                setIsShuffled((prev) => !prev);
+                if (!isShuffled) shuffleSongs();
+              }}
+              className={`text-xl transition-colors ${
+                isShuffled ? "text-sky-400" : "text-white"
+              } hover:text-sky-600`}
+              aria-label="Shuffle"
+            >
+              <PiShuffleFill />
+            </button>
+          )}
+
           <button
             onClick={handleSkipPrevious}
             className="text-xl text-white hover:text-purple-400 transition-colors"
