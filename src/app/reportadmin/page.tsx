@@ -11,8 +11,6 @@ import {
   FaPlay,
   FaUsers,
   FaTrashAlt,
-  FaBell,
-  FaCheck,
 } from "react-icons/fa";
 import {
   BarChart,
@@ -64,19 +62,6 @@ interface Album {
   created_at: Date;
 }
 
-interface SupportTicket {
-  notification_id: number;
-  user_id: number;
-  username: string;
-  title: string;
-  description: string;
-  priority: "low" | "medium" | "high";
-  category: string;
-  created_at: Date;
-  is_read: boolean;
-  metadata: Record<string, any>;
-}
-
 interface AdminReportData {
   allArtists: Artist[];
   topArtists: Artist[];
@@ -90,7 +75,6 @@ interface AdminReportData {
   monthlyTopSongs: { month: string; songs: Song[] }[];
   monthlyTopArtists: { month: string; artists: Artist[] }[];
   allAlbums: Album[];
-  supportTickets: SupportTicket[];
 }
 
 export default function AdminReport() {
@@ -260,67 +244,6 @@ export default function AdminReport() {
       } else {
         alert("An unknown error occurred");
       }
-    }
-  };
-
-  const handleMarkTicketAsRead = async (notification_id: number) => {
-    try {
-      const res = await fetch(`/api/notifications/${notification_id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ is_read: true }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to mark ticket as read");
-      }
-
-      setData((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          supportTickets: prev.supportTickets.map((ticket) =>
-            ticket.notification_id === notification_id
-              ? { ...ticket, is_read: true }
-              : ticket
-          ),
-        };
-      });
-    } catch (error) {
-      console.error("Error marking ticket as read:", error);
-      alert("Failed to mark ticket as read");
-    }
-  };
-
-  const handleDeleteTicket = async (notification_id: number) => {
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this support ticket?"
-    );
-    if (!confirmDelete) return;
-
-    try {
-      const res = await fetch(`/api/notifications/${notification_id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to delete ticket");
-      }
-
-      setData((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          supportTickets: prev.supportTickets.filter(
-            (ticket) => ticket.notification_id !== notification_id
-          ),
-        };
-      });
-    } catch (error) {
-      console.error("Error deleting ticket:", error);
-      alert("Failed to delete ticket");
     }
   };
 
@@ -607,94 +530,6 @@ export default function AdminReport() {
                       >
                         <FaTrashAlt />
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </SectionCard>
-
-        <SectionCard icon={<FaBell />} title="Support Tickets">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left border-b border-gray-700">
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Title</th>
-                  <th className="p-3">User</th>
-                  <th className="p-3">Priority</th>
-                  <th className="p-3">Category</th>
-                  <th className="p-3">Created</th>
-                  <th className="p-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.supportTickets.map((ticket) => (
-                  <tr
-                    key={ticket.notification_id}
-                    className={`border-b border-gray-700 hover:bg-gray-800/50 ${
-                      !ticket.is_read ? "bg-blue-900/20" : ""
-                    }`}
-                  >
-                    <td className="p-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          ticket.is_read
-                            ? "bg-gray-700 text-gray-300"
-                            : "bg-blue-500 text-white"
-                        }`}
-                      >
-                        {ticket.is_read ? "Read" : "New"}
-                      </span>
-                    </td>
-                    <td className="p-3">
-                      <div className="font-medium">{ticket.title}</div>
-                      <div className="text-sm text-gray-400 mt-1">
-                        {ticket.description}
-                      </div>
-                    </td>
-                    <td className="p-3">{ticket.username}</td>
-                    <td className="p-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          ticket.priority === "high"
-                            ? "bg-red-500/20 text-red-400"
-                            : ticket.priority === "medium"
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : "bg-green-500/20 text-green-400"
-                        }`}
-                      >
-                        {ticket.priority}
-                      </span>
-                    </td>
-                    <td className="p-3">{ticket.category}</td>
-                    <td className="p-3">
-                      {new Date(ticket.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="p-3">
-                      <div className="flex gap-2">
-                        {!ticket.is_read && (
-                          <button
-                            onClick={() =>
-                              handleMarkTicketAsRead(ticket.notification_id)
-                            }
-                            className="text-blue-500 hover:text-blue-400 transition-colors"
-                            title="Mark as read"
-                          >
-                            <FaCheck />
-                          </button>
-                        )}
-                        <button
-                          onClick={() =>
-                            handleDeleteTicket(ticket.notification_id)
-                          }
-                          className="text-red-500 hover:text-red-400 transition-colors"
-                          title="Delete ticket"
-                        >
-                          <FaTrashAlt />
-                        </button>
-                      </div>
                     </td>
                   </tr>
                 ))}

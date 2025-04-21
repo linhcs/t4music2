@@ -1,51 +1,37 @@
-import { NextResponse } from "next/server";
-import { NotificationService } from "@/services/notificationService";
-import prisma from "@/lib/prisma";
+import { NextResponse } from 'next/server';
+import { NotificationService } from '@/services/notificationService';
 
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
-    const userId = url.searchParams.get("userId");
-    const count = url.searchParams.get("count");
+    const userId = url.searchParams.get('userId');
+    const count = url.searchParams.get('count');
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    if (count === "true") {
-      const count = await NotificationService.getNotificationCount(
-        Number(userId)
-      );
+    if (count === 'true') {
+      const count = await NotificationService.getNotificationCount(Number(userId));
       return NextResponse.json({ count });
     }
 
-    const notifications = await NotificationService.getUnreadNotifications(
-      Number(userId)
-    );
+    const notifications = await NotificationService.getUnreadNotifications(Number(userId));
     return NextResponse.json(notifications);
   } catch (error) {
-    console.error("Error fetching notifications:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error('Error fetching notifications:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
 export async function PUT(request: Request) {
   try {
     const url = new URL(request.url);
-    const userId = url.searchParams.get("userId");
-    const notificationId = url.searchParams.get("notificationId");
+    const userId = url.searchParams.get('userId');
+    const notificationId = url.searchParams.get('notificationId');
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
     if (notificationId) {
@@ -56,64 +42,24 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error updating notifications:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error('Error updating notifications:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
 export async function HEAD(request: Request) {
   try {
     const url = new URL(request.url);
-    const userId = url.searchParams.get("userId");
+    const userId = url.searchParams.get('userId');
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    const count = await NotificationService.getNotificationCount(
-      Number(userId)
-    );
+    const count = await NotificationService.getNotificationCount(Number(userId));
     return NextResponse.json({ count });
   } catch (error) {
-    console.error("Error fetching notification count:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error('Error fetching notification count:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-}
-
-export async function POST(req: Request) {
-  try {
-    const { user_id, message } = await req.json();
-
-    if (!user_id || !message) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
-    const notification = await prisma.notifications.create({
-      data: {
-        user_id,
-        message,
-        is_read: false,
-      },
-    });
-
-    return NextResponse.json(notification);
-  } catch (error) {
-    console.error("Error creating notification:", error);
-    return NextResponse.json(
-      { error: "Failed to create notification" },
-      { status: 500 }
-    );
-  }
-}
+} 

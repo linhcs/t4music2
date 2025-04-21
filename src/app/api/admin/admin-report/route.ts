@@ -193,47 +193,6 @@ export async function GET() {
       created_at: album.created_at,
     }));
 
-    const supportTickets = await prisma.notifications.findMany({
-      where: {
-        message: {
-          startsWith: '{"type":"support_ticket"',
-        },
-      },
-      include: {
-        users: {
-          select: {
-            username: true,
-            role: true,
-          },
-        },
-      },
-      orderBy: {
-        created_at: "desc",
-      },
-    });
-
-    const formattedTickets = supportTickets
-      .map((ticket) => {
-        try {
-          const ticketData = JSON.parse(ticket.message);
-          return {
-            notification_id: ticket.notification_id,
-            user_id: ticket.user_id,
-            username: ticket.users?.username || "Unknown",
-            title: ticketData.title || "No Title",
-            description: ticketData.description || "No Description",
-            priority: ticketData.priority || "medium",
-            category: ticketData.category || "general",
-            created_at: ticket.created_at,
-            is_read: ticket.is_read,
-            metadata: ticketData.metadata || {},
-          };
-        } catch (e) {
-          return null;
-        }
-      })
-      .filter(Boolean);
-
     return NextResponse.json({
       allArtists: artists,
       topArtists: artists
@@ -258,7 +217,6 @@ export async function GET() {
       monthlyTopSongs,
       monthlyTopArtists,
       allAlbums: formattedAlbums,
-      supportTickets: formattedTickets,
     });
   } catch (err) {
     console.error("[ADMIN_REPORT_ERROR]", err);

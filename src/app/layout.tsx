@@ -3,8 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { AudioProvider } from "@/context/AudioContext";
-import ClientLayoutWrapper from "@/components/wrappers/ClientLayoutWrapper";
-import SupportButton from "./components/SupportButton";
+import ClientLayoutWrapper from "@/components/wrappers/ClientLayoutWrapper"; 
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +32,6 @@ export default function RootLayout({
       >
         <AudioProvider>
           <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
-          <SupportButton />
         </AudioProvider>
       </body>
     </html>
