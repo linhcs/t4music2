@@ -36,7 +36,6 @@ export default function SettingsPage() {
   const store = useUserStore.getState();
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
 
   // Edit‑profile modal state
   const [editMode, setEditMode] = useState(false);
