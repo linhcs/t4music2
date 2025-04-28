@@ -13,11 +13,6 @@ const convertBigIntToNumber = (obj: unknown): unknown => {
   return obj;
 }
 
-interface SongPlay {
-  song_id: number;
-  play_count: bigint; 
-}
-
 interface GenreCount {
   genre: string | null;
   count: bigint;
@@ -115,28 +110,29 @@ export async function GET(request: Request) {
   
       const startDate = getDateRange();
 
-      const topSongs = await prisma.$queryRaw<SongPlay[]>`
-      SELECT 
-        s.song_id, 
-        s.plays_count as play_count
-      FROM songs s
-      WHERE s.user_id = ${numericUserId}
-      ORDER BY s.plays_count DESC
-      LIMIT 10
-    `;
-    
-    const songDetails = await prisma.songs.findMany({
-      where: { 
-        user_id: numericUserId,
-        plays_count: { gt: 0 } //songs with play counts greater than 0
-      },
-      orderBy: { plays_count: 'desc' },
-      take: 10,
-      include: {
-        users: { select: { username: true } },
-        album: { select: { album_art: true } }
-      }
-    });
+      const topSongs = await prisma.$queryRaw<Array<{
+        song_id: number;
+        play_count: bigint;
+        title: string;
+        artist: string;
+        album_art: string | null;
+      }>>`
+        SELECT 
+          s.song_id, 
+          COUNT(*) as play_count,
+          s.title,
+          u.username as artist,
+          a.album_art
+        FROM song_plays sp
+        JOIN songs s ON sp.song_id = s.song_id
+        JOIN users u ON s.user_id = u.user_id
+        LEFT JOIN album a ON s.album_id = a.album_id
+        WHERE s.user_id = ${numericUserId}
+          AND sp.played_at >= ${startDate}
+        GROUP BY s.song_id, s.title, u.username, a.album_art
+        ORDER BY play_count DESC
+        LIMIT 10
+      `;
 
       //top genres
       const topGenres = await prisma.$queryRaw<GenreCount[]>`
@@ -159,6 +155,7 @@ export async function GET(request: Request) {
         FROM song_plays sp
         JOIN songs s ON sp.song_id = s.song_id
         WHERE s.user_id = ${numericUserId}
+          AND sp.played_at >= ${startDate}
       `;
 
       const mostActiveHour = await prisma.$queryRaw<{ hour: number; count: bigint }[]>`
@@ -239,16 +236,13 @@ export async function GET(request: Request) {
       }; //show album art
 
       const reportData: ReportData = {
-        topSongs: topSongs.map(play => {
-          const detail = songDetails.find(s => s.song_id === play.song_id);
-          return {
-            song_id: play.song_id,
-            title: detail?.title || 'Unknown',
-            artist: detail?.users?.username || 'Unknown',
-            play_count: Number(play.play_count),
-            album_art: getAlbumArt(detail?.album?.album_art)
-          };
-        }),
+        topSongs: topSongs.map(song => ({
+          song_id: song.song_id,
+          title: song.title,
+          artist: song.artist,
+          play_count: Number(song.play_count),
+          album_art: getAlbumArt(song.album_art)
+        })),
         topGenres: topGenres.map(g => ({
           genre: g.genre || 'Unknown',
           count: Number(g.count)
@@ -261,13 +255,15 @@ export async function GET(request: Request) {
           play_count: Number(month.play_count),
           total_play_time: Math.round(Number(month.total_play_time)),
           topSongs: (monthTopSongsMap.get(month.month) || []).map(song => {
-            const detail = songDetails.find(s => s.song_id === song.song_id);
+            const songDetail = topSongs.find(s => s.song_id === song.song_id) || artistSongs.find(s => s.song_id === song.song_id);
             return {
               song_id: song.song_id,
-              title: detail?.title || 'Unknown',
-              artist: detail?.users?.username || 'Unknown',
+              title: songDetail?.title || 'Unknown',
+              artist: songDetail ? 
+                ('artist' in songDetail ? songDetail.artist as string : 'Unknown') : 
+                'Unknown',
               play_count: Number(song.play_count),
-              album_art: getAlbumArt(detail?.album?.album_art)
+              album_art: songDetail ? getAlbumArt('album_art' in songDetail ? songDetail.album_art : null) : undefined
             };
           })
         })),

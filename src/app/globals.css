@@ -243,8 +243,7 @@ h1{
 
 .selection.inactive.selected {
   border-radius: 8px;  
-  padding: 8px 12px;
-  font-size: 22px;    
+  padding: 8px 12px;  
   color: rgb(0, 0, 0);         
   background-color: rgba(255, 255, 255, 0.445); 
   border: 2px solid rgb(255, 255, 255);  
@@ -283,7 +282,6 @@ h1{
 }
 .custom-gradient-container2 {
   width: 1000px;
-  height: 430px;
   padding: 12px 12px;
   background: linear-gradient(to right, rgba(59, 130, 246, 0.4), rgba(168, 85, 247, 0.4), rgba(244, 114, 182, 0.4));
   border-radius: 14px; 
@@ -294,7 +292,6 @@ h1{
 
 .custom-gradient-container3 {
   width: 1000px;
-  height: 750px;
   padding: 12px 12px;
   background: linear-gradient(to right, rgba(59, 130, 246, 0.4), rgba(168, 85, 247, 0.4), rgba(244, 114, 182, 0.4));
   border-radius: 14px; 

@@ -10,6 +10,7 @@ import CreatePlaylistModal from "./CreatePlaylistModal";
 import PlayBar from "@/components/ui/playBar";
 import { useAudioPlayer } from "@/context/AudioContext";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import ConfirmModal from "@/components/ui/ConfirmModal"; 
 
 type Playlist = {
   playlist_id: number | "liked";
@@ -28,6 +29,9 @@ export default function UserPlaylists() {
     setPlaylists: setGlobalPlaylists,
   } = useUserStore();
    
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [playlistToDelete, setPlaylistToDelete] = useState<Playlist | null>(null);  
+
   const [showModal, setShowModal] = useState(false);
   // const { playlists, setPlaylists: setGlobalPlaylists } = useUserStore();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -72,24 +76,22 @@ export default function UserPlaylists() {
     }
   };
 
-  const handleDelete = async (playlistId: number | "liked") => {
-    if (playlistId === "liked") return;
+const handleDelete = async () => {
+  if (!playlistToDelete || playlistToDelete.playlist_id === "liked") return;
 
-    const confirm = window.confirm("Are you sure you want to delete this playlist?");
-    if (!confirm) return;
+  const res = await fetch(`/api/playlists/${playlistToDelete.playlist_id}/delete`, {
+    method: "DELETE",
+  });
 
-    const res = await fetch(`/api/playlists/${playlistId}/delete`, {
-      method: "DELETE",
-    });
+  const data = await res.json();
+  if (!res.ok) return alert(data.error || "Failed to delete playlist");
 
-    const data = await res.json();
-    if (!res.ok) return alert(data.error || "Failed to delete playlist");
-
-    alert("🗑️ Playlist deleted!");
-    const updated = playlists.filter((p) => p.playlist_id !== playlistId);
-    // setPlaylists(updated);
-    setGlobalPlaylists(updated);
-  };
+  alert("🗑️ Playlist deleted!");
+  const updated = playlists.filter((p) => p.playlist_id !== playlistToDelete.playlist_id);
+  setGlobalPlaylists(updated);
+  setPlaylistToDelete(null);
+  setIsConfirmOpen(false);
+};
 
   return (
     <div className="mt-10 w-full relative">
@@ -141,7 +143,11 @@ export default function UserPlaylists() {
             className="relative group min-w-[200px] max-w-[200px] bg-gray-900 rounded-xl shadow-xl hover:scale-105 transition-transform duration-300 flex flex-col items-center justify-center py-4"
           >
             <button
-              onClick={() => handleDelete(playlist.playlist_id)}
+              onClick={() => {
+                setPlaylistToDelete(playlist);
+                setIsConfirmOpen(true);
+              }}
+              
               className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
               title="Delete playlist"
             >
@@ -193,6 +199,19 @@ export default function UserPlaylists() {
         volume={volume}
         setVolume={setVolume}
       />
+
+      {isConfirmOpen && playlistToDelete && (
+      <ConfirmModal
+        title="Delete Playlist?"
+        message={`Are you sure you want to delete "${playlistToDelete.name}"? This cannot be undone.`}
+        onConfirm={handleDelete}
+        onCancel={() => {
+          setIsConfirmOpen(false);
+          setPlaylistToDelete(null);
+        }}
+      />
+    )}
+
     </div>
   );
 }

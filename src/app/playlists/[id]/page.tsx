@@ -11,6 +11,7 @@ import { useUserStore } from "@/store/useUserStore";
 import PlayBar from "@/components/ui/playBar";
 import dynamic from "next/dynamic";
 import cuteAnimation from "@/assets/cute_animation.json";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 interface Playlist {
@@ -37,7 +38,7 @@ export default function PlaylistPage() {
   const [currentSongIndex, setCurrentSongIndex] = useState<number | null>(null);
   const [songsToRender, setSongsToRender] = useState<Song[]>([]);
 
-  const { currentSong, isPlaying, playSong, togglePlayPause, progress, volume, setVolume } = useAudioPlayer();
+  const { currentSong, isPlaying, playSong, togglePlayPause, progress, volume, setVolume} = useAudioPlayer();
   const { likedSongs, username } = useUserStore();
   const isLikedPlaylist = id === "liked";
   const { handleSeek } = useAudioPlayer();
@@ -45,12 +46,30 @@ export default function PlaylistPage() {
   const [hasMounted, setHasMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [songToRemove, setSongToRemove] = useState<Song | null>(null);
+  
+  const [isShuffled, setIsShuffled] = useState(false);
+
   const fetchPlaylist = useCallback(async () => {
     const res = await fetch(`/api/playlists/${id}`);
     const data: Playlist = await res.json();
     setPlaylist(data);
     setSongsToRender(data.playlist_songs.map(entry => entry.songs));
   }, [id]);
+
+  const shuffleSongs = useCallback(() => {
+    if (songsToRender.length === 0) return;
+  
+    const shuffledSongs = [...songsToRender];
+    for (let i = shuffledSongs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledSongs[i], shuffledSongs[j]] = [shuffledSongs[j], shuffledSongs[i]];
+    }
+  
+    setSongsToRender(shuffledSongs);
+  }, [songsToRender]);
+  
 
   useEffect(() => {
     if (id && !isLikedPlaylist) {
@@ -71,10 +90,17 @@ export default function PlaylistPage() {
 
   const playNextSong = useCallback(() => {
     if (currentSongIndex === null || songsToRender.length === 0) return;
-    
-    const nextIndex = (currentSongIndex + 1) % songsToRender.length;
+  
+    let nextIndex: number;
+  
+    if (isShuffled) {
+      nextIndex = Math.floor(Math.random() * songsToRender.length);
+    } else { //if not shuffled play in chronological order
+      nextIndex = (currentSongIndex + 1) % songsToRender.length;
+    }
     playSong(songsToRender[nextIndex]);
-  }, [currentSongIndex, songsToRender, playSong]);
+  }, [currentSongIndex, songsToRender, playSong, isShuffled]);
+  
 
   const playPreviousSong = useCallback(() => {
     if (currentSongIndex === null || songsToRender.length === 0) return;
@@ -83,19 +109,24 @@ export default function PlaylistPage() {
     playSong(songsToRender[prevIndex]);
   }, [currentSongIndex, songsToRender, playSong]);
 
-  const handleRemove = async (songId: number) => {
+  const handleRemove = async () => {
+    if (!songToRemove) return;
+  
     const res = await fetch(`/api/playlists/${id}/remove-song`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ song_id: songId }),
+      body: JSON.stringify({ song_id: songToRemove.song_id }),
     });
-
+  
     const result = await res.json();
     if (!res.ok) return alert(result.error || "Failed to remove song");
+  
+    setIsConfirmOpen(false);
+    setSongToRemove(null);
     alert("❌ Song removed");
     fetchPlaylist();
   };
-
+  
   useEffect(() => {
     setHasMounted(true);
     if ((!isLikedPlaylist && playlist) || (isLikedPlaylist && songsToRender.length > 0)) {
@@ -216,7 +247,8 @@ export default function PlaylistPage() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleRemove(song.song_id);
+                setSongToRemove(song);
+                setIsConfirmOpen(true);
               }}
               className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 text-sm shadow"
             >
@@ -241,6 +273,9 @@ export default function PlaylistPage() {
           isPlaylist={true}
           volume={volume}
           setVolume={setVolume}
+          isShuffled={isShuffled}
+          setIsShuffled={setIsShuffled}
+          shuffleSongs={shuffleSongs}
         />
       )}
 
@@ -251,6 +286,19 @@ export default function PlaylistPage() {
           playlistId={playlist.playlist_id}
         />
       )}
+
+      {isConfirmOpen && songToRemove && (
+        <ConfirmModal
+          title="Remove Song?"
+          message={`Are you sure you want to remove "${songToRemove.title}" from this playlist?`}
+          onConfirm={handleRemove}
+          onCancel={() => {
+            setIsConfirmOpen(false);
+            setSongToRemove(null);
+          }}
+        />
+      )}
+
     </div>
   );
 }

@@ -6,6 +6,8 @@ import Image from "next/image";
 import { FiPlayCircle, FiPauseCircle } from "react-icons/fi";
 import { useAudioPlayer } from "@/context/AudioContext";
 import PlayBar from "@/components/ui/playBar";
+import ConfirmModal from "@/components/ui/ConfirmModal";
+import { useUserStore } from "@/store/useUserStore";
 
 interface Song {
   song_id: number;
@@ -16,7 +18,6 @@ interface Song {
   user_id: number;    
   genre?: string;
 }
-
 
 interface Album {
   album_id: number;
@@ -30,7 +31,10 @@ interface Album {
 export default function AlbumPage() {
   const router = useRouter();
   const params = useParams();
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [songToDelete, setSongToDelete] = useState<Song | null>(null);  
   const album_id = Array.isArray(params.album_id) ? params.album_id[0] : params.album_id;
+  const { user_id } = useUserStore();
   const {
     currentSong,
     isPlaying,
@@ -90,8 +94,29 @@ export default function AlbumPage() {
       },
     });
   };
-  
 
+  const handleDeleteSong = async () => {
+    if (!songToDelete) return;
+  
+    try {
+      const res = await fetch(`/api/songs/${songToDelete.song_id}`, {
+        method: "DELETE",
+      });
+  
+      if (!res.ok) {
+        alert("Failed to delete the song.");
+        return;
+      }
+  
+      setSongsToRender((prev) => prev.filter((s) => s.song_id !== songToDelete.song_id));
+      setSongToDelete(null);
+      setIsConfirmOpen(false);
+    } catch (err) {
+      console.error("Error deleting song:", err);
+      alert("An error occurred while deleting the song.");
+    }
+  };
+  
   if (!album) return <div className="text-white p-6">Loading album...</div>;
 
   return (
@@ -165,6 +190,18 @@ export default function AlbumPage() {
                     <FiPlayCircle />
                   )}
                 </button>
+                {album.user_id === user_id && (
+  <button
+    onClick={() => {
+      setSongToDelete(song);
+      setIsConfirmOpen(true);
+    }}
+    className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 text-sm"
+  >
+    Delete
+  </button>
+)}
+
               </div>
             </div>
           ))
@@ -186,6 +223,18 @@ export default function AlbumPage() {
           setVolume={setVolume}
         />
       )}
+      {isConfirmOpen && songToDelete && (
+      <ConfirmModal
+        title="Remove Song?"
+        message={`Are you sure you want to delete "${songToDelete.title}" from this album?`}
+        onConfirm={handleDeleteSong}
+        onCancel={() => {
+          setIsConfirmOpen(false);
+          setSongToDelete(null);
+        }}
+      />
+    )}
+
     </div>
   );
 }
